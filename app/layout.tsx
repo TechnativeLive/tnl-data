@@ -1,12 +1,13 @@
 import '@mantine/core/styles.css';
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { theme } from './theme';
-import { Shell } from '../components/shell';
+import { Shell } from '../components/shell/shell';
 import './globals.css';
+import { Providers } from '@/components/providers';
 
 export const metadata = {
-  title: 'Mantine Next.js template',
-  description: 'I am using Mantine with Next.js!',
+  title: 'TNL Interfaces',
+  description: 'TNL Interfaces',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <MantineProvider theme={theme} defaultColorScheme="dark">
-          <Shell>{children}</Shell>
+          <Providers>
+            <Shell>{children}</Shell>
+          </Providers>
         </MantineProvider>
       </body>
     </html>

@@ -1,0 +1,16 @@
+.root {
+  position: relative;
+}
+
+.input {
+  height: rem(58px);
+  padding-top: rem(22px);
+}
+
+.label {
+  position: absolute;
+  pointer-events: none;
+  padding-left: var(--mantine-spacing-sm);
+  padding-top: calc(var(--mantine-spacing-sm) / 2);
+  z-index: 1;
+}
