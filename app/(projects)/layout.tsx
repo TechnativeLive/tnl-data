@@ -8,5 +8,10 @@ export default async function ProjectLayout({ children }: { children: React.Reac
   } = await supabase.auth.getSession();
   if (!session) redirect(`/login`);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      {/* <BackButton /> */}
+    </>
+  );
 }

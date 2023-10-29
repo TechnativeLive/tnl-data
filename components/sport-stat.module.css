@@ -1,0 +1,11 @@
+.stat {
+  min-width: rem(98px);
+  padding-top: var(--mantine-spacing-xl);
+  min-height: rem(140px);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid transparent;
+  box-shadow: var(--mantine-shadow-sm);
+}

@@ -15,11 +15,7 @@ export function ThemeSwitcher() {
   }, []);
 
   return !isMounted.current ? null : (
-    <ActionIcon
-      variant="default"
-      onClick={toggleColorScheme}
-      className="animate-fade animate-duration-300"
-    >
+    <ActionIcon onClick={toggleColorScheme} className="animate-fade animate-duration-300">
       {colorScheme === 'dark' ? <IconSun size={14} /> : <IconMoon size={14} />}
     </ActionIcon>
   );

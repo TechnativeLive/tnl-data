@@ -75,7 +75,7 @@ export default async function IceSkatingPage() {
                 <Link
                   href={`/ice-skating/${event.slug}`}
                   key={event.slug}
-                  className="active border-[calc(0.0625rem_*_var(--mantine-scale))] border-solid border-[color:var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] hover:bg-[var(--mantine-color-default-hover)] rounded-lg px-3 py-1 flex"
+                  className="active border bg-button rounded-lg px-3 py-1 flex"
                 >
                   <div className="flex flex-col mr-auto">
                     <Text fw={600} size={event.starts_at || event.ends_at ? 'md' : 'xl'}>

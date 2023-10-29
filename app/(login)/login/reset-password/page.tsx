@@ -15,9 +15,7 @@ export default function ResetPassword({ searchParams }: { searchParams: Record<s
           </Title>
           <Text mb="xl">Your password has been updated</Text>
           <Link href="/" className="text-center">
-            <Button variant="default" fullWidth>
-              Back to Home
-            </Button>
+            <Button fullWidth>Back to Home</Button>
           </Link>
         </Stack>
       </Center>

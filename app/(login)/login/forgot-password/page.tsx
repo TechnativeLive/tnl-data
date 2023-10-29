@@ -37,7 +37,7 @@ export default function Reset({ searchParams }: { searchParams: Record<string, s
           </Text>
         )}
         <p className="text-center text-sm">
-          <span className="text-[var(--mantine-color-dimmed)]">Already have an account?</span>{' '}
+          <span className="text-dimmed">Already have an account?</span>{' '}
           <Link href="/login" className="underline-offset-2 underline">
             Sign in
           </Link>

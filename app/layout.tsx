@@ -1,13 +1,14 @@
 import '@mantine/core/styles.css';
+import './globals.css';
+
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { theme } from './theme';
-import { Shell } from '../components/shell/shell';
-import './globals.css';
+import { Shell } from '@/components/shell/shell';
 import { Providers } from '@/components/providers';
 
 export const metadata = {
-  title: 'TNL Interfaces',
-  description: 'TNL Interfaces',
+  title: 'TNL Data',
+  description: 'TNL Data',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

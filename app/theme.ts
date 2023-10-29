@@ -1,7 +1,20 @@
 'use client';
 
-import { createTheme } from '@mantine/core';
+import { ActionIcon, Button, UnstyledButton, createTheme } from '@mantine/core';
 
 export const theme = createTheme({
+  primaryColor: 'teal',
   activeClassName: 'active',
+  components: {
+    Button: Button.extend({
+      defaultProps: {
+        variant: 'default',
+      },
+    }),
+    ActionIcon: ActionIcon.extend({
+      defaultProps: {
+        variant: 'default',
+      },
+    }),
+  },
 });

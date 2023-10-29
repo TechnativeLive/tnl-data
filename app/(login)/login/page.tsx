@@ -41,7 +41,7 @@ export default function Login({ searchParams }: { searchParams?: Record<string, 
         <LoginSubmitButton label="Sign In" />
         <Link
           href="/login/forgot-password"
-          className="text-sm underline-offset-2 text-center text-[var(--mantine-color-dimmed)] underline"
+          className="text-sm underline-offset-2 text-center text-dimmed underline"
         >
           Forgot your password?
         </Link>
