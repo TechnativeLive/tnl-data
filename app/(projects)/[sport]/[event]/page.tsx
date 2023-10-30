@@ -4,22 +4,22 @@ import { supabase } from '@/lib/db/static';
 import { Flex } from '@mantine/core';
 
 export async function generateStaticParams() {
-  const events = await supabase.from('events').select('slug').eq('sport', 'ice-skating');
+  const events = await supabase.from('events').select('slug');
 
-  return events.data;
+  return Array.from(new Set(events.data ?? []));
 }
 
-export default async function IceSkatingEventPage({ params }: { params: { event: string } }) {
+export default async function EventPage({ params }: { params: { sport: string; event: string } }) {
   const supabase = createServerComponentClient();
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('rounds')
-    .select('id, slug, name, order')
+    .select('id, slug, name, order, event')
     .eq('event', params.event)
     .order('order', { ascending: true, nullsFirst: true });
 
   const items = data?.map((item) => ({
     ...item,
-    href: `/ice-skating/${params.event}/${item.slug}`,
+    href: `/${params.sport}/${params.event}/${item.slug}`,
   }));
 
   return (

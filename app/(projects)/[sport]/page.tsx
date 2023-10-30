@@ -1,19 +1,24 @@
 import { createServerComponentClient } from '@/lib/db/server';
+import { PageProps } from '@/lib/types';
 import { Button, Center, Divider, Flex, Stack, Text, Title, UnstyledButton } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
+import { Route } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { Fragment } from 'react';
 
 type EventGroups = { label: string; data: Tables<'events'>[] }[];
 
 const timestamp = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
 
-export default async function IceSkatingPage() {
+export default async function SportPage({ params }: PageProps<{ sport: string }>) {
+  if (!params?.sport) return notFound();
+
   const supabase = createServerComponentClient();
   const { data, error } = await supabase
     .from('events')
     .select()
-    .eq('sport', 'ice-skating')
+    .eq('sport', params.sport)
     .order('starts_at', { ascending: true });
 
   if (error) {
@@ -73,7 +78,7 @@ export default async function IceSkatingPage() {
               <Divider mt="xl" label={group.label} labelPosition="left" />
               {group.data.map((event) => (
                 <Link
-                  href={`/ice-skating/${event.slug}`}
+                  href={`/${params.sport}/${event.slug}` as Route}
                   key={event.slug}
                   className="active border bg-button rounded-lg px-3 py-1 flex"
                 >

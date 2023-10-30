@@ -1,9 +1,8 @@
-import { Paper, Text } from '@mantine/core';
-import classes from './sport-stat.module.css';
-import { Icon as TablerIcon, IconIceSkating, IconQuestionMark } from '@tabler/icons-react';
+import { Text } from '@mantine/core';
+import { IconQuestionMark } from '@tabler/icons-react';
 import Link from 'next/link';
-import clsx from 'clsx';
 import { Route } from 'next';
+import { PROJECT_ICONS } from '@/components/project-icons';
 
 export type SportStatProp = {
   label: string;
@@ -13,20 +12,13 @@ export type SportStatProp = {
   unknownCount: number;
 };
 
-const ICONS: Record<string, TablerIcon> = {
-  'ice-skating': IconIceSkating,
-};
-
 export function SportStat({ stat }: { stat: SportStatProp }) {
-  const Icon = ICONS[stat.slug] ?? IconQuestionMark;
+  const Icon = PROJECT_ICONS[stat.slug] ?? IconQuestionMark;
 
   return (
-    <Paper
-      component={Link}
+    <Link
       href={stat.slug as Route}
-      className={clsx('transition-all', classes.stat)}
-      radius="md"
-      p="md"
+      className="transition-all border border-button hover:bg-body-dimmed rounded-md p-md min-w-[6rem] min-h-[8rem] pt-xl flex flex-1 flex-col shadow-sm"
       key={stat.label}
     >
       <Icon size={32} className="mx-auto my-lg text-blue-6" stroke={1.5} />
@@ -55,6 +47,6 @@ export function SportStat({ stat }: { stat: SportStatProp }) {
           </span>
         </Text>
       </div>
-    </Paper>
+    </Link>
   );
 }

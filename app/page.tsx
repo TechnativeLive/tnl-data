@@ -1,10 +1,11 @@
 import Login from '@/app/(login)/login/page';
 import { SportStat, SportStatProp } from '@/components/sport-stat';
 import { createServerComponentClient } from '@/lib/db/server';
-import { Blockquote, Stack } from '@mantine/core';
-import { IconInfoCircle } from '@tabler/icons-react';
+import { Stack } from '@mantine/core';
 import { classifyEventsByDate } from '@/lib/dates';
 import { Debug } from '@/components/debug';
+import { Info } from '@/components/info';
+// import 'array-grouping-polyfill';
 
 export default async function HomePage() {
   const supabase = createServerComponentClient();
@@ -16,21 +17,20 @@ export default async function HomePage() {
   const { data, error } = await supabase
     .from('events')
     .select('starts_at, ends_at, sport, sports!inner(name)');
+  // TODO: smart sql select to group by date/category and add dividers for each section
 
   const dataGroupedBySport = data?.reduce((acc, event) => {
-    if (!event.sport) return acc;
-    const id = { name: event.sports!.name, slug: event.sport };
-    acc.has(id) ? acc.get(id)!.push(event) : acc.set(id, [event]);
+    event.sport in acc ? acc[event.sport].push(event) : (acc[event.sport] = [event]);
     return acc;
-  }, new Map<{ name: string; slug: string }, typeof data>());
+  }, {} as Record<string, NonNullable<typeof data>>);
 
   const classifiedData =
     dataGroupedBySport &&
-    Array.from(dataGroupedBySport.entries()).map(([sport, statData]) => {
+    Object.entries(dataGroupedBySport).map(([sport, statData]) => {
       const classification = classifyEventsByDate(statData);
       const stat: SportStatProp = {
-        label: sport.name,
-        slug: sport.slug,
+        label: statData[0].sports?.name || 'Unknown',
+        slug: sport,
         count: statData.length,
         unknownCount: classification[0].data.length,
         activeCount: classification[1].data.length,
@@ -43,14 +43,12 @@ export default async function HomePage() {
 
   return (
     <Stack className="flex-1 p-16">
-      <Blockquote color="blue" icon={<IconInfoCircle />}>
-        Select a sport from the menu to get started
-      </Blockquote>
-      <Debug data={data} />
+      <Debug data={error} label="error" />
+      <Info>Select a sport from the menu to get started</Info>
       {!sortedByCurrentEventCount ? null : (
         <div className="mt-16 grid gap-md grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
           {sortedByCurrentEventCount.map(([sport, stat]) => (
-            <SportStat stat={stat} key={sport.slug} />
+            <SportStat stat={stat} key={sport} />
           ))}
         </div>
       )}

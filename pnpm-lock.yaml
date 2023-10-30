@@ -20,6 +20,9 @@ dependencies:
   '@tabler/icons-react':
     specifier: ^2.39.0
     version: 2.39.0(react@18.2.0)
+  array-grouping-polyfill:
+    specifier: ^0.0.3
+    version: 0.0.3
   clsx:
     specifier: ^2.0.0
     version: 2.0.0
@@ -640,6 +643,10 @@ packages:
       call-bind: 1.0.5
       is-array-buffer: 3.0.2
     dev: true
+
+  /array-grouping-polyfill@0.0.3:
+    resolution: {integrity: sha512-YQQAEeCMd3aTqnZIyL9P14wgE+Tu38LdLkYIfyyILW9kAwKkDzqytHCS50pWGad8/6DmCUVgpwvr9MxI5DfpGQ==}
+    dev: false
 
   /array-includes@3.1.7:
     resolution: {integrity: sha512-dlcsNBIiWhPkHdOEEKnehA+RNUWDc4UqFtnIXU4uuYDPtA4LDkr7qip2p0VvFAEXNDr0yWZ9PJyIRiGjRLQzwQ==}

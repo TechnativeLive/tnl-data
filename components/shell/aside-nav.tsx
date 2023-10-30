@@ -11,7 +11,9 @@ export const asideEnabledRoutes: (({
 }: {
   pathname: string;
   params: Record<string, string>;
-}) => boolean)[] = [({ pathname, params }) => pathname.startsWith(`/ice-skating/${params.event}`)];
+}) => boolean)[] = [
+  ({ pathname, params }) => pathname.startsWith(`/${params.sport}/${params.event}`),
+];
 
 export function AsideNav({ items }: { items: { label: string; href: string; id: string }[] }) {
   const pathname = usePathname();

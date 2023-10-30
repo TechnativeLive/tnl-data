@@ -10,7 +10,7 @@ export default async function EventLayout({
   params: Record<string, string>;
 }) {
   const supabase = createServerComponentClient();
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('rounds')
     .select('slug, name, order')
     .eq('event', params.event)
@@ -24,7 +24,7 @@ export default async function EventLayout({
           <AsideNav
             items={data?.map((round) => ({
               label: round.name,
-              href: `/ice-skating/${params.event}/${round.slug}`,
+              href: `/${params.sport}/${params.event}/${round.slug}`,
               id: round.slug,
             }))}
           />

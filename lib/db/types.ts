@@ -9,9 +9,31 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      ds_keys: {
+        Row: {
+          description: string | null
+          name: string
+          private: string
+          public: string
+        }
+        Insert: {
+          description?: string | null
+          name: string
+          private: string
+          public: string
+        }
+        Update: {
+          description?: string | null
+          name?: string
+          private?: string
+          public?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
+          ds_keys: string | null
           ends_at: string | null
           name: string
           slug: string
@@ -20,6 +42,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
+          ds_keys?: string | null
           ends_at?: string | null
           name: string
           slug: string
@@ -28,6 +51,7 @@ export interface Database {
         }
         Update: {
           created_at?: string
+          ds_keys?: string | null
           ends_at?: string | null
           name?: string
           slug?: string
@@ -35,6 +59,12 @@ export interface Database {
           starts_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "events_ds_keys_fkey"
+            columns: ["ds_keys"]
+            referencedRelation: "ds_keys"
+            referencedColumns: ["name"]
+          },
           {
             foreignKeyName: "events_sport_fkey"
             columns: ["sport"]

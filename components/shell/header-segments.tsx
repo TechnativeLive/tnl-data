@@ -1,58 +1,67 @@
 'use client';
 
-import { useHeaderSegments } from '@/lib/context/header';
 import { createClientComponentClient } from '@/lib/db/client';
-import { Group, Text } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
+import clsx from 'clsx';
+import { Route } from 'next';
 import Link from 'next/link';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
-export function HeaderSegments() {
-  // const supabase = createClientComponentClient();
-  // let event: Segment | null = null;
-  // let round: Segment | null = null;
+type Segment = { id?: string | number; slug: string; name: string } & Record<string, unknown>;
 
-  // if ('event' in params) {
-  //   const { data } = await supabase
-  //     .from('events')
-  //     .select('name, href:slug, id:slug')
-  //     .eq('slug', params.event)
-  //     .single();
-  //   event = data;
-  //   if (event) event.href = `/ice-skating/${event?.href}`;
-  // }
+export function HeaderSegments({ params }: { params: Record<string, string> }) {
+  const supabase = createClientComponentClient();
+  const [loading, setLoading] = useState(true);
+  const [segments, setSegments] = useState<(Segment | null)[]>([]);
 
-  // if ('round' in params) {
-  //   const { data } = await supabase
-  //     .from('rounds')
-  //     .select('name, href:slug, id')
-  //     .eq('slug', params.round)
-  //     .single();
-  //   round = data;
-  //   if (round) round.href = event?.href ? `/ice-skating/${event.href}/${round?.href}` : null;
-  // }
+  useEffect(() => {
+    (async () => {
+      const data = await Promise.all([
+        supabase.from('sports').select('id, slug, name').eq('slug', params.sport).single(),
+        supabase.from('events').select('slug, name').eq('slug', params.event).single(),
+        supabase
+          .from('rounds')
+          .select('id, slug, name, event')
+          .eq('slug', params.round)
+          .eq('event', params.event)
+          .single(),
+      ]);
+      setSegments(data.map((query) => query.data));
+    })();
 
-  // const headerSegments = [event, round].filter(Boolean) as Segment[];
-  const { segments } = useHeaderSegments();
+    setLoading(false);
+  }, [params.sport, params.event, params.round, supabase]);
 
   return (
-    <Group className="grow" gap="xs" px="md">
-      {segments.map((segment, index) => (
-        <Fragment key={segment.id}>
-          {index > 0 && <IconChevronRight size={14} />}
-          <Text
-            // @ts-expect-error
-            component={segment.href ? Link : Text}
-            href={segment.href ?? ''}
-            fz="sm"
-            fw="bold"
-            className="hover:underline"
-            c={index === segments.length - 1 ? 'violet.3' : 'violet.2'}
-          >
-            {segment.label}
-          </Text>
-        </Fragment>
-      ))}
+    <Group
+      className={clsx('grow transition-opacity', loading ? 'opacity-0' : 'opacity-100')}
+      gap="xs"
+      px="md"
+    >
+      {segments.map((segment, index) => {
+        const href = `/${segments
+          .slice(0, index + 1)
+          .filter((s) => !!s?.slug)
+          .map((s) => s!.slug)
+          .join('/')}`;
+        return !segment ? null : (
+          <Fragment key={segment.id ?? segment.slug}>
+            {index > 0 && <IconChevronRight size={14} className="animate-fade" />}
+            <Link
+              aria-disabled={loading}
+              href={href as Route}
+              className={clsx(
+                'hover:underline underline-offset-2 text-sm animate-fade',
+                index === segments.length - 1 && 'text-violet-3',
+                loading && 'cursor-default'
+              )}
+            >
+              {segment.name}
+            </Link>
+          </Fragment>
+        );
+      })}
     </Group>
   );
 }

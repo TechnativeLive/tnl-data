@@ -1,5 +1,3 @@
-import { EventList } from '@/components/event-list';
-import { SetHeaderSegments } from '@/lib/context/header';
 import { createServerComponentClient } from '@/lib/db/server';
 import { supabase } from '@/lib/db/static';
 import { Flex } from '@mantine/core';
@@ -7,10 +5,14 @@ import { Flex } from '@mantine/core';
 export async function generateStaticParams({ params }: { params: { event: string } }) {
   const events = await supabase.from('rounds').select('slug').eq('event', params.event);
 
-  return events.data;
+  return events.data ?? [];
 }
 
-export default async function IceSkatingEventPage({ params }: { params: { event: string } }) {
+export default async function IceSkatingEventPage({
+  params,
+}: {
+  params: { sport: string; event: string };
+}) {
   const supabase = createServerComponentClient();
   const { data, error } = await supabase
     .from('rounds')
@@ -20,7 +22,7 @@ export default async function IceSkatingEventPage({ params }: { params: { event:
 
   const items = data?.map((round) => ({
     label: round.name,
-    href: `/ice-skating/${params.event}/${round.slug}`,
+    href: `/${params.sport}/${params.event}/${round.slug}`,
     id: round.slug,
   }));
 

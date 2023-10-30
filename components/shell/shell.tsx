@@ -13,12 +13,19 @@ import {
   Title,
   UnstyledButton,
 } from '@mantine/core';
-import { IconChevronRight, IconSmartHome, IconIceSkating } from '@tabler/icons-react';
+import {
+  IconChevronRight,
+  IconSmartHome,
+  IconIceSkating,
+  IconQuestionMark,
+} from '@tabler/icons-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { AsideNav, asideEnabledRoutes } from '@/components/shell/aside-nav';
+import { asideEnabledRoutes } from '@/components/shell/aside-nav';
 import { HeaderSegments } from '@/components/shell/header-segments';
+import { Route } from 'next';
+import { PROJECT_ICONS } from '@/components/project-icons';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -37,7 +44,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         collapsed: { mobile: !isHome, desktop: !isHome && !isLogin },
       }}
       aside={{ width: 220, breakpoint: 'md', collapsed: { desktop: !isAsideOpen, mobile: true } }}
-      className="p-md dark:bg-gray-9"
+      className="p-md"
     >
       <AppShell.Header>
         <Group h="100%" className="px-md">
@@ -48,7 +55,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             TNL Data
           </Title>
           <Divider orientation="vertical" />
-          <HeaderSegments />
+          <HeaderSegments params={params} />
           <ThemeSwitcher />
         </Group>
       </AppShell.Header>
@@ -59,15 +66,23 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </Text>
         </AppShell.Section>
         <AppShell.Section grow component={ScrollArea} className="-mr-[14px] pr-[14px]">
-          <Button
-            component={Link}
-            href="/ice-skating"
-            justify="left"
-            leftSection={<IconIceSkating stroke={1.5} />}
-            fullWidth
-          >
-            Ice Skating
-          </Button>
+          {Object.entries(PROJECT_ICONS).map(([slug, Icon]) => (
+            <Button
+              key={slug}
+              fullWidth
+              leftSection={<Icon stroke={1.5} />}
+              component={Link}
+              href={slug as Route}
+              justify="left"
+              className="mb-2"
+            >
+              {slug
+                .replaceAll('-', ' ')
+                .split(' ')
+                .map((part) => `${part.charAt(0).toLocaleUpperCase()}${part.substring(1)}`)
+                .join(' ')}
+            </Button>
+          ))}
         </AppShell.Section>
         <AppShell.Section>
           <UnstyledButton
@@ -90,6 +105,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         {children}
       </AppShell.Main>
       <AppShell.Aside withBorder={false} p="md" className="opacity-0 cursor-none" />
+      <AppShell.Footer className="p-md">Footer</AppShell.Footer>
     </AppShell>
   );
 }

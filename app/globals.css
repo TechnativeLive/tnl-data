@@ -1,6 +1,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --mantine-color-body-dimmed: var(--mantine-color-gray-1);
+  --mantine-color-body-dimmed-hover: var(--mantine-color-gray-2);
+}
+
+[data-mantine-color-scheme='dark']:root {
+  --mantine-color-body-dimmed: var(--mantine-color-gray-9);
+  --mantine-color-body-dimmed-hover: var(--mantine-color-gray-8);
+}
+
 a {
   text-decoration: none;
   color: inherit;

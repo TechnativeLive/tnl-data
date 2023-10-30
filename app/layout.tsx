@@ -1,3 +1,4 @@
+// import '@/lib/polyfills';
 import '@mantine/core/styles.css';
 import './globals.css';
 
