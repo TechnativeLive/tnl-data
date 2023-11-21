@@ -4,19 +4,28 @@
 *,
 ::before,
 ::after {
-  box-sizing: border-box; /* 1 */
-  border-width: 0; /* 2 */
-  border-style: solid; /* 2 */
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: var(--bd-default, var(--mantine-color-gray-5));
+}
+
+[data-mantine-color-scheme='dark']*,
+[data-mantine-color-scheme='dark']::before,
+[data-mantine-color-scheme='dark']::after {
+  border-color: var(--mantine-color-dark-4);
 }
 
 :root {
   --mantine-color-body-dimmed: var(--mantine-color-gray-1);
   --mantine-color-body-dimmed-hover: var(--mantine-color-gray-2);
+  --bd-default: var(--mantine-color-gray-4);
 }
 
 [data-mantine-color-scheme='dark']:root {
   --mantine-color-body-dimmed: var(--mantine-color-gray-9);
   --mantine-color-body-dimmed-hover: var(--mantine-color-gray-8);
+  --bd-default: var(--mantine-color-dark-4);
 }
 
 html {
