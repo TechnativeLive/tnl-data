@@ -101,7 +101,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </AppShellSection>
       </AppShellNavbar>
       <AppShellMain>{children}</AppShellMain>
-      <AppShellAside withBorder={true} p="md">
+      <AppShellAside withBorder={false} p="md">
         <Suspense fallback={null}>
           <ClientOnly>
             <EventOutline />

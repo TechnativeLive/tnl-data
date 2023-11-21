@@ -1,17 +1,14 @@
 'use client';
 
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Json } from '@/lib/db/types';
-import { useHash } from '@/lib/hooks/use-hash';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { Route } from 'next';
-import { Debug } from '@/components/debug';
 import { throttleAndDebounce } from '@/lib/utils';
-import { Text } from '@mantine/core';
 
-const PAGE_OFFSET = 0;
+// scroll margin above anchors
+const PAGE_OFFSET = 83;
 
 type OutlineItem = {
   title: string;
@@ -21,62 +18,37 @@ type OutlineItem = {
 };
 
 export function EventOutline() {
-  const hash = useHash();
-
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const params = useParams();
 
   const containerRef = useRef(null);
   const styles = useActiveAnchor(containerRef);
 
   const [headers, setHeaders] = useState<OutlineItem[]>([]);
-
-  useEffect(() => setHeaders(getHeaders()), []);
-
-  // const activeSection = items.findIndex((item) => item.href === `#${hash}`);
-
-  // const activeRouteIndex = items.findIndex((item) => pathname.endsWith(item.href));
+  useEffect(() => setHeaders(getHeaders()), [params.sport, params.event]);
 
   return (
-    <>
-      <div className="flex flex-col pl-4 -ml-4 -mt-2 relative overflow-hidden" ref={containerRef}>
-        <div
-          className="absolute h-[22px] mt-[7px] -ml-4 w-0.5 rounded-sm bg-violet-5 dark:bg-violet-3 transition-transform"
-          // style={{ transform: `translateY(${activeSection * 36}px)` }}
-        />
-
-        <Headers headers={headers} />
-
-        {/* {items?.map((item, index) => (
-          <Link
-            key={item.id}
-            href={item.href as Route}
-            className={clsx(
-              'text-sm leading-9 transition-colors overflow-hidden whitespace-nowrap text-ellipsis',
-              index !== activeSection && 'text-dimmed'
-            )}
-          >
-            {item.label}
-          </Link>
-        ))} */}
-      </div>
-      <Debug data={headers} />
-      <Debug data={hash} label="hash" />
-    </>
+    <div
+      className="flex flex-col pl-4 -ml-4 relative overflow-hidden border-l border-gray-3 dark:border-dark-4"
+      ref={containerRef}
+    >
+      <div
+        className="absolute h-[22px] mt-[3px] -ml-4 w-0.5 rounded-sm bg-violet-5 dark:bg-violet-3 transition-all duration-[250ms]"
+        style={{ transform: `translateY(${styles.top})`, opacity: styles.opacity }}
+      />
+      <Headers headers={headers} />
+    </div>
   );
 }
 
 function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: boolean }) {
   return (
-    <ul className={clsx('list-none m-0 p-0', !root && 'pl-4')}>
+    <ul className={clsx('list-none m-0 p-0', !root ? 'pl-4' : 'relative')}>
       {headers.map((header) => (
-        <li key={header.href}>
+        <li key={header.href} className="outline-item">
           <Link
             href={header.href as Route}
             className={clsx(
-              'text-sm leading-9 transition-colors overflow-hidden whitespace-nowrap text-ellipsis'
-              // index !== activeSection && 'text-dimmed'
+              'outline-link block text-sm font-medium leading-7 transition-colors overflow-hidden whitespace-nowrap text-ellipsis'
             )}
           >
             {header.title}
@@ -89,15 +61,12 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
 }
 
 function getHeaders() {
-  const potentialHeaders = Array.from(
+  const eventHeaders = Array.from(
     document.querySelectorAll('.event-header:where(h1,h2,h3,h4,h5,h6')
   );
-  const headersWithChildren = potentialHeaders.filter((el) => el.id && el.hasChildNodes());
-  const headers = headersWithChildren.map((el) => {
-    const level = Number(el.tagName[1]);
-    return { title: serializeHeader(el), href: `#${el.id}`, level };
-  });
-  console.log({ potentialHeaders, headersWithChildren, headers });
+  const headers = eventHeaders
+    .filter((el) => el.id && el.hasChildNodes())
+    .map((el) => ({ title: serializeHeader(el), href: `#${el.id}`, level: Number(el.tagName[1]) }));
 
   return resolveHeaders(headers);
 }
@@ -141,26 +110,20 @@ function resolveHeaders(headers: OutlineItem[]) {
 }
 
 export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | null | undefined>) {
-  // const { isAsideEnabled } = useAside()
-
   const prevActiveLink = useRef<HTMLElement | null>();
-  const [styles, setStyles] = useState({ top: '0px', opacity: '0' });
+  const [styles, setStyles] = useState({ top: '0px', opacity: '1' });
 
-  // onUpdated(() => {
-  //   // sidebar update means a route change
-  //   activateLink(location.hash)
-  // })
   const activateLink = useCallback(
-    (hash: string | null) => {
+    (linkHash: string | null) => {
       if (prevActiveLink.current) {
         prevActiveLink.current.classList.remove('active');
       }
 
-      if (hash === null) {
+      if (linkHash === null) {
         prevActiveLink.current = null;
       } else if (container.current) {
         prevActiveLink.current = container.current.querySelector<HTMLElement>(
-          `a[href="${decodeURIComponent(hash)}"]`
+          `a[href="${decodeURIComponent(linkHash)}"]`
         );
       }
 
@@ -168,7 +131,7 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
 
       if (activeLink) {
         activeLink.classList.add('active');
-        setStyles({ top: activeLink.offsetTop + 33 + 'px', opacity: '1' });
+        setStyles({ top: activeLink.offsetTop + 'px', opacity: '1' });
       } else {
         setStyles({ top: '0px', opacity: '0' });
       }
@@ -177,24 +140,24 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
   );
 
   const setActiveLink = useCallback(() => {
-    // if (!isAsideEnabled.value) {
-    //   return
-    // }
-
     const links = Array.from(
       container.current?.querySelectorAll('.outline-link') ?? []
     ) as HTMLAnchorElement[];
 
     const anchors = (
-      Array.from(document.querySelectorAll('.content .header-anchor')) as HTMLAnchorElement[]
+      Array.from(document.querySelectorAll('.header-anchor')) as HTMLAnchorElement[]
     ).filter((anchor) => {
       return links.some((link) => link.hash === anchor.hash && anchor.offsetParent !== null);
     });
 
     const scrollY = window.scrollY;
-    const innerHeight = window.innerHeight;
-    const offsetHeight = document.body.offsetHeight;
-    const isBottom = Math.abs(scrollY + innerHeight - offsetHeight) < 1;
+    const isBottom = scrollY >= document.body.scrollHeight - document.body.offsetHeight;
+
+    // page top - highlight first one
+    if (anchors.length && scrollY === 0) {
+      activateLink(anchors[0].hash);
+      return;
+    }
 
     // page bottom - highlight last one
     if (anchors.length && isBottom) {
@@ -215,7 +178,8 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
     }
   }, [activateLink, container]);
 
-  const onScroll = throttleAndDebounce(setActiveLink, 100);
+  const onScroll = useCallback(() => throttleAndDebounce(setActiveLink, 100)(), [setActiveLink]);
+
   useEffect(() => {
     window.requestAnimationFrame(setActiveLink);
     window.addEventListener('scroll', onScroll);

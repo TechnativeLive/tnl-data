@@ -46,7 +46,7 @@ export default async function EventPage({ params }: { params: { sport: string; e
     <Flex justify="center" className="flex-1 py-8 mb-4">
       <Stack w="100%" maw={800} mx="lg">
         <div className="flex items-center gap-4">
-          <Title fz="lg">{data?.name}</Title>
+          <Title>{data?.name}</Title>
           <Text size="sm" c="dimmed">
             {eventStatusTextMap[eventStatus]}
           </Text>

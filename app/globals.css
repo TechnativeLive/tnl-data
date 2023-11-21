@@ -1,6 +1,14 @@
 @tailwind components;
 @tailwind utilities;
 
+*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+}
+
 :root {
   --mantine-color-body-dimmed: var(--mantine-color-gray-1);
   --mantine-color-body-dimmed-hover: var(--mantine-color-gray-2);
@@ -11,15 +19,24 @@
   --mantine-color-body-dimmed-hover: var(--mantine-color-gray-8);
 }
 
+html {
+  --scroll-behavior: smooth !important;
+  scroll-behavior: smooth !important;
+}
+
 a {
   text-decoration: none;
   color: inherit;
 }
 
-:where(.border) {
-  border-style: solid;
-  border-color: var(--mantine-color-default-border);
-  border-width: 0;
+.outline-link {
+  color: var(--mantine-color-dimmed);
+  transition: color 250ms;
+}
+
+.outline-link:hover,
+.outline-link.active {
+  color: inherit;
 }
 
 .active {
