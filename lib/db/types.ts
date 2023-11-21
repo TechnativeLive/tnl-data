@@ -32,6 +32,7 @@ export interface Database {
       }
       entrants: {
         Row: {
+          country: string | null
           created_at: string
           data: Json | null
           dob: string | null
@@ -43,6 +44,7 @@ export interface Database {
           updated_at: string | null
         }
         Insert: {
+          country?: string | null
           created_at?: string
           data?: Json | null
           dob?: string | null
@@ -54,6 +56,7 @@ export interface Database {
           updated_at?: string | null
         }
         Update: {
+          country?: string | null
           created_at?: string
           data?: Json | null
           dob?: string | null

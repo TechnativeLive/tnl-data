@@ -6,6 +6,7 @@ export const tsTerse = new Intl.DateTimeFormat('en-GB', {
   timeStyle: 'medium',
   dateStyle: 'short',
 });
+export const dsShort = new Intl.DateTimeFormat('en-GB', { dateStyle: 'short' });
 export const dsLong = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
 
 type ClassLabels = [Unknown: string, Current: string, Upcoming: string, Past: string];

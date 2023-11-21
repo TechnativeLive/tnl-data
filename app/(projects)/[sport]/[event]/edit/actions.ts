@@ -212,7 +212,7 @@ export async function populateFormatEntrants(
 
     const entrants = await supabase
       .from('entrants')
-      .select('id, dob, first_name, last_name, nick_name, data')
+      .select('id, dob, first_name, last_name, nick_name, country, data')
       .in('id', uniqueIds);
 
     const entrantMap = entrants.data?.reduce((acc, entrant) => {
@@ -287,7 +287,7 @@ export async function updateFormatEntrants(
 
     const entrants = await supabase
       .from('entrants')
-      .select('id, dob, first_name, last_name, nick_name, data')
+      .select('id, dob, first_name, last_name, nick_name, country, data')
       .in('id', uniqueIds);
 
     const entrantMap = entrants.data?.reduce((acc, entrant) => {

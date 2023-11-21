@@ -5,6 +5,7 @@ import { ActionIcon, Button, createTheme } from '@mantine/core';
 export const theme = createTheme({
   primaryColor: 'teal',
   activeClassName: 'active',
+  cursorType: 'pointer',
   components: {
     Button: Button.extend({
       defaultProps: {

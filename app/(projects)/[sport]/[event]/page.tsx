@@ -43,8 +43,8 @@ export default async function EventPage({ params }: { params: { sport: string; e
   const eventStatus = classifyEventByDate({ starts_at: data?.starts_at, ends_at: data?.ends_at });
 
   return (
-    <Flex justify="center" className="flex-1 py-8 mb-4">
-      <Stack w="100%" maw={800} mx="lg">
+    <Flex justify="center" className="flex-1 py-4 mb-4">
+      <Stack w="100%" mx="lg">
         <div className="flex items-center gap-4">
           <Title>{data?.name}</Title>
           <Text size="sm" c="dimmed">

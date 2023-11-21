@@ -1,9 +1,21 @@
 'use client';
 
+import { LabelledSwitch } from '@/components/mantine-extensions/labelled-switch';
 import { ScoringTableProps } from '@/components/scoring-table/scoring-table';
+import { dsLong, dsShort } from '@/lib/dates';
 import { createBrowserClient } from '@/lib/db/client';
 import { Sport, EventData } from '@/lib/db/event-data';
-import { Alert, Button, Divider, NumberInput, Paper, Stack, Text, Title } from '@mantine/core';
+import {
+  Alert,
+  Button,
+  Divider,
+  NumberInput,
+  Paper,
+  Stack,
+  Switch,
+  Text,
+  Title,
+} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconCircleCheck, IconCircleCheckFilled, IconExclamationCircle } from '@tabler/icons-react';
 import clsx from 'clsx';
@@ -101,11 +113,9 @@ export function ScoringTableIceSkating({ format, initialResults }: ScoringTableP
                 <Paper
                   key={classId}
                   p="sm"
+                  display="flex"
                   withBorder
-                  className={clsx(
-                    'flex flex-col gap-2',
-                    active && 'border-teal-4 dark:border-teal-7'
-                  )}
+                  className={clsx('flex-col gap-2', active && 'border-teal-4 dark:border-teal-7')}
                 >
                   <div className="flex items-center px-2 gap-2 group">
                     <Title order={3} id={classId} className="event-header scroll-m-[5.25rem]">
@@ -175,12 +185,9 @@ function Entrant({
   classId: string;
   loading: boolean;
 }) {
-  const row = typeof entrant === 'number' ? { id: entrant } : entrant;
-  // id={`${round.id}.${cls.id}.${row.id}`}
-
   return (
     <form
-      className="flex justify-between items-center px-2 gap-2"
+      className="grid max-md:grid-cols-1 max-md:mb-4 grid-cols-[4fr,6fr] justify-between items-center px-2 gap-2"
       onSubmit={(ev) => {
         ev.preventDefault();
         const formData = new FormData(ev.currentTarget);
@@ -192,15 +199,44 @@ function Entrant({
         updateResults(roundId, classId, entrant.id!, result);
       }}
     >
-      <Title order={4} className="event-header scroll-m-[5.25rem]">
-        {row.id}
-      </Title>
-      <NumberInput name="tech" autoComplete="off" min={0} defaultValue={initialResult?.tech} />
-      <NumberInput name="pres" autoComplete="off" min={0} defaultValue={initialResult?.pres} />
-      <NumberInput name="ddct" autoComplete="off" min={0} defaultValue={initialResult?.ddct} />
-      <Button variant="light" type="submit" className="self-stretch h-auto" loading={loading}>
-        Submit
-      </Button>
+      <div className="flex items-center gap-2">
+        {/* <button
+          className="rounded-full border shadow-sm bg-gray-3/20 dark:bg-dark-4/30 w-6 h-6 cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault();
+          }}
+        /> */}
+        <Button size="compact-xs" variant="default" color="teal">
+          Active
+        </Button>
+        {/* <LabelledSwitch defaultChecked onLabel="Active" offLabel="Inactive" offColor="red" /> */}
+        {typeof entrant === 'number' ? (
+          <Title order={4} className="event-header scroll-m-[5.25rem]">
+            {entrant}
+          </Title>
+        ) : (
+          <div className="flex flex-col flex-wrap">
+            <div>
+              <Text display="inline-block">{entrant.first_name}</Text>{' '}
+              <Text display="inline-block" fw={600}>
+                {entrant.last_name}
+              </Text>
+            </div>
+            <div className="flex gap-3 text-dimmed">
+              {/* {entrant.dob && <Text size="xs">{dsShort.format(new Date(entrant.dob))}</Text>} */}
+              {entrant.country && <Text size="xs">{entrant.country}</Text>}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2 justify-end">
+        <NumberInput name="tech" autoComplete="off" min={0} defaultValue={initialResult?.tech} />
+        <NumberInput name="pres" autoComplete="off" min={0} defaultValue={initialResult?.pres} />
+        <NumberInput name="ddct" autoComplete="off" min={0} defaultValue={initialResult?.ddct} />
+        <Button variant="light" type="submit" className="self-stretch h-auto" loading={loading}>
+          Submit
+        </Button>
+      </div>
     </form>
   );
 }

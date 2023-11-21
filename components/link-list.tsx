@@ -12,7 +12,7 @@ export function LinkList<T extends { href: string; id: string | number }>({
   row: React.ComponentType<T>;
 }) {
   return (
-    <Stack w="100%" maw={800} mx="lg">
+    <Stack w="100%" mx="lg">
       <Title>{label}</Title>
       {data.map((item) => (
         <Link

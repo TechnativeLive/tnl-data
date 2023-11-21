@@ -100,7 +100,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </Link>
         </AppShellSection>
       </AppShellNavbar>
-      <AppShellMain>{children}</AppShellMain>
+      <AppShellMain display="flex">{children}</AppShellMain>
       <AppShellAside withBorder={false} p="md">
         <Suspense fallback={null}>
           <ClientOnly>

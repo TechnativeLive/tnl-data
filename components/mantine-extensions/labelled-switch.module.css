@@ -1,0 +1,168 @@
+.root {
+  --ls-height-xs: rem(16px);
+  --ls-height-sm: rem(20px);
+  --ls-height-md: rem(24px);
+  --ls-height-lg: rem(30px);
+  --ls-height-xl: rem(36px);
+
+  --ls-width-xs: rem(32px);
+  --ls-width-sm: rem(38px);
+  --ls-width-md: rem(46px);
+  --ls-width-lg: rem(56px);
+  --ls-width-xl: rem(72px);
+
+  --ls-thumb-size-xs: rem(12px);
+  --ls-thumb-size-sm: rem(14px);
+  --ls-thumb-size-md: rem(18px);
+  --ls-thumb-size-lg: rem(22px);
+  --ls-thumb-size-xl: rem(28px);
+
+  --ls-label-font-size-xs: rem(12px);
+  --ls-label-font-size-sm: rem(14px);
+  --ls-label-font-size-md: rem(16px);
+  --ls-label-font-size-lg: rem(18px);
+  --ls-label-font-size-xl: rem(20px);
+
+  --ls-track-label-padding-xs: rem(3px);
+  --ls-track-label-padding-sm: rem(6px);
+  --ls-track-label-padding-md: rem(6px);
+  --ls-track-label-padding-lg: rem(9px);
+  --ls-track-label-padding-xl: rem(9px);
+
+  --ls-height: var(--ls-height-sm);
+  --ls-width: var(--ls-width-sm);
+  --ls-thumb-size: var(--ls-thumb-size-sm);
+  --ls-label-font-size: var(--ls-label-font-size-sm);
+  --ls-track-label-padding: var(--ls-track-label-padding-sm);
+  --ls-radius: rem(1000px);
+  --ls-color: var(--mantine-primary-color-filled);
+  --ls-color-off: var(--mantine-color-dimmed);
+
+  position: relative;
+}
+
+.input {
+  height: 0;
+  width: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.track {
+  -webkit-tap-highlight-color: transparent;
+  cursor: var(--_ls-cursor, var(--mantine-cursor-type));
+  overflow: hidden;
+  position: relative;
+  border-radius: var(--ls-radius);
+  background-color: var(--_ls-bg);
+  border: rem(1px) solid var(--_ls-bd);
+  height: var(--ls-height);
+  min-width: var(--ls-width);
+  margin: 0;
+  transition: background-color 150ms ease, border-color 150ms ease;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  font-size: var(--ls-label-font-size);
+  font-weight: 600;
+  user-select: none;
+  z-index: 0;
+  line-height: 0;
+  color: var(--_ls-color);
+
+  .input:focus-visible + & {
+    outline: rem(2px) solid var(--mantine-primary-color-filled);
+    outline-offset: rem(2px);
+  }
+
+  .input:checked + & {
+    --_ls-bg: var(--ls-color);
+    --_ls-bd: var(--ls-color);
+    --_ls-color: var(--mantine-color-white);
+    --_ls-color-off: var(--mantine-color-white);
+  }
+
+  .input:disabled + &,
+  .input[data-disabled] + & {
+    --_ls-bg: var(--_ls-disabled-color);
+    --_ls-bd: var(--_ls-disabled-color);
+    --_ls-cursor: not-allowed;
+  }
+
+  @mixin light {
+    --_ls-bg: var(--mantine-color-gray-2);
+    --_ls-bd: var(--mantine-color-gray-3);
+    --_ls-color: var(--mantine-color-gray-6);
+    --_ls-color-off: var(--mantine-color-gray-6);
+    --_ls-disabled-color: var(--mantine-color-gray-2);
+  }
+
+  @mixin dark {
+    --_ls-bg: var(--mantine-color-dark-6);
+    --_ls-bd: var(--mantine-color-dark-4);
+    --_ls-color: var(--mantine-color-dark-1);
+    --_ls-color-off: var(--mantine-color-dark-1);
+    --_ls-disabled-color: var(--mantine-color-dark-4);
+  }
+
+  &[data-error] {
+    --_ls-bd: var(--mantine-color-error);
+  }
+}
+
+.thumb {
+  position: absolute;
+  z-index: 1;
+  border-radius: var(--ls-radius);
+  display: flex;
+  background-color: var(--_ls-thumb-bg, var(--mantine-color-white));
+  height: var(--ls-thumb-size);
+  width: var(--ls-thumb-size);
+  border: rem(1px) solid var(--_ls-thumb-bd);
+  left: var(--_ls-thumb-left, var(--ls-track-label-padding));
+  transition: left 150ms ease;
+
+  & > * {
+    margin: auto;
+  }
+
+  .input:checked + * > & {
+    --_ls-thumb-left: calc(100% - var(--ls-thumb-size) - var(--ls-track-label-padding));
+    --_ls-thumb-bd: var(--mantine-color-white);
+  }
+
+  .input:disabled + * > &,
+  .input[data-disabled] + * > & {
+    --_ls-thumb-bd: var(--_ls-thumb-bg-disabled);
+    --_ls-thumb-bg: var(--_ls-thumb-bg-disabled);
+  }
+
+  @mixin light {
+    --_ls-thumb-bd: var(--mantine-color-gray-3);
+    --_ls-thumb-bg-disabled: var(--mantine-color-gray-0);
+  }
+
+  @mixin dark {
+    --_ls-thumb-bd: var(--mantine-color-white);
+    --_ls-thumb-bg-disabled: var(--mantine-color-dark-3);
+  }
+}
+
+.trackLabel {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  min-width: calc(var(--ls-width) - var(--ls-thumb-size));
+  padding-inline: var(--ls-track-label-padding);
+  margin: 0 0 0 calc(var(--ls-thumb-size) + var(--ls-track-label-padding));
+  transition: margin 150ms ease;
+
+  .input:checked + * > & {
+    margin: 0 calc(var(--ls-thumb-size) + var(--ls-track-label-padding)) 0 0;
+  }
+}

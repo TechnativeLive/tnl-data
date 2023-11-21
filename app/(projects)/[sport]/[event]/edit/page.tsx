@@ -33,8 +33,8 @@ export default async function EventPage({ params }: { params: { sport: string; e
   const updatedAtDate = data?.updated_at ? new Date(data.updated_at) : undefined;
 
   return (
-    <Flex justify="center" className="flex-1 py-8 mb-4">
-      <Stack w="100%" maw={800} mx="lg" gap="xl">
+    <Flex justify="center" className="flex-1 py-4 mb-4">
+      <Stack w="100%" mx="lg" gap="xl">
         <Paper
           display="flex"
           shadow="xs"
