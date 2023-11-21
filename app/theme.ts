@@ -1,6 +1,6 @@
 'use client';
 
-import { ActionIcon, Button, UnstyledButton, createTheme } from '@mantine/core';
+import { ActionIcon, Button, createTheme } from '@mantine/core';
 
 export const theme = createTheme({
   primaryColor: 'teal',
@@ -17,4 +17,6 @@ export const theme = createTheme({
       },
     }),
   },
+  fontFamilyMonospace:
+    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
 });

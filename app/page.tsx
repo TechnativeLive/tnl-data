@@ -1,6 +1,6 @@
 import Login from '@/app/(login)/login/page';
 import { SportStat, SportStatProp } from '@/components/sport-stat';
-import { createServerComponentClient } from '@/lib/db/server';
+import { createServerClient } from '@/lib/db/server';
 import { Stack } from '@mantine/core';
 import { classifyEventsByDate } from '@/lib/dates';
 import { Debug } from '@/components/debug';
@@ -8,7 +8,7 @@ import { Info } from '@/components/info';
 // import 'array-grouping-polyfill';
 
 export default async function HomePage() {
-  const supabase = createServerComponentClient();
+  const supabase = createServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -43,8 +43,8 @@ export default async function HomePage() {
 
   return (
     <Stack className="flex-1 p-16">
-      <Debug data={error} label="error" />
-      <Info>Select a sport from the menu to get started</Info>
+      {error && <Debug data={error} label="error" className="mb-8" />}
+      <Info title="Getting Started">Select a sport from the menu</Info>
       {!sortedByCurrentEventCount ? null : (
         <div className="mt-16 grid gap-md grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
           {sortedByCurrentEventCount.map(([sport, stat]) => (

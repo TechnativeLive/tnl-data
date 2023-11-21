@@ -23,21 +23,18 @@ export function SportStat({ stat }: { stat: SportStatProp }) {
     >
       <Icon size={32} className="mx-auto my-lg text-blue-6" stroke={1.5} />
       <div className="font-bold mb-2">{stat.label}</div>
-      <div className="flex text-gray-6">
+      <div className="flex text-gray-6 items-end grow">
         <div className="flex flex-col grow justify-end pb-1">
           <div className="text-sm">
             {stat.activeCount === 0 ? null : (
-              <span>
+              <div>
                 <span className="font-bold">{stat.activeCount}</span> Active
-              </span>
-            )}
-            {!stat.activeCount || !stat.unknownCount ? null : (
-              <span className="font-bold"> / </span>
+              </div>
             )}
             {stat.unknownCount === 0 ? null : (
-              <span>
+              <div>
                 <span className="font-bold">{stat.unknownCount}</span> No Dates
-              </span>
+              </div>
             )}
           </div>
         </div>

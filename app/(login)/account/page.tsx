@@ -1,9 +1,9 @@
 import { Center, Text, Title } from '@mantine/core';
 import { LoginSubmitButton } from '@/app/(login)/login/submit-button';
-import { createServerComponentClient } from '@/lib/db/server';
+import { createServerClient } from '@/lib/db/server';
 
 export default async function AccountPage() {
-  const supabase = createServerComponentClient();
+  const supabase = createServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

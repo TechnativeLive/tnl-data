@@ -1,13 +1,17 @@
-.root {
+.label {
+  font-size: var(--mantine-font-size-xs);
+}
+
+[data-surround='true'] .root {
   position: relative;
 }
 
-.input {
+[data-surround='true'] .input {
   height: rem(58px);
   padding-top: rem(22px);
 }
 
-.label {
+[data-surround='true'] .label {
   position: absolute;
   pointer-events: none;
   padding-left: var(--mantine-spacing-sm);

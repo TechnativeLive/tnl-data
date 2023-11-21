@@ -1,16 +1,8 @@
 import { Select as MantineSelect } from '@mantine/core';
 import classes from './select.module.css';
 
-type SelectProps = React.ComponentProps<typeof MantineSelect>;
+type SelectProps = React.ComponentProps<typeof MantineSelect> & { surround?: boolean };
 
-export function Select(props: SelectProps) {
-  return (
-    <MantineSelect
-      // data={['React', 'Angular', 'Svelte', 'Vue']}
-      // placeholder="Pick one"
-      // label="Your favorite library/framework"
-      classNames={classes}
-      {...props}
-    />
-  );
+export function Select({ surround = false, ...props }: SelectProps) {
+  return <MantineSelect data-surround={surround.valueOf()} classNames={classes} {...props} />;
 }

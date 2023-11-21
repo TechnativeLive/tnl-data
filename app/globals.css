@@ -19,6 +19,7 @@ a {
 :where(.border) {
   border-style: solid;
   border-color: var(--mantine-color-default-border);
+  border-width: 0;
 }
 
 .active {
@@ -27,53 +28,4 @@ a {
 
 .active:active {
   transform: scale(0.97);
-}
-
-.aside-wrapper {
-  flex-grow: 1;
-  margin: -1rem;
-  padding: 1rem;
-  position: relative;
-}
-
-.aside {
-  position: fixed;
-  width: var(--app-shell-aside-width);
-  height: var(
-    --_section-height,
-    calc(100dvh - var(--app-shell-header-offset, 0px) - var(--app-shell-footer-offset, 0px))
-  );
-  top: var(--_section-top, var(--app-shell-header-offset, 0));
-  left: var(--_aside-left);
-  right: var(--_aside-right, 0);
-  padding: 1rem;
-
-  z-index: calc(var(--app-shell-aside-z-index, 101) + 1);
-  display: flex;
-  flex-direction: column;
-  background-color: var(--mantine-color-body);
-
-  transform: translateX(var(--app-shell-aside-width));
-  transition-property: transform, top, height;
-  transition-duration: var(--app-shell-transition-duration);
-  transition-timing-function: var(--app-shell-transition-timing-function);
-
-  animation-name: animate-aside;
-  animation-timing-function: var(--app-shell-transition-timing-function);
-  animation-duration: 450ms;
-  animation-delay: 50ms;
-  animation-fill-mode: both;
-}
-
-.aside.open {
-  transform: translateX(0);
-}
-
-@keyframes animate-aside {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
 }

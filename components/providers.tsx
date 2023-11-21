@@ -1,8 +1,15 @@
 'use client';
 
-// import { HeaderSegmentsProvider } from '@/lib/context/header';
+import { ModalsProvider } from '@mantine/modals';
+import { DatesProvider } from '@mantine/dates';
+import { DatesProviderProps } from '@mantine/dates/lib/components/DatesProvider/DatesProvider';
+
+const datesOptions: DatesProviderProps['settings'] = { timezone: 'GMT' };
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return children;
-  // return <HeaderSegmentsProvider>{children}</HeaderSegmentsProvider>;
+  return (
+    <ModalsProvider>
+      <DatesProvider settings={datesOptions}>{children}</DatesProvider>
+    </ModalsProvider>
+  );
 }

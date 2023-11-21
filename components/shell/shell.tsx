@@ -3,6 +3,11 @@
 import {
   ActionIcon,
   AppShell,
+  AppShellAside,
+  AppShellHeader,
+  AppShellMain,
+  AppShellNavbar,
+  AppShellSection,
   Avatar,
   Button,
   Divider,
@@ -11,21 +16,17 @@ import {
   Stack,
   Text,
   Title,
-  UnstyledButton,
 } from '@mantine/core';
-import {
-  IconChevronRight,
-  IconSmartHome,
-  IconIceSkating,
-  IconQuestionMark,
-} from '@tabler/icons-react';
+import { IconChevronRight, IconSmartHome } from '@tabler/icons-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { asideEnabledRoutes } from '@/components/shell/aside-nav';
+import { EventOutline } from '@/components/shell/event-outline';
 import { HeaderSegments } from '@/components/shell/header-segments';
 import { Route } from 'next';
 import { PROJECT_ICONS } from '@/components/project-icons';
+import { Suspense } from 'react';
+import ClientOnly from '@/components/client-only';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,7 +34,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const isHome = pathname === '/';
   const isLogin = pathname.startsWith('/login');
-  const isAsideOpen = asideEnabledRoutes.some((fn) => fn({ pathname, params }));
+  const isAsideOpen = params.sport && params.event && !pathname.endsWith('/edit');
 
   return (
     <AppShell
@@ -44,28 +45,27 @@ export function Shell({ children }: { children: React.ReactNode }) {
         collapsed: { mobile: !isHome, desktop: !isHome && !isLogin },
       }}
       aside={{ width: 220, breakpoint: 'md', collapsed: { desktop: !isAsideOpen, mobile: true } }}
-      className="p-md"
     >
-      <AppShell.Header>
+      <AppShellHeader>
         <Group h="100%" className="px-md">
           <ActionIcon component={Link} href="/" className="leading-none" size={42}>
             <IconSmartHome />
           </ActionIcon>
-          <Title size="sm" className="px-md select-none">
+          <Text component={Link} href="/" fw={700} className="px-md select-none">
             TNL Data
-          </Title>
+          </Text>
           <Divider orientation="vertical" />
-          <HeaderSegments params={params} />
+          <HeaderSegments />
           <ThemeSwitcher />
         </Group>
-      </AppShell.Header>
-      <AppShell.Navbar p="md">
-        <AppShell.Section>
+      </AppShellHeader>
+      <AppShellNavbar p="md">
+        <AppShellSection>
           <Text fz="xs" fw="bold" c="dimmed" mb="sm">
             Projects
           </Text>
-        </AppShell.Section>
-        <AppShell.Section grow component={ScrollArea} className="-mr-[14px] pr-[14px]">
+        </AppShellSection>
+        <AppShellSection grow component={ScrollArea} className="-mr-[14px] pr-[14px]">
           {Object.entries(PROJECT_ICONS).map(([slug, Icon]) => (
             <Button
               key={slug}
@@ -83,12 +83,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 .join(' ')}
             </Button>
           ))}
-        </AppShell.Section>
-        <AppShell.Section>
-          <UnstyledButton
-            component={Link}
+        </AppShellSection>
+        <AppShellSection>
+          <Link
             href="/account"
-            className="flex gap-4 items-center bg-button rounded-lg p-sm w-full"
+            className="active flex gap-4 items-center bg-button rounded-lg p-sm w-full active:bg-body-dimmed"
           >
             <Avatar color="teal">TN</Avatar>
             <Stack gap={1} className="grow">
@@ -98,14 +97,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </Text>
             </Stack>
             <IconChevronRight size={14} />
-          </UnstyledButton>
-        </AppShell.Section>
-      </AppShell.Navbar>
-      <AppShell.Main display="flex" pos="relative">
-        {children}
-      </AppShell.Main>
-      <AppShell.Aside withBorder={false} p="md" className="opacity-0 cursor-none" />
-      <AppShell.Footer className="p-md">Footer</AppShell.Footer>
+          </Link>
+        </AppShellSection>
+      </AppShellNavbar>
+      <AppShellMain>{children}</AppShellMain>
+      <AppShellAside withBorder={true} p="md">
+        <Suspense fallback={null}>
+          <ClientOnly>
+            <EventOutline />
+          </ClientOnly>
+        </Suspense>
+      </AppShellAside>
     </AppShell>
   );
 }

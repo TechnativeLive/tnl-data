@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@/lib/db/server';
+import { createServerClient } from '@/lib/db/server';
 
 export default async function Unauthenticated() {
-  const supabase = createServerComponentClient();
+  const supabase = createServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

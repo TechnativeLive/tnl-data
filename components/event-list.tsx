@@ -1,6 +1,4 @@
 import { Stack, Title } from '@mantine/core';
-import { Route } from 'next';
-import Link from 'next/link';
 
 export function EventList<T extends { href: string; id: string | number }>({
   label,
@@ -12,17 +10,13 @@ export function EventList<T extends { href: string; id: string | number }>({
   row: React.ComponentType<T>;
 }) {
   return (
-    <Stack w="100%" maw={800}>
-      <Title>{label}</Title>
-      {data.map((item) => (
-        <Link
-          href={item.href as Route}
-          key={item.id}
-          className="active border bg-button rounded-lg px-3 py-1 flex"
-        >
-          <Row {...item} />
-        </Link>
-      ))}
+    <Stack w="100%" maw={800} mx="lg">
+      <Title order={2}>{label}</Title>
+      <div className="flex flex-col border-0 border-l-4 border-solid rounded-bl-2xl rounded-tl-sm pl-2 pb-2 border-blue-4">
+        {data.map((item) => (
+          <Row key={item.id} {...item} />
+        ))}
+      </div>
     </Stack>
   );
 }

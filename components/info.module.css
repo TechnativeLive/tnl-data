@@ -1,8 +1,0 @@
-.root {
-  padding-top: var(--mantine-spacing-sm);
-  padding-bottom: var(--mantine-spacing-sm);
-}
-
-[data-dimmed='true'] .icon {
-  background: var(--mantine-color-body-dimmed);
-}
