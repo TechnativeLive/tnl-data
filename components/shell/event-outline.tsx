@@ -6,6 +6,14 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { Route } from 'next';
 import { throttleAndDebounce } from '@/lib/utils';
+import { atom, useAtom, useAtomValue } from 'jotai';
+
+const outlineRerenderStoreAtom = atom(0);
+const outlineRerenderKeyAtom = atom((get) => get(outlineRerenderStoreAtom));
+
+export const updateOutlineAtom = atom(null, (get, set) =>
+  set(outlineRerenderStoreAtom, get(outlineRerenderStoreAtom) + 1)
+);
 
 // scroll margin above anchors
 const PAGE_OFFSET = 83;
@@ -19,12 +27,13 @@ type OutlineItem = {
 
 export function EventOutline() {
   const params = useParams();
+  const externalUpdate = useAtomValue(outlineRerenderKeyAtom);
 
   const containerRef = useRef(null);
   const styles = useActiveAnchor(containerRef);
 
   const [headers, setHeaders] = useState<OutlineItem[]>([]);
-  useEffect(() => setHeaders(getHeaders()), [params.sport, params.event]);
+  useEffect(() => setHeaders(getHeaders()), [params.sport, params.event, externalUpdate]);
 
   return (
     <div

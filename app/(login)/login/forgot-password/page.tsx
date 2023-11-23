@@ -7,7 +7,7 @@ export default function Reset({ searchParams }: { searchParams: Record<string, s
   const message = searchParams?.message;
 
   return (
-    <Center className="flex-1">
+    <Center className="flex-1 p-8">
       <form
         className="w-full max-w-[300px] flex flex-col justify-center gap-2"
         action="/auth/reset-password"

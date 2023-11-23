@@ -1,3 +1,5 @@
+'use client';
+
 import { ScoringTableFallback } from '@/components/scoring-table/fallback';
 import { ScoringTableIceSkating } from '@/components/scoring-table/ice-skating';
 import { Sport } from '@/lib/db/event-data';

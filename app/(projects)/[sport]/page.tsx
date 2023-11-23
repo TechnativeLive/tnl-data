@@ -54,8 +54,8 @@ export default async function SportPage({
     sortOption === 'starts_at' ? startDateReducer(data) : sortedDateReducer(data, sortOption, asc);
 
   return (
-    <Flex justify="center" className="flex-1 py-4 mb-4">
-      <Stack w="100%" mx="lg">
+    <Flex justify="center" className="flex-1 py-4 mb-4 mx-content">
+      <Stack w="100%">
         <div className="flex justify-between items-end">
           <Title>Events</Title>
           <div className="flex items-end gap-2">

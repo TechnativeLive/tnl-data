@@ -15,7 +15,6 @@ import {
   ScrollArea,
   Stack,
   Text,
-  Title,
 } from '@mantine/core';
 import { IconChevronRight, IconSmartHome } from '@tabler/icons-react';
 import { ThemeSwitcher } from '../theme-switcher';

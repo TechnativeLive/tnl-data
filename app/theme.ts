@@ -1,11 +1,36 @@
 'use client';
 
-import { ActionIcon, Button, createTheme } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  createTheme,
+  defaultVariantColorsResolver,
+  lighten,
+  parseThemeColor,
+  rem,
+} from '@mantine/core';
 
 export const theme = createTheme({
   primaryColor: 'teal',
   activeClassName: 'active',
   cursorType: 'pointer',
+  black: 'var(--mantine-color-dark-7)',
+  variantColorResolver: (input) => {
+    const defaultResolvedColors = defaultVariantColorsResolver(input);
+    const parsedColor = parseThemeColor({
+      color: input.color || input.theme.primaryColor,
+      theme: input.theme,
+    });
+
+    if (input.variant === 'filled') {
+      return {
+        ...defaultResolvedColors,
+        border: `${rem(1)} solid ${lighten(parsedColor.value, 0.1)}`,
+      };
+    }
+
+    return defaultResolvedColors;
+  },
   components: {
     Button: Button.extend({
       defaultProps: {

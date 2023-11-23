@@ -53,6 +53,14 @@ module.exports = {
             backgroundColor: 'var(--mantine-color-default-hover)',
           },
         },
+        '.mx-content': {
+          marginLeft: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
+          marginRight: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
+          // '@media (min-width: 1024px)': {
+          //   marginLeft: 'clamp(1rem, 5vw, 10rem)',
+          //   marginRight: 'clamp(1rem, 5vw, 10rem)',
+          // }
+        },
       });
     }),
   ],

@@ -1,9 +1,5 @@
 import { EventDataEditForm } from '@/app/(projects)/[sport]/[event]/edit/edit';
 import {
-  PopulateEntrantsInFormat,
-  DepopulateEntrantsInFormat,
-} from '@/app/(projects)/[sport]/[event]/edit/format';
-import {
   PreviousSnapshotModal,
   RestoreFromSnapshotButton,
   TakeSnapshotButton,
@@ -12,7 +8,7 @@ import { Info } from '@/components/info';
 import { tsReadable } from '@/lib/dates';
 import { day } from '@/lib/dayjs';
 import { createServerClient } from '@/lib/db/server';
-import { Button, Flex, Paper, Stack, Text, Tooltip } from '@mantine/core';
+import { Flex, Paper, Stack, Text } from '@mantine/core';
 
 export default async function EventPage({ params }: { params: { sport: string; event: string } }) {
   const supabase = createServerClient();
@@ -33,8 +29,8 @@ export default async function EventPage({ params }: { params: { sport: string; e
   const updatedAtDate = data?.updated_at ? new Date(data.updated_at) : undefined;
 
   return (
-    <Flex justify="center" className="flex-1 py-4 mb-4">
-      <Stack w="100%" mx="lg" gap="xl">
+    <Flex justify="center" className="flex-1 py-4 mb-4 mx-content">
+      <Stack w="100%" maw={1024} gap="xl">
         <Paper
           display="flex"
           shadow="xs"

@@ -8,7 +8,7 @@ export default function ResetPassword({ searchParams }: { searchParams: Record<s
 
   if (success) {
     return (
-      <Center className="flex-1">
+      <Center className="flex-1 p-8">
         <Stack gap="xs" w="100%" maw={300}>
           <Title size="h4" c="green">
             Success

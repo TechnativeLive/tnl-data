@@ -18,7 +18,7 @@ export default async function AccountPage() {
   }
 
   return (
-    <Center className="flex-1">
+    <Center className="flex-1 p-8">
       <form
         className="w-full max-w-[300px] flex flex-col justify-center gap-2"
         action="/auth/sign-out"

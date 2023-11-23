@@ -1,4 +1,3 @@
 {
-  "typescript.tsdk": "node_modules\\typescript\\lib",
-  "css.validate": false
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

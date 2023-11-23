@@ -16,6 +16,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import { useDidUpdate } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconCircleCheck, IconCircleCheckFilled, IconExclamationCircle } from '@tabler/icons-react';
 import clsx from 'clsx';
@@ -32,7 +33,12 @@ type UpdateResultsHelper = (round: string, cls: string, id: number, data: Result
 
 export function ScoringTableIceSkating({ format, initialResults }: ScoringTableProps) {
   const params = useParams();
-  const [results, setResults] = useState(validateResults(initialResults));
+  const [results, setResults] = useState(() => validateResults(initialResults));
+  // Keep results up to date with database changes
+  useDidUpdate(() => {
+    setResults(validateResults(initialResults));
+  }, [initialResults, setResults]);
+
   const supabase = createBrowserClient();
   const [loading, setLoading] = useState<false | [string, string, number]>(false);
 
