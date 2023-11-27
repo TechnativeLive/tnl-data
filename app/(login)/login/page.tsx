@@ -1,10 +1,22 @@
 import Link from 'next/link';
 import { Center, TextInput, Title } from '@mantine/core';
 import { LoginSubmitButton } from '@/app/(login)/login/submit-button';
+import { createServerClient } from '@/lib/db/server';
+import { redirect } from 'next/navigation';
 
-export default function Login({ searchParams }: { searchParams?: Record<string, string> }) {
+export default async function Login({ searchParams }: { searchParams?: Record<string, string> }) {
+  const redirectTo = searchParams?.redirectTo;
   const emailError = searchParams?.email;
   const passwordError = searchParams?.password;
+
+  const supabase = createServerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session) {
+    redirect(redirectTo ? decodeURIComponent(redirectTo) : '/');
+  }
 
   return (
     <Center className="flex-1 p-8">
@@ -16,6 +28,10 @@ export default function Login({ searchParams }: { searchParams?: Record<string, 
         <Title size="h4" mb="xl">
           Log In
         </Title>
+
+        {!!redirectTo && (
+          <input name="redirectTo" type="hidden" value={decodeURIComponent(redirectTo)} />
+        )}
 
         <TextInput
           name="email"

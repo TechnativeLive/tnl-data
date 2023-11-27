@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <MantineProvider theme={theme} defaultColorScheme="dark">
           <Providers>
-            <Notifications autoClose={4000} />
+            <Notifications containerWidth={340} autoClose={3000} />
             <ShellWithProfile>{children}</ShellWithProfile>
           </Providers>
         </MantineProvider>

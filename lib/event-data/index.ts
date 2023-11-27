@@ -2,7 +2,7 @@ import {
   EventFormatIceSkating,
   EventResultIceSkating,
   EventLiveDataIceSkating,
-} from '@/lib/db/event-data/ice-skating';
+} from '@/lib/event-data/ice-skating';
 
 export type Sport = keyof SportJsonTypes;
 

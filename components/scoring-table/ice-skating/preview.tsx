@@ -1,5 +1,5 @@
 import { dsShort } from '@/lib/dates';
-import { EventLiveData } from '@/lib/db/event-data';
+import { EventLiveData } from '@/lib/event-data';
 import {
   AccordionItem,
   AccordionControl,

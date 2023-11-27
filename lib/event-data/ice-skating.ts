@@ -1,4 +1,4 @@
-import { EventFormat, EventResult, EventResults } from '@/lib/db/event-data';
+import { EventFormat, EventResult, EventResults } from '@/lib/event-data';
 import { sortAndRank } from '@/lib/sort-and-rank';
 
 export type EventResultIceSkating = {

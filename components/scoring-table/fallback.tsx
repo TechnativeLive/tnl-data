@@ -1,6 +1,6 @@
 import { Debug } from '@/components/debug';
 import { ScoringTableProps } from '@/components/scoring-table/scoring-table';
-import { Sport, EventFormat } from '@/lib/db/event-data';
+import { Sport, EventFormat } from '@/lib/event-data';
 import { Json } from '@/lib/db/types';
 import { Alert, Text, Title, TitleOrder } from '@mantine/core';
 import { IconExclamationCircle } from '@tabler/icons-react';

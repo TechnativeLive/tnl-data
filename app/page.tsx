@@ -32,8 +32,7 @@ export default async function HomePage() {
         label: statData[0].sports?.name || 'Unknown',
         slug: sport,
         count: statData.length,
-        unknownCount: classification[0].data.length,
-        activeCount: classification[1].data.length,
+        events: classification.map((c) => ({ label: c.label, count: c.data.length })),
       };
       return [sport, stat] as [typeof sport, typeof stat];
     });

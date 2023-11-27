@@ -8,6 +8,7 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const email = String(formData.get('email'));
   const password = String(formData.get('password'));
+  const redirectTo = formData.get('redirectTo');
   const supabase = createRouteHandlerClient();
 
   // if (!email || /^\S+@\S+$/.test(email)) {
@@ -29,7 +30,9 @@ export async function POST(request: Request) {
     });
   }
 
-  return NextResponse.redirect(`${requestUrl.origin}/`, {
+  const destination = redirectTo ? `${requestUrl.origin}${redirectTo}` : `${requestUrl.origin}/`;
+
+  return NextResponse.redirect(destination, {
     // a 301 status is required to redirect from a POST to a GET route
     status: 301,
   });

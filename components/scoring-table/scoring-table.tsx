@@ -2,7 +2,7 @@
 
 import { ScoringTableFallback } from '@/components/scoring-table/fallback';
 import { ScoringTableIceSkating } from '@/components/scoring-table/ice-skating/scoring';
-import { Sport } from '@/lib/db/event-data';
+import { Sport } from '@/lib/event-data';
 
 export type ScoringTableProps = {
   format: Tables<'events'>['format'] | undefined;

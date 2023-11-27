@@ -55,3 +55,11 @@ a {
 .active:active {
   transform: scale(0.97);
 }
+
+.mantine-ScrollArea-viewport > div {
+  display: block !important;
+}
+
+.mantine-List-itemWrapper {
+  padding-right: 1.25rem;
+}

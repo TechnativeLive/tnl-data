@@ -51,11 +51,16 @@ export function HeaderSegments() {
     : null;
   const allSegments = specialSemgent ? [...segments, specialSemgent] : segments;
 
+  const segmentsLength = allSegments
+    .map((segment) => segment?.name.length ?? 0)
+    .reduce((a, b) => a + b, 0);
+
   return (
-    <Group
-      className={clsx('grow transition-opacity', loading ? 'opacity-0' : 'opacity-100')}
-      gap="xs"
-      px="md"
+    <div
+      className={clsx(
+        'flex items-center flex-wrap gap-x-2 px-md grow transition-opacity',
+        loading ? 'opacity-0' : 'opacity-100'
+      )}
     >
       {allSegments.map((segment, index) => {
         const href = `/${segments
@@ -70,10 +75,11 @@ export function HeaderSegments() {
               aria-disabled={loading}
               href={href as Route}
               className={clsx(
-                'underline-offset-2 text-sm animate-fade flex items-center transition-all',
+                'underline-offset-2 animate-fade flex items-center transition-all',
                 'hover:underline hover:text-teal-5',
                 index === segments.length - 1 && 'text-violet-5 dark:text-violet-3',
-                loading && 'cursor-default'
+                loading && 'cursor-default',
+                segmentsLength > 60 ? 'text-xs md:text-sm' : 'text-xs sm:text-sm'
               )}
             >
               {segment.id === '__edit' && <IconEdit size={14} className="mr-2" />}
@@ -82,6 +88,6 @@ export function HeaderSegments() {
           </Fragment>
         );
       })}
-    </Group>
+    </div>
   );
 }

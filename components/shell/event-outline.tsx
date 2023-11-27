@@ -6,7 +6,8 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { Route } from 'next';
 import { throttleAndDebounce } from '@/lib/utils';
-import { atom, useAtom, useAtomValue } from 'jotai';
+import { atom, useAtomValue } from 'jotai';
+import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/scroll-area-with-shadow';
 
 const outlineRerenderStoreAtom = atom(0);
 const outlineRerenderKeyAtom = atom((get) => get(outlineRerenderStoreAtom));
@@ -38,14 +39,21 @@ export function EventOutline() {
 
   return (
     <div
-      className="flex flex-col pl-4 -ml-4 relative overflow-hidden border-l border-gray-3 dark:border-dark-4"
+      className="flex flex-col mb-14 -mr-3 relative overflow-hidden border-l border-gray-3 dark:border-dark-4"
       ref={containerRef}
     >
-      <div
-        className="absolute h-[22px] mt-[3px] -ml-4 w-0.5 rounded-sm bg-violet-5 dark:bg-violet-3 transition-all duration-[250ms]"
-        style={{ transform: `translateY(${styles.top})`, opacity: styles.opacity }}
-      />
-      <Headers headers={headers} />
+      <ScrollAreaAutosizeWithShadow className="max-h-full [&>div]:max-w-full">
+        <div className="relative px-4">
+          <div
+            className="absolute h-[22px] mt-[3px] -ml-4 w-0.5 rounded-sm bg-violet-5 dark:bg-violet-3 transition-all duration-[250ms]"
+            style={{
+              transform: `translateY(${styles.top}px)`,
+              opacity: styles.opacity,
+            }}
+          />
+          <Headers headers={headers} />
+        </div>
+      </ScrollAreaAutosizeWithShadow>
     </div>
   );
 }
@@ -55,7 +63,7 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
     <ul className={clsx('list-none m-0 p-0', !root ? 'pl-4' : 'relative')}>
       {headers.map((header) => (
         <li key={header.href} className="outline-item">
-          <div className="relative flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2">
             <Link
               href={header.href as Route}
               className={clsx(
@@ -66,7 +74,7 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
             </Link>
             <div
               className={clsx(
-                'w-3 h-3 rounded-full border shadow-xs border-green-5/70 bg-green-5/20 opacity-0 transition-opacity',
+                'w-3 h-3 shrink-0 rounded-full border shadow-xs border-green-5/70 bg-green-5/20 opacity-0 transition-opacity',
                 header.active && 'opacity-100',
                 root && 'mr-2'
               )}
@@ -135,7 +143,7 @@ function resolveHeaders(headers: OutlineItem[]) {
 
 export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | null | undefined>) {
   const prevActiveLink = useRef<HTMLElement | null>();
-  const [styles, setStyles] = useState({ top: '0px', opacity: '1' });
+  const [styles, setStyles] = useState({ top: 0, opacity: '1' });
 
   const activateLink = useCallback(
     (linkHash: string | null) => {
@@ -155,9 +163,10 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
 
       if (activeLink) {
         activeLink.classList.add('active');
-        setStyles({ top: activeLink.offsetTop + 'px', opacity: '1' });
+        console.log(activeLink.offsetTop);
+        setStyles({ top: activeLink.offsetTop, opacity: '1' });
       } else {
-        setStyles({ top: '0px', opacity: '0' });
+        setStyles({ top: 0, opacity: '0' });
       }
     },
     [prevActiveLink, container]

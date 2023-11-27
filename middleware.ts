@@ -60,7 +60,20 @@ export async function middleware(request: NextRequest) {
 
   // Refresh session if expired - required for Server Components
   // https://supabase.com/docs/guides/auth/auth-helpers/nextjs#managing-session-with-middleware
-  await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const pathname = request.nextUrl.pathname;
+  const protectedPaths = ['/ice-skating'];
+  const isPathProtected = protectedPaths.some((path) => pathname.startsWith(path));
+
+  if (isPathProtected && !session) {
+    const url = new URL(`/login`, request.url);
+    url.searchParams.set('redirectTo', pathname);
+    console.log(url.toString());
+    return NextResponse.redirect(url, { status: 302 });
+  }
 
   return response;
 }

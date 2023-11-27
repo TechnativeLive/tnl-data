@@ -4,23 +4,19 @@ import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/sc
 import { LiveDataPreviewIceSkating } from '@/components/scoring-table/ice-skating/preview';
 import { ScoringTableProps } from '@/components/scoring-table/scoring-table';
 import { updateOutlineAtom } from '@/components/shell/event-outline';
-import { dsShort } from '@/lib/dates';
 import { createBrowserClient } from '@/lib/db/client';
-import { Sport, EventFormat, EventResults, EventResult, EventLiveData } from '@/lib/db/event-data';
-import { generateLiveDataIceSkating } from '@/lib/db/event-data/ice-skating';
+import { Sport, EventFormat, EventResults, EventResult, EventLiveData } from '@/lib/event-data';
+import { generateLiveDataIceSkating } from '@/lib/event-data/ice-skating';
 import { updateDatasream } from '@/lib/singular/datastream';
 import {
-  Accordion,
-  AccordionControl,
-  AccordionItem,
-  AccordionPanel,
   Alert,
   Button,
   Collapse,
   Divider,
+  List,
+  ListItem,
   NumberInput,
   Paper,
-  ScrollAreaAutosize,
   Stack,
   Text,
   Title,
@@ -30,13 +26,13 @@ import { notifications } from '@mantine/notifications';
 import {
   IconChevronsUp,
   IconCircleCheck,
-  IconCircleCheckFilled,
   IconExclamationCircle,
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { useParams } from 'next/navigation';
-import { Fragment, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 type Result = EventResult<'ice-skating'>;
 type Results = EventResults<'ice-skating'>;
@@ -58,6 +54,7 @@ export function ScoringTableIceSkating({
   dsPrivateKey,
 }: ScoringTableProps) {
   const params = useParams();
+  const updateOutline = useSetAtom(updateOutlineAtom);
   const [results, setResults] = useState(() => validateResults(initialResults));
   const [liveDataPreview, setLiveDataPreview] = useState<EventLiveData<'ice-skating'>>(
     generateLiveDataIceSkating({
@@ -69,14 +66,21 @@ export function ScoringTableIceSkating({
   // Keep results up to date with database changes
   // Note: this causes unnecessary re-renders. Consider using an atom linked to the realtime event
   useDidUpdate(() => {
-    setResults(validateResults(initialResults));
-  }, [initialResults, setResults]);
+    const newResults = validateResults(initialResults);
+    setResults(newResults);
+    setLiveDataPreview(
+      generateLiveDataIceSkating({
+        format: format as EventFormat<'ice-skating'>,
+        results: newResults,
+      })
+    );
+    updateOutline();
+  }, [setResults, validateResults, initialResults, format, setLiveDataPreview, updateOutline]);
 
   const supabase = createBrowserClient();
   const [loading, setLoading] = useState<
     false | [string | undefined, string | undefined, number | undefined]
   >(false);
-  const updateOutline = useSetAtom(updateOutlineAtom);
 
   const updateActive = useCallback<UpdateActiveHelper>(
     ({ round, cls, entrant }) => {
@@ -212,6 +216,64 @@ export function ScoringTableIceSkating({
 
   return (
     <Stack>
+      <Alert title="How to use this page" variant="light" color="blue" icon={<IconInfoCircle />}>
+        <div className="grid gap-y-4 gap-x-8 grid-cols-1 md:grid-cols-2">
+          <div className="flex flex-col">
+            <Text fw={600} mb="xs">
+              Overview
+            </Text>
+            <Text size="sm">
+              This page is laid out in running order of the event. It powers graphics for the
+              livestream. For example, our startlist graphic will use whichever class is active on
+              here.
+              <br />
+              <br />
+              The guide on the right (only on large screens) will scroll to each class on click, and
+              show which class is active
+            </Text>
+          </div>
+          <div className="flex flex-col">
+            <Text fw={600} mb="xs">
+              Steps
+            </Text>
+            <List>
+              <ListItem>
+                Make sure the correct class is{' '}
+                <Button
+                  component={Text}
+                  color="teal"
+                  size="compact-xs"
+                  leftSection={<IconCircleCheck size={12} className="-mr-1" />}
+                >
+                  Active
+                </Button>{' '}
+                (no active entrant)
+              </ListItem>
+              <ListItem>
+                When an entrant steps onto the ice, set them as{' '}
+                <Button component={Text} color="teal" size="compact-xs">
+                  Active
+                </Button>{' '}
+                on the left of the list
+              </ListItem>
+              <ListItem>
+                Enter the scores when available. Press{' '}
+                <Button component={Text} color="teal" size="compact-xs" variant="subtle">
+                  Submit
+                </Button>{' '}
+                as soon as possible, but wait until the end of a replay if we are on one
+              </ListItem>
+              <ListItem>
+                At the end of a category, we&apos;ll show a scoreboard. After it has gone off, set
+                the next class{' '}
+                <Button component={Text} color="teal" size="compact-xs">
+                  Active
+                </Button>
+              </ListItem>
+            </List>
+          </div>
+        </div>
+      </Alert>
       <div className="fixed bottom-0 left-0 right-0 z-[103] p-2 bg-body border-t">
         <div className="px-6">
           <Button
@@ -245,7 +307,7 @@ export function ScoringTableIceSkating({
       {format.rounds.map((round) => {
         const isRoundActive = round.id === results.active.round;
         return (
-          <Paper key={round.id} p="sm" shadow="sm" className="bg-body-dimmed" withBorder>
+          <Paper key={round.id} p="sm" mb={52} shadow="sm" className="bg-body-dimmed" withBorder>
             <div className="flex items-center gap-2 px-2 mb-sm group">
               <Title
                 order={2}
@@ -266,20 +328,14 @@ export function ScoringTableIceSkating({
               </Text>
               <Button
                 size="compact-sm"
-                variant={isRoundActive ? 'filled' : 'outline'}
+                variant={isRoundActive ? 'filled' : 'default'}
                 onClick={() =>
                   updateActive({ round: round.id, cls: undefined, entrant: undefined })
                 }
                 loading={loading && loading[0] === round.id}
-                leftSection={
-                  isRoundActive ? (
-                    <IconCircleCheckFilled size={16} />
-                  ) : (
-                    <IconCircleCheck size={16} />
-                  )
-                }
+                leftSection={isRoundActive && <IconCircleCheck size={16} />}
               >
-                Set Active
+                Active
               </Button>
             </div>
             <div className="flex flex-col gap-md">
@@ -319,45 +375,42 @@ export function ScoringTableIceSkating({
                       </Text>
                       <Button
                         size="compact-sm"
-                        variant={isClassActive ? 'filled' : 'outline'}
+                        variant={isClassActive ? 'filled' : 'default'}
                         onClick={() =>
                           updateActive({ round: round.id, cls: cls.id, entrant: undefined })
                         }
                         loading={loading && loading[1] === cls.id}
-                        leftSection={
-                          isClassActive ? (
-                            <IconCircleCheckFilled size={16} />
-                          ) : (
-                            <IconCircleCheck size={16} />
-                          )
-                        }
+                        leftSection={isClassActive && <IconCircleCheck size={16} />}
                       >
-                        Set Active
+                        Active
                       </Button>
                     </div>
                     <Divider />
-                    {cls.entrants.map((entrant) => {
+                    {cls.entrants.map((entrant, i) => {
                       const row = typeof entrant === 'number' ? { id: entrant } : entrant;
                       const isRowActive =
                         row.id === results.active.entrant && results.active.class === cls.id;
                       return (
-                        <Entrant
-                          key={row.id}
-                          entrant={row}
-                          initialResult={results[round.id]?.[cls.id]?.[row.id]}
-                          updateResults={updateResult}
-                          updateActive={updateActive}
-                          roundId={round.id}
-                          classId={cls.id}
-                          isActive={isRowActive}
-                          loading={
-                            loading &&
-                            ((loading[0] === round.id &&
-                              loading[1] === cls.id &&
-                              loading[2] === row.id) ||
-                              (isRowActive && loading[2] === row.id))
-                          }
-                        />
+                        <>
+                          {i > 0 && <Divider />}
+                          <Entrant
+                            key={row.id}
+                            entrant={row}
+                            initialResult={results[round.id]?.[cls.id]?.[row.id]}
+                            updateResults={updateResult}
+                            updateActive={updateActive}
+                            roundId={round.id}
+                            classId={cls.id}
+                            isActive={isRowActive}
+                            loading={
+                              loading &&
+                              ((loading[0] === round.id &&
+                                loading[1] === cls.id &&
+                                loading[2] === row.id) ||
+                                (isRowActive && loading[2] === row.id))
+                            }
+                          />
+                        </>
                       );
                     })}
                   </Paper>
@@ -394,7 +447,7 @@ function Entrant({
   const data = entrant.data as any;
   return (
     <form
-      className="grid max-md:grid-cols-1 max-md:mb-4 grid-cols-[4fr,6fr] justify-between items-center px-2 gap-2"
+      className="grid max-md:grid-cols-1 max-md:my-2 grid-cols-[4fr,6fr] justify-between items-center px-2 gap-2"
       onSubmit={(ev) => {
         ev.preventDefault();
         const formData = new FormData(ev.currentTarget);
@@ -451,9 +504,30 @@ function Entrant({
         )}
       </div>
       <div className="flex gap-2 justify-end">
-        <NumberInput name="tech" autoComplete="off" min={0} defaultValue={initialResult?.tech} />
-        <NumberInput name="pres" autoComplete="off" min={0} defaultValue={initialResult?.pres} />
-        <NumberInput name="ddct" autoComplete="off" min={0} defaultValue={initialResult?.ddct} />
+        <NumberInput
+          label="Technical"
+          labelProps={{ fz: 'xs' }}
+          name="tech"
+          autoComplete="off"
+          min={0}
+          defaultValue={initialResult?.tech}
+        />
+        <NumberInput
+          label="Presentation"
+          labelProps={{ fz: 'xs' }}
+          name="pres"
+          autoComplete="off"
+          min={0}
+          defaultValue={initialResult?.pres}
+        />
+        <NumberInput
+          label="Deductions"
+          labelProps={{ fz: 'xs' }}
+          name="ddct"
+          autoComplete="off"
+          min={0}
+          defaultValue={initialResult?.ddct}
+        />
         <Button variant="light" type="submit" className="self-stretch h-auto" loading={loading}>
           Submit
         </Button>

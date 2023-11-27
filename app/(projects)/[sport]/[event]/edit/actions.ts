@@ -1,6 +1,6 @@
 'use server';
 
-import { EventFormat } from '@/lib/db/event-data';
+import { EventFormat } from '@/lib/event-data';
 import { createServerActionClient } from '@/lib/db/server-action';
 import { Json } from '@/lib/db/types';
 import { isObject } from '@/lib/utils';

@@ -1,0 +1,5 @@
+.avatar {
+}
+.avatar:hover {
+  border: 2px solid color-mix(in lch, var(--mantine-color-teal-6) 30%, transparent);
+}

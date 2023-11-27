@@ -8,7 +8,7 @@ export default async function Unauthenticated() {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (session) redirect('/dashboard');
+  if (session) redirect('/');
 
   return (
     <div className="flex-1 grid place-content-center p-8">
@@ -16,8 +16,7 @@ export default async function Unauthenticated() {
         Please{' '}
         <Link href="/login" className="text-green-4 font-bold underline underline-offset-2">
           Sign In
-        </Link>{' '}
-        to see your dashboard
+        </Link>
       </p>
     </div>
   );

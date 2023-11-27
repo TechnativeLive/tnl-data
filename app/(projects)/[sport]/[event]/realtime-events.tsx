@@ -5,7 +5,7 @@ import { ScoringTable } from '@/components/scoring-table/scoring-table';
 import { updateOutlineAtom } from '@/components/shell/event-outline';
 import { EventDateClassification, classifyEventByDate } from '@/lib/dates';
 import { createBrowserClient } from '@/lib/db/client';
-import { Sport } from '@/lib/db/event-data';
+import { Sport } from '@/lib/event-data';
 import { Title, Button, Text, Loader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconEdit } from '@tabler/icons-react';
