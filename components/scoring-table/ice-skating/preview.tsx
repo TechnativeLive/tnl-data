@@ -137,16 +137,16 @@ function ActiveAndStartlistPreview({
             <Title order={4}>Active</Title>
             <Text>
               <span className="text-dimmed italic">Round: </span>
-              {active.round}
+              <span className="text-teal-7 dark:text-teal-4 font-bold">{active.round}</span>
             </Text>
             <Text>
               <span className="text-dimmed italic">Class: </span>
-              {active.class}
+              <span className="text-teal-7 dark:text-teal-4 font-bold">{active.class}</span>
             </Text>
             <Text>
               <span className="text-dimmed italic">Entrant: </span>
             </Text>
-            <pre className="relative min-w-[8rem] text-xs my-0 p-4 border whitespace-pre-wrap rounded bg-body">
+            <pre className="relative min-w-[8rem] text-xs my-0 p-4 border border-teal-7 dark:border-teal-4 whitespace-pre-wrap rounded bg-body">
               {JSON.stringify(active.entrant, null, 2)}
             </pre>
           </div>
