@@ -1,0 +1,25 @@
+.shadowed {
+  position: relative;
+}
+
+.shadowed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  opacity: 1;
+  background: linear-gradient(to bottom, var(--mantine-color-body), transparent);
+  transition: opacity 200ms ease;
+  z-index: 0;
+  pointer-events: none;
+}
+
+[data-shadow='false'] .shadowed::before {
+  opacity: 0;
+}
+
+.scrollbar {
+  z-index: 1;
+}

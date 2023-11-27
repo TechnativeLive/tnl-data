@@ -1,9 +1,10 @@
 import { getRanks } from '@/lib/sort-and-rank/rank';
 import { sort } from '@/lib/sort-and-rank/sort';
+import { Simplify } from 'type-fest';
 
 export type SortConfig = {
   criteria: SortCriteria;
-  stratagem: Strategy;
+  stratagem?: Strategy;
 };
 
 export type SortCriteria = SortCriterion[];
@@ -18,11 +19,11 @@ export type Strategy = 'standard' | 'modified' | 'dense' | 'ordinal' | 'fraction
 
 export function sortAndRank<Datum extends Record<string, unknown>, FieldName extends 'rank'>(
   data: Datum[],
-  { criteria: sortBy, stratagem }: SortConfig,
+  config: SortConfig,
   fieldName = 'rank'
-): (Datum & Record<FieldName, number>)[] {
-  const sortedData = sort(data, sortBy);
-  const ranks = getRanks(data, sortBy, stratagem);
+): Simplify<Record<FieldName, number> & Datum>[] {
+  const sortedData = sort(data, config.criteria);
+  const ranks = getRanks(data, config.criteria, config.stratagem);
 
   return sortedData.map((datum, index) => {
     // @ts-expect-error - We are mutating the object by adding a new field

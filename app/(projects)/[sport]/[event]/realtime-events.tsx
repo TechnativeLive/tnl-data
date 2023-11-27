@@ -26,7 +26,7 @@ const eventStatusTextMap: Record<EventDateClassification, string> = {
   unknown: 'Unknown',
 };
 
-export function RealtimeEvent() {
+export function RealtimeEvent({ debug }: { debug?: boolean }) {
   const params = useParams<{ sport?: string; event?: string }>();
   const supabase = createBrowserClient();
   const [event, setEvent] = useState<Data | null>(null);
@@ -98,6 +98,8 @@ export function RealtimeEvent() {
     <div className="fixed inset-0 flex items-center justify-center">
       <Loader />
     </div>
+  ) : debug ? (
+    <Debug data={event} label="Event" />
   ) : (
     <>
       <div className="flex items-center gap-4">
@@ -120,8 +122,8 @@ export function RealtimeEvent() {
         sport={params.sport as Sport}
         format={event?.format}
         initialResults={event?.results}
+        dsPrivateKey={event?.ds_keys?.private}
       />
-      <Debug data={event} />
     </>
   );
 }

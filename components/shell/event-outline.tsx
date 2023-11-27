@@ -16,12 +16,13 @@ export const updateOutlineAtom = atom(null, (get, set) =>
 );
 
 // scroll margin above anchors
-const PAGE_OFFSET = 83;
+const PAGE_OFFSET = 86;
 
 type OutlineItem = {
   title: string;
   href: string;
   level: number;
+  active: boolean;
   children?: OutlineItem[];
 };
 
@@ -54,14 +55,23 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
     <ul className={clsx('list-none m-0 p-0', !root ? 'pl-4' : 'relative')}>
       {headers.map((header) => (
         <li key={header.href} className="outline-item">
-          <Link
-            href={header.href as Route}
-            className={clsx(
-              'outline-link block text-sm font-medium leading-7 transition-colors overflow-hidden whitespace-nowrap text-ellipsis'
-            )}
-          >
-            {header.title}
-          </Link>
+          <div className="relative flex items-center justify-between gap-2">
+            <Link
+              href={header.href as Route}
+              className={clsx(
+                'outline-link block text-sm font-medium leading-7 transition-colors overflow-hidden whitespace-nowrap text-ellipsis relative'
+              )}
+            >
+              {header.title}
+            </Link>
+            <div
+              className={clsx(
+                'w-3 h-3 rounded-full border shadow-xs border-green-5/70 bg-green-5/20 opacity-0 transition-opacity',
+                header.active && 'opacity-100',
+                root && 'mr-2'
+              )}
+            />
+          </div>
           {header.children && <Headers headers={header.children} root={false} />}
         </li>
       ))}
@@ -72,10 +82,15 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
 function getHeaders() {
   const eventHeaders = Array.from(
     document.querySelectorAll('.event-header:where(h1,h2,h3,h4,h5,h6')
-  );
+  ) as HTMLElement[];
   const headers = eventHeaders
     .filter((el) => el.id && el.hasChildNodes())
-    .map((el) => ({ title: serializeHeader(el), href: `#${el.id}`, level: Number(el.tagName[1]) }));
+    .map((el) => ({
+      title: serializeHeader(el),
+      href: `#${el.id}`,
+      level: Number(el.tagName[1]),
+      active: el.dataset.tnlActive === 'true',
+    }));
 
   return resolveHeaders(headers);
 }

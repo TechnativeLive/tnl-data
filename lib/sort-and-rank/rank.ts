@@ -4,7 +4,7 @@ import { findNextFalsey, isTied } from '@/lib/sort-and-rank/helpers';
 export function getRanks<Datum extends Record<string, unknown>>(
   data: Datum[],
   criteria: SortCriteria,
-  strategem: Strategy
+  strategem?: Strategy
 ): number[] {
   const tiedRanks: boolean[] = [];
   let assignableRanks: number[] = [];

@@ -43,9 +43,13 @@ export function HeaderSegments() {
   }, [params.sport, params.event, params.round, supabase]);
 
   const isOnEditPage = pathname.endsWith('/edit');
-  const allSegments = isOnEditPage
-    ? [...segments, { id: '__edit', slug: 'edit', name: 'Edit' }]
-    : segments;
+  const isOnDebugPage = pathname.endsWith('/debug');
+  const specialSemgent = isOnEditPage
+    ? { id: '__edit', slug: 'edit', name: 'Edit' }
+    : isOnDebugPage
+    ? { id: '__debug', slug: 'debug', name: 'Debug' }
+    : null;
+  const allSegments = specialSemgent ? [...segments, specialSemgent] : segments;
 
   return (
     <Group

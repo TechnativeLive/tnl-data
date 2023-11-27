@@ -1,9 +1,43 @@
-import { EventDataIceSkating } from '@/lib/db/event-data/ice-skating';
+import {
+  EventFormatIceSkating,
+  EventResultIceSkating,
+  EventLiveDataIceSkating,
+} from '@/lib/db/event-data/ice-skating';
 
-export type Sport = keyof _EventData;
+export type Sport = keyof SportJsonTypes;
 
-type _EventData = {
-  'ice-skating': EventDataIceSkating;
+type SportJsonTypes = {
+  'ice-skating': {
+    format: EventFormatIceSkating;
+    results: EventResultIceSkating;
+    liveData: EventLiveDataIceSkating;
+  };
 };
 
-export type EventData<T extends keyof _EventData> = _EventData[T];
+export type EventFormat<S extends Sport> = SportJsonTypes[S]['format'];
+export type EventLiveData<S extends Sport> = SportJsonTypes[S]['liveData'];
+export type EventResult<S extends Sport> = SportJsonTypes[S]['results'];
+export type EventResults<S extends Sport, Exact extends boolean = false> = Results<
+  EventResult<S>,
+  Exact
+>;
+
+type Results<Result extends unknown = unknown, Exact extends boolean = false> = (Exact extends true
+  ? {
+      [round: string]: {
+        [cls: string]: {
+          [entrant: string]: Result;
+        };
+      };
+    }
+  : {
+      [round: string]:
+        | {
+            [cls: string]:
+              | {
+                  [entrant: string]: Result | undefined;
+                }
+              | undefined;
+          }
+        | undefined;
+    }) & { active: { round?: string; class?: string; entrant?: number } };

@@ -33,7 +33,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const isHome = pathname === '/';
   const isLogin = pathname.startsWith('/login');
-  const isAsideOpen = params.sport && params.event && !pathname.endsWith('/edit');
+  const isAsideOpen =
+    params.sport && params.event && !pathname.endsWith('/edit') && !pathname.endsWith('/debug');
 
   return (
     <AppShell

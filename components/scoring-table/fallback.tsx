@@ -1,6 +1,6 @@
 import { Debug } from '@/components/debug';
 import { ScoringTableProps } from '@/components/scoring-table/scoring-table';
-import { Sport, EventData } from '@/lib/db/event-data';
+import { Sport, EventFormat } from '@/lib/db/event-data';
 import { Json } from '@/lib/db/types';
 import { Alert, Text, Title, TitleOrder } from '@mantine/core';
 import { IconExclamationCircle } from '@tabler/icons-react';
@@ -61,7 +61,7 @@ function TieredList({
 function isValidEventFormat<S extends Sport>(
   format: Tables<'events'>['format'] | undefined,
   sport: S
-): format is EventData<S> {
+): format is EventFormat<S> {
   if (sport === 'ice-skating') {
     return !!(
       format &&

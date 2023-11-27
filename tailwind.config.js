@@ -18,6 +18,7 @@ module.exports = {
         DEFAULT: '300ms',
       },
       colors: {
+        body: 'var(--mantine-color-body)',
         dimmed: 'var(--mantine-color-dimmed)',
         'body-dimmed': 'var(--mantine-color-body-dimmed)',
         'body-dimmed-hover': 'var(--mantine-color-body-dimmed-hover)',

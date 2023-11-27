@@ -1,6 +1,6 @@
 'use server';
 
-import { EventData } from '@/lib/db/event-data';
+import { EventFormat } from '@/lib/db/event-data';
 import { createServerActionClient } from '@/lib/db/server-action';
 import { Json } from '@/lib/db/types';
 import { isObject } from '@/lib/utils';
@@ -181,6 +181,7 @@ export async function deleteSnapshot(
   }
 }
 
+// TODO: uses saved event data, not local state of format
 export async function populateFormatEntrants(
   _prevState: FormState,
   formData: FormData
@@ -194,7 +195,7 @@ export async function populateFormatEntrants(
   if (!event) return { success: false, message: 'No event provided' };
 
   try {
-    const validFormat = JSON.parse(format) as Partial<EventData<'ice-skating'>>;
+    const validFormat = JSON.parse(format) as Partial<EventFormat<'ice-skating'>>;
     const entrantIds = validFormat?.rounds
       ?.flatMap((round) => round?.classes?.map((cls) => cls?.entrants))
       .flat()
@@ -269,7 +270,7 @@ export async function updateFormatEntrants(
   if (!event) return { success: false, message: 'No event provided' };
 
   try {
-    const validFormat = JSON.parse(format) as Partial<EventData<'ice-skating'>>;
+    const validFormat = JSON.parse(format) as Partial<EventFormat<'ice-skating'>>;
     const entrantIds = validFormat?.rounds
       ?.flatMap((round) => round?.classes?.map((cls) => cls?.entrants))
       .flat()
@@ -344,7 +345,7 @@ export async function depopulateFormatEntrants(
   if (!event) return { success: false, message: 'No event provided' };
 
   try {
-    const validFormat = JSON.parse(format) as Partial<EventData<'ice-skating'>>;
+    const validFormat = JSON.parse(format) as Partial<EventFormat<'ice-skating'>>;
 
     const depopulatedRounds = validFormat?.rounds?.map((round) => ({
       ...round,

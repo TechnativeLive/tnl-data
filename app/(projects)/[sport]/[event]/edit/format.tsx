@@ -5,7 +5,7 @@ import {
 } from '@/app/(projects)/[sport]/[event]/edit/actions';
 import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
 import { Button } from '@mantine/core';
-import { forwardRef, useRef } from 'react';
+import { forwardRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 
 type Params = { sport: string; event: string };
