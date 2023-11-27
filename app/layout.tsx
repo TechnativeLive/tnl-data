@@ -7,11 +7,11 @@ import './globals.css';
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { theme } from './theme';
-import { Shell } from '@/components/shell/shell';
 import { Providers } from '@/components/providers';
+import { ShellWithProfile } from '@/components/shell/shell-with-profile';
 
 export const metadata = {
-  title: 'TNL Scores',
+  title: 'TNL Event Data',
   description: 'TNL Live Event Judging System',
 };
 
@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <ColorSchemeScript />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.png" />
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MantineProvider theme={theme} defaultColorScheme="dark">
           <Providers>
             <Notifications autoClose={4000} />
-            <Shell>{children}</Shell>
+            <ShellWithProfile>{children}</ShellWithProfile>
           </Providers>
         </MantineProvider>
       </body>

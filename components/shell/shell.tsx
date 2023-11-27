@@ -8,15 +8,13 @@ import {
   AppShellMain,
   AppShellNavbar,
   AppShellSection,
-  Avatar,
   Button,
   Divider,
   Group,
   ScrollArea,
-  Stack,
   Text,
 } from '@mantine/core';
-import { IconChevronRight, IconSmartHome } from '@tabler/icons-react';
+import { IconSmartHome } from '@tabler/icons-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -26,8 +24,14 @@ import { Route } from 'next';
 import { PROJECT_ICONS } from '@/components/project-icons';
 import { Suspense } from 'react';
 import ClientOnly from '@/components/client-only';
+import { QuickProfile, QuickProfileProps } from '@/components/shell/quick-profile';
 
-export function Shell({ children }: { children: React.ReactNode }) {
+export function Shell({
+  name,
+  email,
+  initials,
+  children,
+}: { children: React.ReactNode } & QuickProfileProps) {
   const pathname = usePathname();
   const params = useParams<Record<string, string>>();
 
@@ -85,19 +89,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           ))}
         </AppShellSection>
         <AppShellSection>
-          <Link
-            href="/account"
-            className="active flex gap-4 items-center bg-button rounded-lg p-sm w-full active:bg-body-dimmed"
-          >
-            <Avatar color="teal">TN</Avatar>
-            <Stack gap={1} className="grow">
-              <Text>User Name</Text>
-              <Text size="sm" c="dimmed">
-                Email
-              </Text>
-            </Stack>
-            <IconChevronRight size={14} />
-          </Link>
+          <QuickProfile name={name} initials={initials} email={email} />
         </AppShellSection>
       </AppShellNavbar>
       <AppShellMain display="flex">{children}</AppShellMain>
