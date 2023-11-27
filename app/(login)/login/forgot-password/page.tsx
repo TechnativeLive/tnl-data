@@ -23,7 +23,7 @@ export default function Reset({ searchParams }: { searchParams: Record<string, s
           aria-label="Email"
           type="email"
           required
-          defaultValue="ross@technative.live"
+          defaultValue="judge@technative.live"
         />
         <LoginSubmitButton label="Reset" disabled={!!message} />
         {!message ? null : (

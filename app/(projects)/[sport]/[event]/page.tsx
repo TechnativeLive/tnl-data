@@ -2,6 +2,8 @@ import { supabase } from '@/lib/db/static';
 import { Flex, Stack } from '@mantine/core';
 import { RealtimeEvent } from '@/app/(projects)/[sport]/[event]/realtime-events';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateStaticParams() {
   const events = await supabase.from('events').select('slug');
 

@@ -39,7 +39,7 @@ export default async function Login({ searchParams }: { searchParams?: Record<st
           aria-label="Email"
           type="email"
           required
-          defaultValue="ross@technative.live"
+          defaultValue="judge@technative.live"
           error={emailError}
         />
 
