@@ -32,7 +32,7 @@ import {
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { useParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { Fragment, useCallback, useState } from 'react';
 
 type Result = EventResult<'ice-skating'>;
 type Results = EventResults<'ice-skating'>;
@@ -391,10 +391,9 @@ export function ScoringTableIceSkating({
                       const isRowActive =
                         row.id === results.active.entrant && results.active.class === cls.id;
                       return (
-                        <>
+                        <Fragment key={row.id}>
                           {i > 0 && <Divider />}
                           <Entrant
-                            key={row.id}
                             entrant={row}
                             initialResult={results[round.id]?.[cls.id]?.[row.id]}
                             updateResults={updateResult}
@@ -410,7 +409,7 @@ export function ScoringTableIceSkating({
                                 (isRowActive && loading[2] === row.id))
                             }
                           />
-                        </>
+                        </Fragment>
                       );
                     })}
                   </Paper>
