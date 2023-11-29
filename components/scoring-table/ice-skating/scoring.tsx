@@ -271,7 +271,8 @@ export function ScoringTableIceSkating({
                   Submit
                 </Button>{' '}
                 as soon as possible, but wait until the end of a replay if we are on one. This puts
-                up a graphic for ~5 seconds
+                up a graphic for ~5 seconds. The graphic will{' '}
+                <span className="font-bold">only</span> show if the entrant is active
               </ListItem>
               <ListItem>
                 At the end of a category, we&apos;ll show a scoreboard. After it has gone off, set
