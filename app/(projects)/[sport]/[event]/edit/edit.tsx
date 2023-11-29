@@ -179,7 +179,6 @@ export function EventDataEditForm({
         This will replace each ID with the lastest data.
         Existing entrants will not be altered.`}
         >
-          {/* <Button>Populate Entrants</Button> */}
           <PopulateEntrantsInFormat sport={sport} event={event} format={eventData.format} />
         </Tooltip>
 
@@ -187,12 +186,11 @@ export function EventDataEditForm({
           <UpdateEntrantsInFormat sport={sport} event={event} format={eventData.format} />
         </Tooltip>
 
-        {process.env.NODE_ENV === 'development' ? (
-          <Tooltip label="Entrants will be changed to a list of IDs">
-            {/* <Button>Populate Entrants</Button> */}
-            <DepopulateEntrantsInFormat sport={sport} event={event} format={eventData.format} />
-          </Tooltip>
-        ) : null}
+        <Tooltip label="Entrants will be changed to a list of IDs">
+          <DepopulateEntrantsInFormat sport={sport} event={event} format={eventData.format} />
+        </Tooltip>
+
+        {/* TODO: Add prune results - remove any rounds/classes that no longer exist in the format */}
       </div>
     </>
   );

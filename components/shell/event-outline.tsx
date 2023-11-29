@@ -163,7 +163,6 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
 
       if (activeLink) {
         activeLink.classList.add('active');
-        console.log(activeLink.offsetTop);
         setStyles({ top: activeLink.offsetTop, opacity: '1' });
       } else {
         setStyles({ top: 0, opacity: '0' });

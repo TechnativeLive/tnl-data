@@ -1,6 +1,10 @@
-export function updateDatasream(privateKey: string, body: Record<string, unknown>) {
+export function updateDatasream(
+  privateKey: string,
+  body: Record<string, unknown>,
+  customMessage?: unknown
+) {
   return fetch(`https://datastream.singular.live/datastreams/${privateKey}`, {
-    body: JSON.stringify(body),
+    body: JSON.stringify(customMessage ? { ...body, message: customMessage } : body),
     headers: { 'Content-Type': 'application/json' },
     method: 'PUT',
   });

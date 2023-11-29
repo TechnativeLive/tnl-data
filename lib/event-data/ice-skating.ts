@@ -44,7 +44,8 @@ export type EventLiveDataIceSkating = {
     entrant?: Partial<LiveDataSegmentResult>;
   };
   results: { segment?: LiveDataSegmentResult[]; overall?: LiveDataOverallResult[] };
-  startlist?: (Tables<'entrants'> & { pos: number })[];
+  startlist?: { entrant: Tables<'entrants'>; pos: number }[];
+  message?: unknown;
 };
 
 export function generateLiveDataIceSkating({
@@ -59,58 +60,64 @@ export function generateLiveDataIceSkating({
   const active = results.active;
   if (!active.round) return liveData;
 
-  const round = format.rounds.find((round) => round.id === active.round);
-  if (!round) return liveData;
+  const activeRound = format.rounds.find((round) => round.id === active.round);
+  if (!activeRound) return liveData;
 
-  liveData.active.round = round.name;
+  liveData.active.round = activeRound.name;
   if (!active.class) return liveData;
 
-  const cls = round?.classes.find((cls) => cls.id === active.class);
-  if (!cls) return liveData;
+  const activeClass = activeRound?.classes.find((cls) => cls.id === active.class);
+  if (!activeClass) return liveData;
 
-  liveData.active.class = cls.name;
-  liveData.startlist = cls.entrants.map((e, i) =>
-    typeof e === 'number' ? { id: e, pos: i + 1 } : { ...e, pos: i + 1 }
-  ) as NonNullable<EventLiveDataIceSkating['startlist']>;
+  liveData.active.class = activeClass.name;
+  liveData.startlist = activeClass.entrants.map((e, i) => ({
+    entrant: typeof e === 'number' ? { id: e } : e,
+    pos: i + 1,
+  })) as NonNullable<EventLiveDataIceSkating['startlist']>;
 
   const activeResults = results?.[active.round]?.[active.class];
   const segmentResults: Omit<LiveDataSegmentResult, 'rank'>[] = getEntrants(
-    cls.entrants,
+    activeClass.entrants,
     activeResults
   );
 
   liveData.results.segment = sortAndRank(segmentResults, {
     criteria: [{ field: 'total' }, { field: 'pres' }, { field: 'tech' }],
   });
+
   const rankedEntrant = liveData.results.segment.find((e) => e.entrant?.id === active.entrant);
 
-  const overallClassResultsObj = format.rounds
-    .map((round) => round.classes.find((cls) => cls.id === active.class))
-    .filter(Boolean)
-    .reduce((acc, cls) => {
-      if (!active.class) return acc;
-      const classResults = getEntrants(cls.entrants, results?.[round.id]?.[active.class]);
-      for (const entrant of classResults) {
-        if (acc[entrant.entrant.id]) {
-          acc[entrant.entrant.id].total += entrant.total;
-          acc[entrant.entrant.id].breakdown!.pres += entrant.pres;
-          acc[entrant.entrant.id].breakdown!.tech += entrant.tech;
-          acc[entrant.entrant.id].breakdown!.ddct += entrant.ddct;
-        } else {
-          acc[entrant.entrant.id] = {
-            total: entrant.total,
-            breakdown: {
-              tech: entrant.tech,
-              pres: entrant.pres,
-              ddct: entrant.ddct,
-            },
-            entrant: entrant.entrant,
-          };
-        }
+  const roundWithMatchingClass = format.rounds
+    .map((round) => {
+      const { classes, ...roundInfo } = round;
+      const matchingClass = round.classes.find((cls) => cls.id === active.class);
+      return matchingClass ? { ...roundInfo, class: matchingClass } : undefined;
+    })
+    .filter(Boolean);
+
+  const overallClassResultsObj = roundWithMatchingClass.reduce((acc, round) => {
+    const classResults = getEntrants(round.class.entrants, results?.[round.id]?.[activeClass.id]);
+    for (const entrant of classResults) {
+      if (acc[entrant.entrant.id]) {
+        acc[entrant.entrant.id].total += entrant.total;
+        acc[entrant.entrant.id].breakdown!.pres += entrant.pres;
+        acc[entrant.entrant.id].breakdown!.tech += entrant.tech;
+        acc[entrant.entrant.id].breakdown!.ddct += entrant.ddct;
+      } else {
+        acc[entrant.entrant.id] = {
+          total: entrant.total,
+          breakdown: {
+            tech: entrant.tech,
+            pres: entrant.pres,
+            ddct: entrant.ddct,
+          },
+          entrant: entrant.entrant,
+        };
       }
-      return acc;
-    }, {} as Record<string, Omit<LiveDataOverallResult, 'rank'>>);
-  console.log({ overallClassResultsObj });
+    }
+    return acc;
+  }, {} as Record<string, Omit<LiveDataOverallResult, 'rank'>>);
+
   const overallClassResultsUnranked = Object.values(overallClassResultsObj);
   const overallClassResults = sortAndRank(overallClassResultsUnranked, {
     criteria: [{ field: 'total' }, { field: 'breakdown.pres' }, { field: 'breakdown.tech' }],
@@ -172,7 +179,7 @@ export function generateLiveDataIceSkating({
   liveData.results.overall = overallClassResults;
 
   // if (!active.entrant) return liveData;
-  const _entrant = cls?.entrants.find(
+  const _entrant = activeClass?.entrants.find(
     (entrant) => (typeof entrant === 'number' ? entrant : entrant.id) === active.entrant
   );
   const entrant = typeof _entrant === 'number' ? undefined : _entrant;

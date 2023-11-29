@@ -1,6 +1,7 @@
 'use client';
 
 import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/scroll-area-with-shadow';
+import { RealtimeHeartbeat } from '@/components/realtime-heartbeat';
 import { LiveDataPreviewIceSkating } from '@/components/scoring-table/ice-skating/preview';
 import { ScoringTableProps } from '@/components/scoring-table/scoring-table';
 import { updateOutlineAtom } from '@/components/shell/event-outline';
@@ -37,15 +38,23 @@ import { Fragment, useCallback, useState } from 'react';
 type Result = EventResult<'ice-skating'>;
 type Results = EventResults<'ice-skating'>;
 
-type UpdateResultsHelper = (round: string, cls: string, id: number, data: Result) => void;
+type UpdateResultHelper = (
+  round: string,
+  cls: string,
+  id: number,
+  data: Result,
+  message?: string
+) => void;
 type UpdateActiveHelper = ({
   round,
   cls,
   entrant,
+  message,
 }: {
   round?: string | undefined;
   cls?: string | undefined;
   entrant?: number | undefined;
+  message?: string;
 }) => void;
 
 export function ScoringTableIceSkating({
@@ -83,7 +92,7 @@ export function ScoringTableIceSkating({
   >(false);
 
   const updateActive = useCallback<UpdateActiveHelper>(
-    ({ round, cls, entrant }) => {
+    ({ round, cls, entrant, message }) => {
       if (!format || !dsPrivateKey) {
         notifications.show({
           color: 'red',
@@ -115,7 +124,7 @@ export function ScoringTableIceSkating({
             results: newResults,
           });
           setLiveDataPreview(liveData);
-          updateDatasream(dsPrivateKey, liveData);
+          updateDatasream(dsPrivateKey, liveData, message);
 
           // update db
           supabase
@@ -147,8 +156,8 @@ export function ScoringTableIceSkating({
     [updateOutline, setResults, setLoading, supabase, params.event, format, dsPrivateKey]
   );
 
-  const updateResult = useCallback<UpdateResultsHelper>(
-    (round, cls, id, data) => {
+  const updateResult = useCallback<UpdateResultHelper>(
+    (round, cls, id, data, message) => {
       if (!format || !dsPrivateKey) {
         notifications.show({
           color: 'red',
@@ -182,7 +191,7 @@ export function ScoringTableIceSkating({
             results: newResults,
           });
           setLiveDataPreview(liveData);
-          updateDatasream(dsPrivateKey, liveData);
+          updateDatasream(dsPrivateKey, liveData, message);
 
           // update db
           supabase
@@ -254,14 +263,15 @@ export function ScoringTableIceSkating({
                 <Button component={Text} color="teal" size="compact-xs">
                   Active
                 </Button>{' '}
-                on the left of the list
+                on the left of the list. This puts up a graphic for ~5 seconds
               </ListItem>
               <ListItem>
                 Enter the scores when available. Press{' '}
                 <Button component={Text} color="teal" size="compact-xs" variant="subtle">
                   Submit
                 </Button>{' '}
-                as soon as possible, but wait until the end of a replay if we are on one
+                as soon as possible, but wait until the end of a replay if we are on one. This puts
+                up a graphic for ~5 seconds
               </ListItem>
               <ListItem>
                 At the end of a category, we&apos;ll show a scoreboard. After it has gone off, set
@@ -275,7 +285,7 @@ export function ScoringTableIceSkating({
         </div>
       </Alert>
       <div className="fixed bottom-0 left-0 right-0 z-[103] p-2 bg-body border-t">
-        <div className="px-6">
+        <div className="flex items-center gap-4 px-2">
           <Button
             fullWidth
             leftSection={
@@ -295,6 +305,7 @@ export function ScoringTableIceSkating({
               ? 'Hide Preview\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'
               : 'Preview Live Data'}
           </Button>
+          <RealtimeHeartbeat />
         </div>
         <Collapse in={previewOpened}>
           <ScrollAreaAutosizeWithShadow mah={'50vh'} mt="xs">
@@ -326,7 +337,7 @@ export function ScoringTableIceSkating({
               <Text size="xs" c="dimmed" className="ml-auto">
                 ROUND
               </Text>
-              <Button
+              {/* <Button
                 size="compact-sm"
                 variant={isRoundActive ? 'filled' : 'default'}
                 onClick={() =>
@@ -336,7 +347,15 @@ export function ScoringTableIceSkating({
                 leftSection={isRoundActive && <IconCircleCheck size={16} />}
               >
                 Active
-              </Button>
+              </Button> */}
+              <div
+                className={clsx(
+                  'w-3 h-3 shrink-0 rounded-full border shadow-xs transition-colors duration-200',
+                  isRoundActive
+                    ? 'border-green-5/70 bg-green-5/20'
+                    : 'border-gray-5/70 bg-gray-5/20'
+                )}
+              />
             </div>
             <div className="flex flex-col gap-md">
               {round.classes.map((cls) => {
@@ -436,7 +455,7 @@ function Entrant({
 }: {
   entrant: Partial<Tables<'entrants'>>;
   initialResult: Result | undefined;
-  updateResults: UpdateResultsHelper;
+  updateResults: UpdateResultHelper;
   updateActive: UpdateActiveHelper;
   isActive: boolean;
   roundId: string;
@@ -455,15 +474,26 @@ function Entrant({
           pres: Number(formData.get('pres')),
           ddct: Number(formData.get('ddct')),
         };
-        updateResults(roundId, classId, entrant.id!, result);
+        const isActiveString = String(formData.get('isActive'));
+        const isActiveBool = isActiveString === 'true';
+        const message = isActiveString.length > 0 && !isActiveBool ? 'silent' : undefined;
+        updateResults(roundId, classId, entrant.id!, result, message);
       }}
     >
+      <input type="hidden" name="isActive" value={isActive.toString()} />
       <div className="flex items-center gap-2">
         <Button
           size="compact-xs"
           variant={isActive ? 'filled' : 'default'}
           color="teal"
-          onClick={() => updateActive({ round: roundId, cls: classId, entrant: entrant.id })}
+          onClick={() =>
+            updateActive({
+              round: roundId,
+              cls: classId,
+              entrant: entrant.id,
+              message: 'active entrant',
+            })
+          }
         >
           Active
         </Button>

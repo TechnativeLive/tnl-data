@@ -30,22 +30,22 @@ type RowPreview<T> = {
 const overallRows: RowPreview<
   NonNullable<EventLiveData<'ice-skating'>['results']['overall']>[number]
 >[] = [
-  { field: 'id', label: 'id', get: (row) => row.entrant?.id },
+  { field: 'id', label: 'entrant.id', get: (row) => row.entrant?.id },
   { field: 'rank', label: 'rank', get: (row) => row.rank },
   { field: 'total', label: 'total', get: (row) => row.total },
-  { field: 'first_name', label: 'first_name', get: (row) => row.entrant?.first_name },
-  { field: 'last_name', label: 'last_name', get: (row) => row.entrant?.last_name },
+  { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant?.first_name },
+  { field: 'last_name', label: 'entrant.last_name', get: (row) => row.entrant?.last_name },
   { field: 'breakdown', label: 'breakdown', get: (row) => JSON.stringify(row.breakdown) },
 ];
 
 const segmentRows: RowPreview<
   NonNullable<EventLiveData<'ice-skating'>['results']['segment']>[number]
 >[] = [
-  { field: 'id', label: 'id', get: (row) => row.entrant?.id },
+  { field: 'id', label: 'entrant.id', get: (row) => row.entrant?.id },
   { field: 'rank', label: 'rank', get: (row) => row.rank },
   { field: 'total', label: 'total', get: (row) => row.total },
-  { field: 'first_name', label: 'first_name', get: (row) => row.entrant?.first_name },
-  { field: 'last_name', label: 'last_name', get: (row) => row.entrant?.last_name },
+  { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant?.first_name },
+  { field: 'last_name', label: 'entrant.last_name', get: (row) => row.entrant?.last_name },
 ];
 
 function ResultsPreview({
@@ -87,20 +87,28 @@ function ResultsPreview({
 function PreviewGrid({ rows, data }: { rows: RowPreview<any>[]; data?: any[] }) {
   return (
     <div
-      className="grid gap-y-2 gap-x-4 justify-start p-4"
+      className="grid gap-y-2 gap-x-4 justify-start p-4 items-baseline"
       style={{ gridTemplateColumns: `repeat(${rows.length},auto)` }}
     >
-      {rows.map(({ field, label }) => (
-        <Text key={field} c={field === 'id' ? 'dimmed' : undefined}>
-          {label}
-        </Text>
-      ))}
+      {rows.map(({ field, label }) => {
+        const isId = field === 'id';
+        return (
+          <Text key={field} c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
+            {label}
+          </Text>
+        );
+      })}
       {data?.map((row) =>
-        rows.map(({ field, get }) => (
-          <Fragment key={field}>
-            <Text c={field === 'id' ? 'dimmed' : undefined}>{get(row)}</Text>
-          </Fragment>
-        ))
+        rows.map(({ field, get }) => {
+          const isId = field === 'id';
+          return (
+            <Fragment key={field}>
+              <Text c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
+                {get(row)}
+              </Text>
+            </Fragment>
+          );
+        })
       )}
     </div>
   );
@@ -108,16 +116,16 @@ function PreviewGrid({ rows, data }: { rows: RowPreview<any>[]; data?: any[] }) 
 
 const startlistRows: RowPreview<NonNullable<EventLiveData<'ice-skating'>['startlist']>[number]>[] =
   [
-    { field: 'id', label: 'id', get: (row) => row.id },
+    { field: 'id', label: 'entrant.id', get: (row) => row.entrant.id },
     { field: 'pos', label: 'pos', get: (row) => row.pos },
-    { field: 'first_name', label: 'first_name', get: (row) => row.first_name },
-    { field: 'last_name', label: 'last_name', get: (row) => row.last_name },
-    { field: 'country', label: 'country', get: (row) => row.country },
-    {
-      field: 'dob',
-      label: 'dob',
-      get: (row) => (row.dob ? dsShort.format(new Date(row.dob)) : ''),
-    },
+    { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant.first_name },
+    { field: 'last_name', label: 'entrant.last_name', get: (row) => row.entrant.last_name },
+    { field: 'country', label: 'entrant.country', get: (row) => row.entrant.country },
+    // {
+    //   field: 'dob',
+    //   label: 'dob',
+    //   get: (row) => (row.entrant.dob ? dsShort.format(new Date(row.entrant.dob)) : ''),
+    // },
   ];
 function ActiveAndStartlistPreview({
   active,

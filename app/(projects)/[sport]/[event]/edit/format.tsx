@@ -5,6 +5,7 @@ import {
 } from '@/app/(projects)/[sport]/[event]/edit/actions';
 import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
 import { Button } from '@mantine/core';
+import { IconDatabaseMinus, IconDatabasePlus, IconRefreshDot } from '@tabler/icons-react';
 import { forwardRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 
@@ -27,7 +28,14 @@ export const PopulateEntrantsInFormat = forwardRef<
       <input type="hidden" name="event" value={event} />
       <input type="hidden" name="sport" value={sport} />
       <input type="hidden" name="format" value={JSON.stringify(format)} />
-      <Button fullWidth color="blue" variant="light" loading={pending} type="submit">
+      <Button
+        fullWidth
+        color="blue"
+        variant="light"
+        loading={pending}
+        type="submit"
+        leftSection={<IconDatabasePlus size={16} />}
+      >
         Populate Entrants
       </Button>
     </form>
@@ -52,7 +60,14 @@ export const UpdateEntrantsInFormat = forwardRef<
       <input type="hidden" name="event" value={event} />
       <input type="hidden" name="sport" value={sport} />
       <input type="hidden" name="format" value={JSON.stringify(format)} />
-      <Button fullWidth color="blue" variant="subtle" loading={pending} type="submit">
+      <Button
+        fullWidth
+        color="blue"
+        variant="light"
+        loading={pending}
+        type="submit"
+        leftSection={<IconRefreshDot size={16} />}
+      >
         Update All Entrants
       </Button>
     </form>
@@ -77,7 +92,14 @@ export const DepopulateEntrantsInFormat = forwardRef<
       <input type="hidden" name="event" value={event} />
       <input type="hidden" name="sport" value={sport} />
       <input type="hidden" name="format" value={JSON.stringify(format)} />
-      <Button fullWidth color="orange" variant="light" loading={pending} type="submit">
+      <Button
+        fullWidth
+        color="orange"
+        variant="light"
+        loading={pending}
+        type="submit"
+        leftSection={<IconDatabaseMinus size={16} />}
+      >
         Depopulate Entrants
       </Button>
     </form>

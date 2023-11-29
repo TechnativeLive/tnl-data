@@ -56,7 +56,7 @@ export function RealtimeEvent({ debug }: { debug?: boolean }) {
       .channel('realtime events')
       .on<Tables<'events'>>(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'events' },
+        { event: 'UPDATE', schema: 'public', table: 'events', filter: `slug=eq.${params.event}` },
         (e) => {
           if (e.new.slug === params.event) {
             if (!event || e.errors || e.new.ds_keys !== event?.ds_keys?.name) {
