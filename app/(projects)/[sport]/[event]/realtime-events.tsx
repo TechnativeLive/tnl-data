@@ -59,6 +59,7 @@ export function RealtimeEvent({ debug }: { debug?: boolean }) {
         { event: 'UPDATE', schema: 'public', table: 'events', filter: `slug=eq.${params.event}` },
         (e) => {
           if (e.new.slug === params.event) {
+            console.log({ new: e.new });
             if (!event || e.errors || e.new.ds_keys !== event?.ds_keys?.name) {
               notifications.show({
                 title: 'Warning',
@@ -73,7 +74,9 @@ export function RealtimeEvent({ debug }: { debug?: boolean }) {
             const updatedEvent: Data = {
               ds_keys: event.ds_keys,
               name: e.new.name,
-              format: e.new.format,
+              // supabase realtime events can skip columns with large data when there are no changes to that data
+              // https://github.com/supabase/realtime/issues/223#issuecomment-1022653529
+              format: e.new.format || event.format,
               results: e.new.results,
               ends_at: e.new.ends_at,
               starts_at: e.new.starts_at,
