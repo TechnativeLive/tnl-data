@@ -123,62 +123,8 @@ export function generateLiveDataIceSkating({
     criteria: [{ field: 'total' }, { field: 'breakdown.pres' }, { field: 'breakdown.tech' }],
   });
 
-  // const roundKindToMerge: RoundKind = round.kind === 'short-prog' ? 'free-skate' : 'short-prog';
-  // const twinRound = format.rounds.find((r) => r.kind === roundKindToMerge);
-
-  // let relevantResults = [{ round, results: activeResults }];
-  // if (twinRound)
-  //   relevantResults.push({ round: twinRound, results: results?.[twinRound.id]?.[active.class] });
-
-  // const overallResults = relevantResults.reduce(
-  //   (acc, cur) => {
-  //     for (const [entry, result] of Object.entries(cur.results ?? {})) {
-  //       // if (!result) continue;
-  //       const entrant = cur.round.classes
-  //         .find((cls) => cls.id === active.class)
-  //         ?.entrants.find((e) =>
-  //           typeof e === 'number' ? e === Number(entry) : e.id === Number(entry)
-  //         );
-
-  //       const total = (result?.tech ?? 0) + (result?.pres ?? 0) - (result?.ddct ?? 0);
-  //       if (!acc[entry]) {
-  //         acc[entry] = {
-  //           total,
-  //           entrant:
-  //             typeof entrant === 'number' ? ({ id: entrant } as Tables<'entrants'>) : entrant,
-  //         };
-  //       } else {
-  //         acc[entry].total += total;
-
-  //         if (result) {
-  //           if (!acc[entry].breakdown) acc[entry].breakdown = { tech: 0, pres: 0, ddct: 0 };
-  //           acc[entry].breakdown!.pres += result.pres;
-  //           acc[entry].breakdown!.tech += result.tech;
-  //           acc[entry].breakdown!.ddct += result.ddct;
-  //         }
-  //       }
-  //     }
-
-  //     return acc;
-  //   },
-  //   {} as Record<
-  //     string,
-  //     {
-  //       total: number;
-  //       breakdown?: EventResult<'ice-skating'>;
-  //       entrant?: Tables<'entrants'>;
-  //     }
-  //   >
-  // );
-
-  // const overallResultsArray = Object.values(overallResults);
-  // const orderedOverallResults = sortAndRank(overallResultsArray, {
-  //   criteria: [{ field: 'total' }, { field: 'breakdown.pres' }, { field: 'breakdown.tech' }],
-  // });
-
   liveData.results.overall = overallClassResults;
 
-  // if (!active.entrant) return liveData;
   const _entrant = activeClass?.entrants.find(
     (entrant) => (typeof entrant === 'number' ? entrant : entrant.id) === active.entrant
   );
