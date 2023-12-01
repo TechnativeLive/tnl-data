@@ -64,14 +64,14 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
       {headers.map((header) => (
         <li key={header.href} className="outline-item">
           <div className="flex items-center justify-between gap-2">
-            <Link
+            <a
               href={header.href as Route}
               className={clsx(
                 'outline-link block text-sm font-medium leading-7 transition-colors overflow-hidden whitespace-nowrap text-ellipsis relative'
               )}
             >
               {header.title}
-            </Link>
+            </a>
             <div
               className={clsx(
                 'w-3 h-3 shrink-0 rounded-full border shadow-xs border-green-5/70 bg-green-5/20 opacity-0 transition-opacity',
@@ -210,7 +210,7 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
     }
   }, [activateLink, container]);
 
-  const onScroll = useCallback(() => throttleAndDebounce(setActiveLink, 100)(), [setActiveLink]);
+  const onScroll = useCallback(() => throttleAndDebounce(setActiveLink, 200)(), [setActiveLink]);
 
   useEffect(() => {
     window.requestAnimationFrame(setActiveLink);
