@@ -408,8 +408,7 @@ export function ScoringTableIceSkating({
                     <Divider />
                     {cls.entrants.map((entrant, i) => {
                       const row = typeof entrant === 'number' ? { id: entrant } : entrant;
-                      const isRowActive =
-                        row.id === results.active.entrant && results.active.class === cls.id;
+                      const isRowActive = row.id === results.active.entrant && isClassActive;
                       return (
                         <Fragment key={row.id}>
                           {i > 0 && <Divider />}
