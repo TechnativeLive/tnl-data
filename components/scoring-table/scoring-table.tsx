@@ -19,6 +19,14 @@ export function ScoringTable({
   sport: Sport;
 } & ScoringTableProps) {
   switch (sport) {
+    case 'climbing':
+      return (
+        <ScoringTableIceSkating
+          format={format}
+          initialResults={initialResults}
+          dsPrivateKey={dsPrivateKey}
+        />
+      );
     case 'ice-skating':
       return (
         <ScoringTableIceSkating

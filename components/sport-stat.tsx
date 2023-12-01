@@ -1,4 +1,4 @@
-import { Text, Title } from '@mantine/core';
+import { Divider, Text, Title } from '@mantine/core';
 import { IconQuestionMark } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Route } from 'next';
@@ -14,6 +14,7 @@ export type SportStatProp = {
 
 export function SportStat({ stat }: { stat: SportStatProp }) {
   const Icon = PROJECT_ICONS[stat.slug] ?? IconQuestionMark;
+  const counts = stat.events.filter((e) => e.count > 0);
 
   return (
     <Link
@@ -26,42 +27,21 @@ export function SportStat({ stat }: { stat: SportStatProp }) {
       </Title>
       <Icon size={32} className="mx-auto my-lg text-blue-6" stroke={1.5} />
       <div className="flex gap-2 items-end">
-        <div className="w-full grid grid-cols-[max-content_min-content] justify-between text-sm text-dimmed pb-6">
-          {stat.events
-            .filter((e) => e.count > 0)
-            .map((e) => (
-              <Fragment key={e.label}>
-                <div>{e.label}</div>
-                <div className="font-bold">{e.count}</div>
-              </Fragment>
-            ))}
+        <div className="w-full grid grid-cols-[max-content_min-content] justify-between text-sm text-dimmed">
+          {counts.map((e) => (
+            <Fragment key={e.label}>
+              <div>{e.label}</div>
+              <div className="font-bold">{e.count}</div>
+            </Fragment>
+          ))}
+          {counts.length <= 1 ? null : (
+            <>
+              <Divider className="col-span-2" />
+              <div className="font-bold col-start-2">{stat.count}</div>
+            </>
+          )}
         </div>
-        <Text className="shrink-0 leading-none relative">
-          <span className="text-dimmed text-[0.65rem] absolute bottom-0 right-full">TOTAL</span>
-          <span className="leading-none text-2xl font-bold">{stat.count}</span>
-        </Text>
       </div>
-      {/* <div className="flex text-gray-7 dark:text-gray-6 items-end grow">
-        <div className="flex flex-col grow justify-end pb-1">
-          <div className="text-sm">
-            {stat.activeCount === 0 ? null : (
-              <div>
-                <span className="font-bold">{stat.activeCount}</span> Active
-              </div>
-            )}
-            {stat.unknownCount === 0 ? null : (
-              <div>
-                <span className="font-bold">{stat.unknownCount}</span> No Dates
-              </div>
-            )}
-          </div>
-        </div>
-        <Text className="shrink-0 leading-none">
-          <span className="text-xs">
-            / <span className="leading-none text-2xl font-bold">{stat.count}</span>
-          </span>
-        </Text>
-      </div> */}
     </Link>
   );
 }

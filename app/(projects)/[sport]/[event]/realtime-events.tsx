@@ -59,7 +59,6 @@ export function RealtimeEvent({ debug }: { debug?: boolean }) {
         { event: 'UPDATE', schema: 'public', table: 'events', filter: `slug=eq.${params.event}` },
         (e) => {
           if (e.new.slug === params.event) {
-            console.log({ new: e.new });
             if (!event || e.errors || e.new.ds_keys !== event?.ds_keys?.name) {
               notifications.show({
                 title: 'Warning',

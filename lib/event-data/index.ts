@@ -7,6 +7,11 @@ import {
 export type Sport = keyof SportJsonTypes;
 
 type SportJsonTypes = {
+  climbing: {
+    format: EventFormatIceSkating;
+    results: EventResultIceSkating;
+    liveData: EventLiveDataIceSkating;
+  };
   'ice-skating': {
     format: EventFormatIceSkating;
     results: EventResultIceSkating;
