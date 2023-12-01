@@ -77,7 +77,7 @@ export function RealtimeEvent({ debug }: { debug?: boolean }) {
               // supabase realtime events can skip columns with large data when there are no changes to that data
               // https://github.com/supabase/realtime/issues/223#issuecomment-1022653529
               format: e.new.format || event.format,
-              results: e.new.results,
+              results: e.new.results || event.results,
               ends_at: e.new.ends_at,
               starts_at: e.new.starts_at,
               updated_at: e.new.updated_at,

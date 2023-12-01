@@ -541,6 +541,7 @@ function Entrant({
           autoComplete="off"
           min={0}
           defaultValue={initialResult?.tech}
+          placeholder={initialResult?.tech ? initialResult.tech.toString() : undefined}
         />
         <NumberInput
           label="Presentation"
@@ -549,6 +550,7 @@ function Entrant({
           autoComplete="off"
           min={0}
           defaultValue={initialResult?.pres}
+          placeholder={initialResult?.pres ? initialResult.pres.toString() : undefined}
         />
         <NumberInput
           label="Deductions"
@@ -557,6 +559,7 @@ function Entrant({
           autoComplete="off"
           min={0}
           defaultValue={initialResult?.ddct}
+          placeholder={initialResult?.ddct ? initialResult.ddct.toString() : undefined}
         />
         <Button variant="light" type="submit" className="self-stretch h-auto" loading={loading}>
           Submit
