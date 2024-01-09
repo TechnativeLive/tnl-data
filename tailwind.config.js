@@ -64,5 +64,97 @@ module.exports = {
         },
       });
     }),
+
+    plugin(({ addUtilities, matchUtilities, theme }) => {
+      addUtilities({
+        '.layout-content': {
+          '--layout-gap-min': '1rem',
+          '--layout-gap-max': '3rem',
+          '--layout-gap-scale': '6vw',
+          '--layout-gap':
+            'clamp(var(--layout-gap-min), var(--layout-gap-scale), var(--layout-gap-max))',
+          '--layout-full': 'minmax(var(--layout-gap), 1fr)',
+          '--layout-content': 'min(50ch, 100% - var(--layout-gap) * 2)',
+          '--layout-popout': 'minmax(0, 2rem)',
+          '--layout-feature': 'minmax(0, 5rem)',
+
+          display: 'grid',
+          'grid-template-columns':
+            '[full-start] var(--layout-full) [feature-start] var(--layout-feature) [popout-start] var(--layout-popout) [content-start] var(--layout-content) [content-end] var(--layout-popout) [popout-end] var(--layout-feature) [feature-end] var(--layout-full) [full-end]',
+          '& > *': {
+            'grid-column': 'content',
+          },
+        },
+        '.layout-popout': {
+          'grid-column': 'popout',
+        },
+        '.layout-feature': {
+          'grid-column': 'feature',
+        },
+        '.layout-full': {
+          'grid-column': 'full',
+        },
+      });
+
+      matchUtilities(
+        {
+          'layout-gap-min': (modifier) => {
+            const value = theme('spacing')[modifier] || modifier;
+            return {
+              '--layout-gap-min': value,
+            };
+          },
+          'layout-gap-max': (modifier) => {
+            const value = theme('spacing')[modifier] || modifier;
+            return {
+              '--layout-gap-max': value,
+            };
+          },
+          'layout-content-min': (modifier) => {
+            const value = theme('spacing')[modifier] || modifier;
+            return {
+              '--layout-content': `min(${value}, 100% - var(--layout-gap) * 2)`,
+            };
+          },
+          'layout-popout-size': (modifier) => {
+            const value = theme('spacing')[modifier] || modifier;
+            return {
+              '--layout-popout': `minmax(0, ${value})`,
+            };
+          },
+          'layout-feature-size': (modifier) => {
+            const value = theme('spacing')[modifier] || modifier;
+            return {
+              '--layout-feature': `minmax(0, ${value})`,
+            };
+          },
+        },
+        { values: theme('spacing') }
+      );
+
+      matchUtilities(
+        {
+          'layout-gap-scale': (modifier) => {
+            const value = theme('spacing')[modifier] || modifier;
+            return {
+              '--layout-gap-scale': value,
+            };
+          },
+        },
+        {
+          values: {
+            DEFAULT: '6vw',
+            1: '1vw',
+            2: '2vw',
+            3: '3vw',
+            4: '4vw',
+            5: '5vw',
+            6: '6vw',
+            7: '7vw',
+            8: '8vw',
+          },
+        }
+      );
+    }),
   ],
 };

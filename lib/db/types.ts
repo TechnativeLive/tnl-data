@@ -79,6 +79,7 @@ export interface Database {
       }
       events: {
         Row: {
+          _format: string | null
           created_at: string
           ds_keys: string | null
           ends_at: string | null
@@ -92,6 +93,7 @@ export interface Database {
           updated_at: string | null
         }
         Insert: {
+          _format?: string | null
           created_at?: string
           ds_keys?: string | null
           ends_at?: string | null
@@ -105,6 +107,7 @@ export interface Database {
           updated_at?: string | null
         }
         Update: {
+          _format?: string | null
           created_at?: string
           ds_keys?: string | null
           ends_at?: string | null
@@ -119,6 +122,13 @@ export interface Database {
         }
         Relationships: [
           {
+            foreignKeyName: "events__format_fkey"
+            columns: ["_format"]
+            isOneToOne: false
+            referencedRelation: "formats"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "events_ds_keys_fkey"
             columns: ["ds_keys"]
             isOneToOne: false
@@ -131,6 +141,38 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "sports"
             referencedColumns: ["slug"]
+          }
+        ]
+      }
+      formats: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          sport_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id: string
+          name: string
+          sport_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sport_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formats_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
           }
         ]
       }
@@ -159,6 +201,122 @@ export interface Database {
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      results: {
+        Row: {
+          created_at: string
+          data: Json | null
+          entry_id: number
+          is_active: boolean
+          is_dirty: boolean
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          entry_id?: number
+          is_active?: boolean
+          is_dirty?: boolean
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          entry_id?: number
+          is_active?: boolean
+          is_dirty?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: true
+            referencedRelation: "round_entrants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      round_entrants: {
+        Row: {
+          created_at: string
+          data: Json | null
+          entrant_id: number
+          id: number
+          round_id: number
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          entrant_id: number
+          id?: number
+          round_id: number
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          entrant_id?: number
+          id?: number
+          round_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "round_entrants_entrant_id_fkey"
+            columns: ["entrant_id"]
+            isOneToOne: false
+            referencedRelation: "entrants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "round_entrants_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      rounds: {
+        Row: {
+          created_at: string
+          id: number
+          is_active: boolean
+          name: string
+          order: number | null
+          parent_event_id: string | null
+          parent_round_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          name: string
+          order?: number | null
+          parent_event_id?: string | null
+          parent_round_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          name?: string
+          order?: number | null
+          parent_event_id?: string | null
+          parent_round_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rounds_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "rounds_parent_round_id_fkey"
+            columns: ["parent_round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
             referencedColumns: ["id"]
           }
         ]
@@ -199,3 +357,83 @@ export interface Database {
     }
   }
 }
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
+      Database["public"]["Views"])
+  ? (Database["public"]["Tables"] &
+      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : never
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof Database["public"]["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : never
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof Database["public"]["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof Database["public"]["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
+  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+  : never

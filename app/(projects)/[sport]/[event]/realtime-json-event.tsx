@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-type Data = Omit<Tables<'events'>, 'slug' | 'snapshot' | 'sport' | 'ds_keys'> & {
+type Data = Omit<Tables<'events'>, 'slug' | 'snapshot' | 'sport' | 'ds_keys' | '_format'> & {
   ds_keys: Tables<'ds_keys'> | null;
 };
 
@@ -26,7 +26,7 @@ const eventStatusTextMap: Record<EventDateClassification, string> = {
   unknown: 'Unknown',
 };
 
-export function RealtimeEvent({ debug }: { debug?: boolean }) {
+export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
   const params = useParams<{ sport?: string; event?: string }>();
   const supabase = createBrowserClient();
   const [event, setEvent] = useState<Data | null>(null);

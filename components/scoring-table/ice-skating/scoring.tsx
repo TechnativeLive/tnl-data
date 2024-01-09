@@ -32,6 +32,7 @@ import {
 } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Fragment, useCallback, useState } from 'react';
 
@@ -97,9 +98,8 @@ export function ScoringTableIceSkating({
         notifications.show({
           color: 'red',
           title: 'Error',
-          message: `${format ? '' : 'No format provided. '}${
-            dsPrivateKey ? '' : 'No datastream key provided'
-          }`,
+          message: `${format ? '' : 'No format provided. '}${dsPrivateKey ? '' : 'No datastream key provided'
+            }`,
         });
         return;
       }
@@ -136,10 +136,10 @@ export function ScoringTableIceSkating({
               const message = entrant
                 ? 'Active entrant updated'
                 : cls
-                ? 'Active class updated'
-                : round
-                ? 'Active round updated'
-                : 'Active cleared';
+                  ? 'Active class updated'
+                  : round
+                    ? 'Active round updated'
+                    : 'Active cleared';
 
               notifications.show({
                 color: 'teal',
@@ -162,9 +162,8 @@ export function ScoringTableIceSkating({
         notifications.show({
           color: 'red',
           title: 'Error',
-          message: `${format ? '' : 'No format provided. '}${
-            dsPrivateKey ? '' : 'No datastream key provided'
-          }`,
+          message: `${format ? '' : 'No format provided. '}${dsPrivateKey ? '' : 'No datastream key provided'
+            }`,
         });
         return;
       }
@@ -228,7 +227,7 @@ export function ScoringTableIceSkating({
       <Alert title="How to use this page" variant="light" color="blue" icon={<IconInfoCircle />}>
         <div className="grid gap-y-4 gap-x-8 grid-cols-1 md:grid-cols-2">
           <div className="flex flex-col">
-            <Text fw={600} mb="xs">
+            <Text fw={600} mb="xs" c="blue.1">
               Overview
             </Text>
             <Text size="sm">
@@ -239,25 +238,20 @@ export function ScoringTableIceSkating({
               <br />
               The guide on the right (only on large screens) will scroll to each class on click, and
               show which class is active
+              <br />
+              <br />
+              Live scores come from{" "}
+              <Link className='text-blue-4 font-bold' href="http://www.iceresultsuk.org.uk/BritanniaCup/2024/index.htm" target="_blank" rel="noopener noreferrer">IceResultsUK</Link>
+              . For each category, click on{" "}
+              <span className='text-orange-4'>Starting Order / Detailed Classification</span>
+              . That page will show the live scores as they come in.
             </Text>
           </div>
           <div className="flex flex-col">
-            <Text fw={600} mb="xs">
+            <Text fw={600} mb="xs" c="blue.1">
               Steps
             </Text>
-            <List>
-              <ListItem>
-                Make sure the correct class is{' '}
-                <Button
-                  component={Text}
-                  color="teal"
-                  size="compact-xs"
-                  leftSection={<IconCircleCheck size={12} className="-mr-1" />}
-                >
-                  Active
-                </Button>{' '}
-                (no active entrant)
-              </ListItem>
+            <List spacing="md">
               <ListItem>
                 When an entrant steps onto the ice, set them as{' '}
                 <Button component={Text} color="teal" size="compact-xs">

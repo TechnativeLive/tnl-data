@@ -1,7 +1,4 @@
 // import '@/lib/polyfills';
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import '@mantine/dates/styles.css';
 import './globals.css';
 
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
@@ -25,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
+        <meta name="google" content="notranslate" />
         <meta name="googlebot" content="notranslate" />
       </head>
       <body>

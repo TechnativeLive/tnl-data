@@ -93,7 +93,7 @@ export function EventDataEditForm({
         {/* This button is opens a confirmation modal rendered in a portal, 
       so we need to submit the form via requestSubmit instead */}
         <Button onClick={openDeleteModal} disabled={pending} fullWidth variant="light" mb="xs">
-          Update Event
+          Save
         </Button>
         {/* Used by action to revalidate specific paths, falls back to revalidating root */}
         <input type="hidden" value={sport} name="sport" />
@@ -171,6 +171,11 @@ export function EventDataEditForm({
           value={formatInput}
           onChange={setFormatInput}
         />
+        {/* This button is opens a confirmation modal rendered in a portal, 
+      so we need to submit the form via requestSubmit instead */}
+        <Button onClick={openDeleteModal} disabled={pending} fullWidth variant="light" mb="xs">
+          Save
+        </Button>
       </form>
       <div className="flex gap-4">
         <Tooltip

@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/db/static';
 import { Flex, Stack } from '@mantine/core';
-import { RealtimeEvent } from '@/app/(projects)/[sport]/[event]/realtime-events';
+import { RealtimeJsonEvent } from '@/app/(projects)/[sport]/[event]/realtime-json-event';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +14,7 @@ export default async function EventPage() {
   return (
     <Flex justify="center" className="flex-1 py-4 mb-4 mx-content">
       <Stack w="100%">
-        <RealtimeEvent />
+        <RealtimeJsonEvent />
       </Stack>
     </Flex>
   );
