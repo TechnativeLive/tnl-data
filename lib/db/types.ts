@@ -84,6 +84,7 @@ export interface Database {
           ds_keys: string | null
           ends_at: string | null
           format: Json | null
+          format_options: Json | null
           name: string
           results: Json | null
           slug: string
@@ -98,6 +99,7 @@ export interface Database {
           ds_keys?: string | null
           ends_at?: string | null
           format?: Json | null
+          format_options?: Json | null
           name: string
           results?: Json | null
           slug: string
@@ -112,6 +114,7 @@ export interface Database {
           ds_keys?: string | null
           ends_at?: string | null
           format?: Json | null
+          format_options?: Json | null
           name?: string
           results?: Json | null
           slug?: string

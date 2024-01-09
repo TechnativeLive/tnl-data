@@ -20,6 +20,7 @@ export function HeaderSegments() {
 
   useEffect(() => {
     (async () => {
+      const t = await supabase.from('rounds').select("events")
       const data = await Promise.all([
         !params.sport
           ? null
@@ -27,14 +28,14 @@ export function HeaderSegments() {
         !params.event
           ? null
           : supabase.from('events').select('slug, name').eq('slug', params.event).single(),
-        !params.round
-          ? null
-          : supabase
-              .from('rounds')
-              .select('id, slug, name, event')
-              .eq('slug', params.round)
-              .eq('event', params.event)
-              .single(),
+        // !params.round
+        //   ? null
+        //   : supabase
+        //       .from('rounds')
+        //       .select('id, slug, name, event:parent_event_id')
+        //       .eq('slug', params.round)
+        //       .eq('event', params.event)
+        //       .single(),
       ]);
       setSegments(data.map((query) => query?.data ?? null));
     })();
@@ -47,8 +48,8 @@ export function HeaderSegments() {
   const specialSemgent = isOnEditPage
     ? { id: '__edit', slug: 'edit', name: 'Edit' }
     : isOnDebugPage
-    ? { id: '__debug', slug: 'debug', name: 'Debug' }
-    : null;
+      ? { id: '__debug', slug: 'debug', name: 'Debug' }
+      : null;
   const allSegments = specialSemgent ? [...segments, specialSemgent] : segments;
 
   const segmentsLength = allSegments

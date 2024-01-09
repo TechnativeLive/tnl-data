@@ -91,7 +91,7 @@ export function EventDataEditForm({
     <>
       <form action={formAction} className="flex flex-col gap-4" ref={formRef}>
         {/* This button is opens a confirmation modal rendered in a portal, 
-      so we need to submit the form via requestSubmit instead */}
+            so we need to submit the form via requestSubmit instead */}
         <Button onClick={openDeleteModal} disabled={pending} fullWidth variant="light" mb="xs">
           Save
         </Button>
@@ -171,8 +171,9 @@ export function EventDataEditForm({
           value={formatInput}
           onChange={setFormatInput}
         />
+
         {/* This button is opens a confirmation modal rendered in a portal, 
-      so we need to submit the form via requestSubmit instead */}
+            so we need to submit the form via requestSubmit instead */}
         <Button onClick={openDeleteModal} disabled={pending} fullWidth variant="light" mb="xs">
           Save
         </Button>
