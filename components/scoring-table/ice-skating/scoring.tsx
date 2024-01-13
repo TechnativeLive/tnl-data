@@ -554,7 +554,7 @@ function Entrant({
           defaultValue={initialResult?.ddct}
           placeholder={initialResult?.ddct ? initialResult.ddct.toString() : undefined}
         />
-        <Button variant="light" type="submit" className="self-stretch h-auto" loading={loading}>
+        <Button variant="light" type="submit" className="self-stretch h-auto shrink-0" loading={loading}>
           Submit
         </Button>
       </div>
