@@ -1,16 +1,15 @@
 'use client';
 
-import { updateEvent } from '@/app/(projects)/[sport]/[event]/edit/actions';
+import { updateEvent } from '@/app/(app-shell)/[sport]/[event]/edit/actions';
 import {
   DepopulateEntrantsInFormat,
   PopulateEntrantsInFormat,
   UpdateEntrantsInFormat,
-} from '@/app/(projects)/[sport]/[event]/edit/format';
+} from '@/app/(app-shell)/[sport]/[event]/edit/format';
 import { Select } from '@/components/select';
-import { Json } from '@/lib/db/types';
 import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
 import { Button, Divider, JsonInput, Text, TextInput, Tooltip } from '@mantine/core';
-import { DateInput, DateTimePicker } from '@mantine/dates';
+import { DateTimePicker } from '@mantine/dates';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
 import { useEffect, useRef, useState } from 'react';

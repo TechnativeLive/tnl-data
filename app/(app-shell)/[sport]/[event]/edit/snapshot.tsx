@@ -4,7 +4,7 @@ import {
   deleteSnapshot,
   restoreFromSnapshot,
   takeSnapshot,
-} from '@/app/(projects)/[sport]/[event]/edit/actions';
+} from '@/app/(app-shell)/[sport]/[event]/edit/actions';
 import { tsReadable } from '@/lib/dates';
 import { day } from '@/lib/dayjs';
 import { Json } from '@/lib/db/types';

@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
           });
         },
       },
-    }
+    },
   );
 
   // Refresh session if expired - required for Server Components
@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
 
   const pathname = request.nextUrl.pathname;
-  const protectedPaths = ['/ice-skating'];
+  const protectedPaths = ['/ice-skating', '/climbing'];
   const isPathProtected = protectedPaths.some((path) => pathname.startsWith(path));
 
   if (isPathProtected && !session) {

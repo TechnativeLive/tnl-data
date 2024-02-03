@@ -2,7 +2,7 @@ import {
   depopulateFormatEntrants,
   populateFormatEntrants,
   updateFormatEntrants,
-} from '@/app/(projects)/[sport]/[event]/edit/actions';
+} from '@/app/(app-shell)/[sport]/[event]/edit/actions';
 import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
 import { Button } from '@mantine/core';
 import { IconDatabaseMinus, IconDatabasePlus, IconRefreshDot } from '@tabler/icons-react';

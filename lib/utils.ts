@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 export function isObject(maybeObject: unknown): maybeObject is Record<string, unknown> {
   return typeof maybeObject === 'object' && maybeObject !== null && !Array.isArray(maybeObject);
 }
@@ -20,3 +22,10 @@ export function throttleAndDebounce(fn: () => void, delay: number): () => void {
     }
   };
 }
+
+export function toNumOrZero(maybeNum: unknown): number {
+  const asNum = Number(maybeNum);
+  return Number.isNaN(asNum) ? 0 : asNum;
+}
+
+export const cn = clsx;

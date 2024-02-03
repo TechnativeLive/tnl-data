@@ -1,9 +1,9 @@
-import { EventDataEditForm } from '@/app/(projects)/[sport]/[event]/edit/edit';
+import { EventDataEditForm } from '@/app/(app-shell)/[sport]/[event]/edit/edit';
 import {
   PreviousSnapshotModal,
   RestoreFromSnapshotButton,
   TakeSnapshotButton,
-} from '@/app/(projects)/[sport]/[event]/edit/snapshot';
+} from '@/app/(app-shell)/[sport]/[event]/edit/snapshot';
 import { Info } from '@/components/info';
 import { tsReadable } from '@/lib/dates';
 import { day } from '@/lib/dayjs';

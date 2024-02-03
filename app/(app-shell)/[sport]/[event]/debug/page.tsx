@@ -1,4 +1,4 @@
-import { RealtimeJsonEvent } from '@/app/(projects)/[sport]/[event]/realtime-json-event';
+import { RealtimeJsonEvent } from '@/app/(app-shell)/[sport]/[event]/realtime-json-event';
 import { Flex, Stack } from '@mantine/core';
 
 export default async function EventPage() {

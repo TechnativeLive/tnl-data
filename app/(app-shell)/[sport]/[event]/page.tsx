@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/db/static';
 import { Flex, Stack } from '@mantine/core';
-import { RealtimeJsonEvent } from '@/app/(projects)/[sport]/[event]/realtime-json-event';
+import { RealtimeJsonEvent } from '@/app/(app-shell)/[sport]/[event]/realtime-json-event';
 
 export const dynamic = 'force-dynamic';
 

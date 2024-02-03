@@ -5,6 +5,7 @@ import { Stack } from '@mantine/core';
 import { classifyEventsByDate } from '@/lib/dates';
 import { Debug } from '@/components/debug';
 import { Info } from '@/components/info';
+import Link from 'next/link';
 // import 'array-grouping-polyfill';
 
 export default async function HomePage() {
@@ -43,6 +44,10 @@ export default async function HomePage() {
   return (
     <Stack className="flex-1 p-16">
       {error && <Debug data={error} label="error" className="mb-8" />}
+      <Link
+        href='/timers'
+        className="active border bg-button rounded-lg px-3 py-1 flex gap-6 self-start"
+      >Timers</Link>
       <Info title="Getting Started">Select a sport from the menu</Info>
       {!sortedByCurrentEventCount ? null : (
         <div className="mt-16 grid gap-md grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">

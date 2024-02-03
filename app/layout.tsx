@@ -1,11 +1,12 @@
 // import '@/lib/polyfills';
 import './globals.css';
 
+import { setUseWhatChange } from '@simbathesailor/use-what-changed';
+setUseWhatChange({ active: process.env.NODE_ENV === 'development' })
+
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
 import { theme } from './theme';
 import { Providers } from '@/components/providers';
-import { ShellWithProfile } from '@/components/shell/shell-with-profile';
 
 export const metadata = {
   title: 'TNL Event Data',
@@ -28,8 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <MantineProvider theme={theme} defaultColorScheme="dark">
           <Providers>
-            <Notifications containerWidth={340} autoClose={3000} />
-            <ShellWithProfile>{children}</ShellWithProfile>
+            {children}
           </Providers>
         </MantineProvider>
       </body>

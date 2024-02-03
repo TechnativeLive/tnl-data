@@ -1,7 +1,7 @@
 import {
   DateSortOption,
   EventListSortSelection,
-} from '@/app/(projects)/[sport]/event-list-sort-selection';
+} from '@/app/(app-shell)/[sport]/event-list-sort-selection';
 import { dsLong, tsTerse } from '@/lib/dates';
 import { createServerClient } from '@/lib/db/server';
 import { PageProps } from '@/lib/types';
@@ -183,9 +183,8 @@ function sortedDateReducer(
 ) {
   return [
     {
-      label: `${sort === 'created_at' ? 'Created' : 'Updated'} (${
-        asc ? 'Oldest' : 'Newest'
-      } first)`,
+      label: `${sort === 'created_at' ? 'Created' : 'Updated'} (${asc ? 'Oldest' : 'Newest'
+        } first)`,
       data: array.sort((aData, bData) => {
         const a = aData[sort];
         const b = bData[sort];

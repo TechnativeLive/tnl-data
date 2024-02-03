@@ -12,18 +12,21 @@ export interface Database {
       ds_keys: {
         Row: {
           description: string | null
+          kind: Database["public"]["Enums"]["datastream_kind"]
           name: string
           private: string
           public: string
         }
         Insert: {
           description?: string | null
+          kind?: Database["public"]["Enums"]["datastream_kind"]
           name: string
           private: string
           public: string
         }
         Update: {
           description?: string | null
+          kind?: Database["public"]["Enums"]["datastream_kind"]
           name?: string
           private?: string
           public?: string
@@ -345,6 +348,65 @@ export interface Database {
         }
         Relationships: []
       }
+      timers: {
+        Row: {
+          countdown: boolean
+          created_at: string
+          datastream: string | null
+          end_hours: number
+          end_mins: number
+          end_secs: number
+          format: string
+          id: number
+          isRunning: boolean
+          muted: boolean
+          name: string | null
+          sounds: Json
+          UTC: number
+          value: number
+        }
+        Insert: {
+          countdown?: boolean
+          created_at?: string
+          datastream?: string | null
+          end_hours?: number
+          end_mins?: number
+          end_secs?: number
+          format?: string
+          id?: number
+          isRunning?: boolean
+          muted?: boolean
+          name?: string | null
+          sounds?: Json
+          UTC?: number
+          value?: number
+        }
+        Update: {
+          countdown?: boolean
+          created_at?: string
+          datastream?: string | null
+          end_hours?: number
+          end_mins?: number
+          end_secs?: number
+          format?: string
+          id?: number
+          isRunning?: boolean
+          muted?: boolean
+          name?: string | null
+          sounds?: Json
+          UTC?: number
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timers_datastream_fkey"
+            columns: ["datastream"]
+            isOneToOne: false
+            referencedRelation: "ds_keys"
+            referencedColumns: ["name"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -353,7 +415,8 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      datastream_kind: "timer" | "data"
+      timer_play_sounds_on: "none" | "all" | "overview" | "fullscreen"
     }
     CompositeTypes: {
       [_ in never]: never
