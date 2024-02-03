@@ -38,7 +38,7 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
       const { data } = await supabase
         .from('events')
         .select(
-          'name, format, format_options, results, starts_at, ends_at, created_at, updated_at, ds_keys(name, description, private, public)'
+          'name, format, format_options, results, starts_at, ends_at, created_at, updated_at, ds_keys(name, description, private, public, kind)',
         )
         .eq('slug', params.event || '')
         .single();
@@ -81,12 +81,12 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
               starts_at: e.new.starts_at,
               updated_at: e.new.updated_at,
               created_at: e.new.created_at,
-              format_options: {}
+              format_options: {},
             };
             setEvent(updatedEvent);
             updateOutline();
           }
-        }
+        },
       )
       .subscribe();
 

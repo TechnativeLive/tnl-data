@@ -16,14 +16,15 @@ export default async function EventPage({ params }: { params: { sport: string; e
   const { data } = await supabase
     .from('events')
     .select(
-      'name, format, results, starts_at, ends_at, created_at, updated_at, snapshot, ds_keys(name, description, public, private)'
+      'name, format, results, starts_at, ends_at, created_at, updated_at, snapshot, ds_keys(name, description, public, private)',
     )
     .eq('slug', params.event)
     .single();
 
   const { data: allDsKeys } = await supabase
     .from('ds_keys')
-    .select('name, description, public, private');
+    .select('name, description, public, private')
+    .filter('kind', 'eq', 'data');
 
   const createdAtDate = data?.created_at ? new Date(data.created_at) : undefined;
   const updatedAtDate = data?.updated_at ? new Date(data.updated_at) : undefined;
