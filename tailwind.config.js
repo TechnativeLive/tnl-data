@@ -41,6 +41,14 @@ module.exports = {
         lg: '1.25rem',
         xl: '2rem',
       },
+      screens: {
+        xxs: '24em', // '384px',
+        xs: '36em',
+        sm: '48em',
+        md: '62em',
+        lg: '75em',
+        xl: '88em',
+      },
     },
   },
   plugins: [
@@ -129,7 +137,7 @@ module.exports = {
             };
           },
         },
-        { values: theme('spacing') }
+        { values: theme('spacing') },
       );
 
       matchUtilities(
@@ -153,7 +161,7 @@ module.exports = {
             7: '7vw',
             8: '8vw',
           },
-        }
+        },
       );
     }),
   ],

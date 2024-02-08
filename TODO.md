@@ -1,6 +1,3 @@
-# Timers
+# Events
 
-- Names
-- Sounds
-  - Implement saved sounds played in AudioEffects component
-- Datastream linking
+- Move from json based events

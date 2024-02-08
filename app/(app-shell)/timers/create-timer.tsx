@@ -36,7 +36,7 @@ export function NewIndicator({ createdAt }: { createdAt: DbTimer['created_at'] }
   const [isNew, setIsNew] = useState(() => isNewTimer(createdAtInMs));
 
   useEffect(() => {
-    if (isNew) setIsNew(false);
+    if (isNew) setTimeout(() => setIsNew(false), 0);
   }, [isNew, setIsNew]);
 
   return (

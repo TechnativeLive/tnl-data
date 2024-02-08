@@ -2,10 +2,10 @@
 
 import { createBrowserClient } from '@/lib/db/client';
 import { DbTimer } from '@/lib/db/custom';
-import { updateDatasream } from '@/lib/singular/datastream';
+import { updateDatastream } from '@/lib/singular/datastream';
 import { useEffect, useState } from 'react';
 
-export function TimerDatastreamUpdates({
+export function useSyncTimerWithDatastream({
   datastream,
   UTC,
   value,
@@ -13,12 +13,10 @@ export function TimerDatastreamUpdates({
   end_hours: beginHours,
   end_mins: beginMinutes,
   end_secs: beginSeconds,
-}: Pick<
-  DbTimer,
-  'datastream' | 'UTC' | 'value' | 'isRunning' | 'end_hours' | 'end_mins' | 'end_secs'
->) {
+}: DbTimer) {
   const [dsKey, setDsKey] = useState<string | null>(null);
   const supabase = createBrowserClient();
+
   useEffect(() => {
     if (!datastream) return;
 
@@ -36,11 +34,9 @@ export function TimerDatastreamUpdates({
 
   useEffect(() => {
     if (dsKey) {
-      updateDatasream(dsKey, {
+      updateDatastream(dsKey, {
         timer: { timeControl: { UTC, value, isRunning }, beginHours, beginMinutes, beginSeconds },
       });
     }
   }, [dsKey, UTC, value, isRunning, beginHours, beginMinutes, beginSeconds]);
-
-  return null;
 }

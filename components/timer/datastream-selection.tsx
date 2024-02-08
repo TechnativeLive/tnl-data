@@ -1,13 +1,14 @@
 'use client';
 
 import { Select } from '@/components/select';
+import { useTimerControls } from '@/app/(app-shell)/timers/controls';
 import { createBrowserClient } from '@/lib/db/client';
-import { DbTimer } from '@/lib/db/custom';
 import { ActionIcon, Space } from '@mantine/core';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
-export function TimerDatastreamSelection({ timer }: { timer: DbTimer }) {
+export function TimerControlsDatastreamSelection() {
+  const [timer] = useTimerControls();
   const supabase = createBrowserClient();
   const [selectedDatastream, setSelectedDatastream] = useState(timer.datastream);
   const [datastreams, setDatastreams] = useState<Pick<Tables<'ds_keys'>, 'name' | 'description'>[]>(
@@ -34,6 +35,7 @@ export function TimerDatastreamSelection({ timer }: { timer: DbTimer }) {
     <div className="flex gap-2 items-end">
       <Select
         label="Datastream"
+        placeholder={selectedDatastream || 'None'}
         value={selectedDatastream}
         onChange={(e) => setSelectedDatastream(e)}
         data={datastreams.map((ds) => ({ label: ds.name, value: ds.name }))}

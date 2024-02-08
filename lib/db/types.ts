@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       ds_keys: {
@@ -94,6 +94,7 @@ export interface Database {
           snapshot: Json | null
           sport: string
           starts_at: string | null
+          timers: number[] | null
           updated_at: string | null
         }
         Insert: {
@@ -109,6 +110,7 @@ export interface Database {
           snapshot?: Json | null
           sport: string
           starts_at?: string | null
+          timers?: number[] | null
           updated_at?: string | null
         }
         Update: {
@@ -124,6 +126,7 @@ export interface Database {
           snapshot?: Json | null
           sport?: string
           starts_at?: string | null
+          timers?: number[] | null
           updated_at?: string | null
         }
         Relationships: [
@@ -327,6 +330,44 @@ export interface Database {
           }
         ]
       }
+      scorecards: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: number
+          order: number | null
+          parent_round: number
+          scores: Json | null
+          status: Database["public"]["Enums"]["status"] | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          order?: number | null
+          parent_round: number
+          scores?: Json | null
+          status?: Database["public"]["Enums"]["status"] | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          order?: number | null
+          parent_round?: number
+          scores?: Json | null
+          status?: Database["public"]["Enums"]["status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorecards_parent_round_fkey"
+            columns: ["parent_round"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       sports: {
         Row: {
           created_at: string
@@ -416,6 +457,7 @@ export interface Database {
     }
     Enums: {
       datastream_kind: "timer" | "data"
+      status: "DNS" | "DNF"
       timer_play_sounds_on: "none" | "all" | "overview" | "fullscreen"
     }
     CompositeTypes: {

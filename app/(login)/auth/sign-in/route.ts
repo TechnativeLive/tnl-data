@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   // }
 
   const { error } = await supabase.auth.signInWithPassword({
-    email,
+    email: email.includes('@') ? email : `${email}@technative.live`,
     password,
   });
 

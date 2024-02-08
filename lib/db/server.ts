@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { createServerClient as _createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
@@ -14,6 +15,6 @@ export const createServerClient = cache(() => {
           return cookieStore.get(name)?.value;
         },
       },
-    }
+    },
   );
 });

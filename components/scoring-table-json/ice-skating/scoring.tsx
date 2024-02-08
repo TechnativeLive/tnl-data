@@ -2,13 +2,13 @@
 
 import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/scroll-area-with-shadow';
 import { RealtimeHeartbeat } from '@/components/realtime-heartbeat';
-import { LiveDataPreviewIceSkating } from '@/components/scoring-table/ice-skating/preview';
-import { ScoringTableProps } from '@/components/scoring-table/scoring-table';
+import { LiveDataPreviewIceSkating } from '@/components/scoring-table-json/ice-skating/preview';
+import { ScoringTablePropsJson } from '@/components/scoring-table-json/scoring-table-json';
 import { updateOutlineAtom } from '@/components/shell/event-outline';
 import { createBrowserClient } from '@/lib/db/client';
 import { Sport, EventFormat, EventResults, EventResult, EventLiveData } from '@/lib/event-data';
 import { generateLiveDataIceSkating } from '@/lib/event-data/ice-skating';
-import { updateDatasream } from '@/lib/singular/datastream';
+import { updateDatastream } from '@/lib/singular/datastream';
 import {
   Alert,
   Button,
@@ -44,7 +44,7 @@ type UpdateResultHelper = (
   cls: string,
   id: number,
   data: Result,
-  message?: string
+  message?: string,
 ) => void;
 type UpdateActiveHelper = ({
   round,
@@ -58,11 +58,11 @@ type UpdateActiveHelper = ({
   message?: string;
 }) => void;
 
-export function ScoringTableIceSkating({
+export function ScoringTableJsonIceSkating({
   format,
-  initialResults,
+  results: initialResults,
   dsPrivateKey,
-}: ScoringTableProps) {
+}: ScoringTablePropsJson) {
   const params = useParams();
   const updateOutline = useSetAtom(updateOutlineAtom);
   const [results, setResults] = useState(() => validateResults(initialResults));
@@ -70,7 +70,7 @@ export function ScoringTableIceSkating({
     generateLiveDataIceSkating({
       format: format as EventFormat<'ice-skating'>,
       results,
-    })
+    }),
   );
   const [previewOpened, { toggle: togglePreview }] = useDisclosure(false);
   // Keep results up to date with database changes
@@ -82,7 +82,7 @@ export function ScoringTableIceSkating({
       generateLiveDataIceSkating({
         format: format as EventFormat<'ice-skating'>,
         results: newResults,
-      })
+      }),
     );
     updateOutline();
   }, [setResults, validateResults, initialResults, format, setLiveDataPreview, updateOutline]);
@@ -98,8 +98,9 @@ export function ScoringTableIceSkating({
         notifications.show({
           color: 'red',
           title: 'Error',
-          message: `${format ? '' : 'No format provided. '}${dsPrivateKey ? '' : 'No datastream key provided'
-            }`,
+          message: `${format ? '' : 'No format provided. '}${
+            dsPrivateKey ? '' : 'No datastream key provided'
+          }`,
         });
         return;
       }
@@ -124,7 +125,7 @@ export function ScoringTableIceSkating({
             results: newResults,
           });
           setLiveDataPreview(liveData);
-          updateDatasream(dsPrivateKey, liveData, message);
+          updateDatastream(dsPrivateKey, liveData, message);
 
           // update db
           supabase
@@ -153,7 +154,7 @@ export function ScoringTableIceSkating({
       });
       updateOutline();
     },
-    [updateOutline, setResults, setLoading, supabase, params.event, format, dsPrivateKey]
+    [updateOutline, setResults, setLoading, supabase, params.event, format, dsPrivateKey],
   );
 
   const updateResult = useCallback<UpdateResultHelper>(
@@ -162,8 +163,9 @@ export function ScoringTableIceSkating({
         notifications.show({
           color: 'red',
           title: 'Error',
-          message: `${format ? '' : 'No format provided. '}${dsPrivateKey ? '' : 'No datastream key provided'
-            }`,
+          message: `${format ? '' : 'No format provided. '}${
+            dsPrivateKey ? '' : 'No datastream key provided'
+          }`,
         });
         return;
       }
@@ -190,7 +192,7 @@ export function ScoringTableIceSkating({
             results: newResults,
           });
           setLiveDataPreview(liveData);
-          updateDatasream(dsPrivateKey, liveData, message);
+          updateDatastream(dsPrivateKey, liveData, message);
 
           // update db
           supabase
@@ -210,7 +212,7 @@ export function ScoringTableIceSkating({
         return newResults;
       });
     },
-    [setResults, setLoading, supabase, params.event, format, dsPrivateKey]
+    [setResults, setLoading, supabase, params.event, format, dsPrivateKey],
   );
 
   if (!isValidEventFormat(format, 'ice-skating'))
@@ -240,11 +242,18 @@ export function ScoringTableIceSkating({
               show which class is active
               <br />
               <br />
-              Live scores come from{" "}
-              <Link className='text-blue-4 font-bold' href="http://www.iceresultsuk.org.uk/BritanniaCup/2024/index.htm" target="_blank" rel="noopener noreferrer">IceResultsUK</Link>
-              . For each category, click on{" "}
-              <span className='text-orange-4'>Starting Order / Detailed Classification</span>
-              . That page will show the live scores as they come in.
+              Live scores come from{' '}
+              <Link
+                className="text-blue-4 font-bold"
+                href="http://www.iceresultsuk.org.uk/BritanniaCup/2024/index.htm"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                IceResultsUK
+              </Link>
+              . For each category, click on{' '}
+              <span className="text-orange-4">Starting Order / Detailed Classification</span>. That
+              page will show the live scores as they come in.
             </Text>
           </div>
           <div className="flex flex-col">
@@ -348,7 +357,7 @@ export function ScoringTableIceSkating({
                   'w-3 h-3 shrink-0 rounded-full border shadow-xs transition-colors duration-200',
                   isRoundActive
                     ? 'border-green-5/70 bg-green-5/20'
-                    : 'border-gray-5/70 bg-gray-5/20'
+                    : 'border-gray-5/70 bg-gray-5/20',
                 )}
               />
             </div>
@@ -366,7 +375,7 @@ export function ScoringTableIceSkating({
                     withBorder
                     className={clsx(
                       'flex-col gap-2',
-                      isClassActive && 'border-teal-4 dark:border-teal-7'
+                      isClassActive && 'border-teal-4 dark:border-teal-7',
                     )}
                   >
                     <div className="flex items-center px-2 gap-2 group">
@@ -435,7 +444,7 @@ export function ScoringTableIceSkating({
     </Stack>
   );
 }
-ScoringTableIceSkating.whyDidYouRender = true;
+ScoringTableJsonIceSkating.whyDidYouRender = true;
 
 function Entrant({
   entrant,
@@ -554,7 +563,12 @@ function Entrant({
           defaultValue={initialResult?.ddct}
           placeholder={initialResult?.ddct ? initialResult.ddct.toString() : undefined}
         />
-        <Button variant="light" type="submit" className="self-stretch h-auto shrink-0" loading={loading}>
+        <Button
+          variant="light"
+          type="submit"
+          className="self-stretch h-auto shrink-0"
+          loading={loading}
+        >
           Submit
         </Button>
       </div>
@@ -564,7 +578,7 @@ function Entrant({
 
 function isValidEventFormat<S extends Sport>(
   format: Tables<'events'>['format'] | undefined,
-  sport: S
+  sport: S,
 ): format is EventFormat<S> {
   return !!(
     sport === 'ice-skating' &&

@@ -3,7 +3,7 @@
 import { EventFormat } from '@/lib/event-data';
 import { createServerActionClient } from '@/lib/db/server-action';
 import { Json } from '@/lib/db/types';
-import { isObject } from '@/lib/utils';
+import { isObject, toNumOrZero } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 
 type FormState = {
@@ -32,7 +32,9 @@ export async function updateEvent(_prevState: FormState, formData: FormData): Pr
   const ds_keys = formData.get('ds_keys')?.toString();
   const starts_at = formData.get('starts_at')?.toString() || null;
   const ends_at = formData.get('ends_at')?.toString() || null;
-
+  const timersString = formData.get('timers')?.toString();
+  const timers = timersString ? timersString.split(',').map(toNumOrZero) : null;
+  console.log({ timers, timersString });
   if (!format) return { success: false, message: 'No format provided' };
   if (!event) return { success: false, message: 'No event provided' };
 
@@ -40,7 +42,7 @@ export async function updateEvent(_prevState: FormState, formData: FormData): Pr
     const validFormat = JSON.parse(format) as Json;
     const { data, error } = await supabase
       .from('events')
-      .update({ format: validFormat, starts_at, ends_at, name, ds_keys })
+      .update({ format: validFormat, starts_at, ends_at, name, ds_keys, timers })
       .eq('slug', event)
       .select('format')
       .single();
@@ -107,7 +109,7 @@ export async function takeSnapshot(_prevState: FormState, formData: FormData): P
  */
 export async function restoreFromSnapshot(
   _prevState: FormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState> {
   const supabase = createServerActionClient();
   const sport = formData.get('sport');
@@ -152,7 +154,7 @@ export async function restoreFromSnapshot(
  */
 export async function deleteSnapshot(
   _prevState: FormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState> {
   const supabase = createServerActionClient();
   const sport = formData.get('sport');
@@ -184,7 +186,7 @@ export async function deleteSnapshot(
 // TODO: uses saved event data, not local state of format
 export async function populateFormatEntrants(
   _prevState: FormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState> {
   const supabase = createServerActionClient();
   const format = formData.get('format')?.toString();
@@ -216,10 +218,13 @@ export async function populateFormatEntrants(
       .select('id, dob, first_name, last_name, nick_name, country, data')
       .in('id', uniqueIds);
 
-    const entrantMap = entrants.data?.reduce((acc, entrant) => {
-      acc[entrant.id] = entrant;
-      return acc;
-    }, {} as Record<string, any>);
+    const entrantMap = entrants.data?.reduce(
+      (acc, entrant) => {
+        acc[entrant.id] = entrant;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
     if (!entrantMap) {
       return { success: false, message: 'No entrants found' };
@@ -230,7 +235,7 @@ export async function populateFormatEntrants(
       classes: round.classes.map((cls) => ({
         ...cls,
         entrants: cls.entrants.map((entrant) =>
-          typeof entrant === 'number' ? entrantMap[entrant] : entrant
+          typeof entrant === 'number' ? entrantMap[entrant] : entrant,
         ),
       })),
     }));
@@ -259,7 +264,7 @@ export async function populateFormatEntrants(
 
 export async function updateFormatEntrants(
   _prevState: FormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState> {
   const supabase = createServerActionClient();
   const format = formData.get('format')?.toString();
@@ -291,10 +296,13 @@ export async function updateFormatEntrants(
       .select('id, dob, first_name, last_name, nick_name, country, data')
       .in('id', uniqueIds);
 
-    const entrantMap = entrants.data?.reduce((acc, entrant) => {
-      acc[entrant.id] = entrant;
-      return acc;
-    }, {} as Record<string, any>);
+    const entrantMap = entrants.data?.reduce(
+      (acc, entrant) => {
+        acc[entrant.id] = entrant;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
     if (!entrantMap) {
       return { success: false, message: 'No entrants found' };
@@ -305,7 +313,7 @@ export async function updateFormatEntrants(
       classes: round.classes.map((cls) => ({
         ...cls,
         entrants: cls.entrants.map((entrant) =>
-          typeof entrant === 'number' ? entrantMap[entrant] : entrant
+          typeof entrant === 'number' ? entrantMap[entrant] : entrant,
         ),
       })),
     }));
@@ -334,7 +342,7 @@ export async function updateFormatEntrants(
 
 export async function depopulateFormatEntrants(
   _prevState: FormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState> {
   const supabase = createServerActionClient();
   const format = formData.get('format')?.toString();
@@ -352,7 +360,7 @@ export async function depopulateFormatEntrants(
       classes: round?.classes?.map((cls) => ({
         ...cls,
         entrants: cls.entrants.map((entrant) =>
-          typeof entrant === 'object' ? entrant.id : entrant
+          typeof entrant === 'object' ? entrant.id : entrant,
         ),
       })),
     }));

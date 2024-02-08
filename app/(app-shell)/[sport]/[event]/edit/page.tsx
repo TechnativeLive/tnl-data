@@ -16,7 +16,7 @@ export default async function EventPage({ params }: { params: { sport: string; e
   const { data } = await supabase
     .from('events')
     .select(
-      'name, format, results, starts_at, ends_at, created_at, updated_at, snapshot, ds_keys(name, description, public, private)',
+      'name, format, results, starts_at, ends_at, created_at, updated_at, snapshot, timers, ds_keys(name, description, public, private)',
     )
     .eq('slug', params.event)
     .single();
@@ -25,6 +25,8 @@ export default async function EventPage({ params }: { params: { sport: string; e
     .from('ds_keys')
     .select('name, description, public, private')
     .filter('kind', 'eq', 'data');
+
+  const { data: timers } = await supabase.from('timers').select('value:id, label:name');
 
   const createdAtDate = data?.created_at ? new Date(data.created_at) : undefined;
   const updatedAtDate = data?.updated_at ? new Date(data.updated_at) : undefined;
@@ -87,6 +89,10 @@ export default async function EventPage({ params }: { params: { sport: string; e
             event={params.event}
             eventData={data}
             dsKeys={allDsKeys}
+            timers={(timers ?? []).map((t) => ({
+              label: t.label ?? 'Unnamed timer',
+              value: t.value.toString(),
+            }))}
           />
         ) : (
           <Info title="No Event Found">

@@ -77,23 +77,3 @@ export const soundsSelectionData = [
     ],
   },
 ];
-
-// // event-driven
-// useDidUpdate(() => {
-//   if (timer.isRunning) {
-//     if (timer.value > 0) {
-//       play('start')
-//       // resume
-//     } else {
-//       play('start')
-//       // start
-//     }
-//   }
-//   // else if (timer.value > 0) {
-//   // play('')
-//   // pause
-//   // } else {
-//   // play('')
-//   // reset
-//   // }
-// }, [timer.isRunning, timer.value, play])

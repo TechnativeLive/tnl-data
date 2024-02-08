@@ -1,7 +1,6 @@
 'use client';
 
 import { createBrowserClient } from '@/lib/db/client';
-import { Group } from '@mantine/core';
 import { IconChevronRight, IconEdit } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { Route } from 'next';
@@ -17,10 +16,10 @@ export function HeaderSegments() {
   const [segments, setSegments] = useState<(Segment | null)[]>([]);
   const params = useParams();
   const pathname = usePathname();
+  const isLegacy = pathname.includes('legacy');
 
   useEffect(() => {
     (async () => {
-      const t = await supabase.from('rounds').select("events")
       const data = await Promise.all([
         !params.sport
           ? null
@@ -37,7 +36,7 @@ export function HeaderSegments() {
         //       .eq('event', params.event)
         //       .single(),
       ]);
-      setSegments(data.map((query) => query?.data ?? null));
+      setSegments(data.map((query, i) => query?.data ?? null));
     })();
 
     setLoading(false);
@@ -59,8 +58,8 @@ export function HeaderSegments() {
   return (
     <div
       className={clsx(
-        'flex items-center flex-wrap gap-x-2 px-md grow transition-opacity',
-        loading ? 'opacity-0' : 'opacity-100'
+        'items-center flex-wrap gap-x-2 px-md grow transition-opacity hidden xs:flex',
+        loading ? 'opacity-0' : 'opacity-100',
       )}
     >
       {allSegments.map((segment, index) => {
@@ -74,13 +73,13 @@ export function HeaderSegments() {
             {index > 0 && <IconChevronRight size={14} className="animate-fade" />}
             <Link
               aria-disabled={loading}
-              href={href as Route}
+              href={index === 1 && isLegacy ? (`${href}/legacy` as Route) : (href as Route)}
               className={clsx(
                 'underline-offset-2 animate-fade flex items-center transition-all',
                 'hover:underline hover:text-teal-5',
                 index === segments.length - 1 && 'text-violet-5 dark:text-violet-3',
                 loading && 'cursor-default',
-                segmentsLength > 60 ? 'text-xs md:text-sm' : 'text-xs sm:text-sm'
+                segmentsLength > 60 ? 'text-xs md:text-sm' : 'text-xs sm:text-sm',
               )}
             >
               {segment.id === '__edit' && <IconEdit size={14} className="mr-2" />}

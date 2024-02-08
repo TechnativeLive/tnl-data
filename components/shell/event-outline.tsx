@@ -13,7 +13,7 @@ const outlineRerenderStoreAtom = atom(0);
 const outlineRerenderKeyAtom = atom((get) => get(outlineRerenderStoreAtom));
 
 export const updateOutlineAtom = atom(null, (get, set) =>
-  set(outlineRerenderStoreAtom, get(outlineRerenderStoreAtom) + 1)
+  set(outlineRerenderStoreAtom, get(outlineRerenderStoreAtom) + 1),
 );
 
 // scroll margin above anchors
@@ -67,7 +67,7 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
             <a
               href={header.href as Route}
               className={clsx(
-                'outline-link block text-sm font-medium leading-7 transition-colors overflow-hidden whitespace-nowrap text-ellipsis relative'
+                'outline-link block text-sm font-medium leading-7 transition-colors overflow-hidden whitespace-nowrap text-ellipsis relative',
               )}
             >
               {header.title}
@@ -76,7 +76,7 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
               className={clsx(
                 'w-3 h-3 shrink-0 rounded-full border shadow-xs border-green-5/70 bg-green-5/20 opacity-0 transition-opacity',
                 header.active && 'opacity-100',
-                root && 'mr-2'
+                root && 'mr-2',
               )}
             />
           </div>
@@ -89,7 +89,7 @@ function Headers({ headers, root = true }: { headers: OutlineItem[]; root?: bool
 
 function getHeaders() {
   const eventHeaders = Array.from(
-    document.querySelectorAll('.event-header:where(h1,h2,h3,h4,h5,h6')
+    document.querySelectorAll('.event-header:where(h1,h2,h3,h4,h5,h6'),
   ) as HTMLElement[];
   const headers = eventHeaders
     .filter((el) => el.id && el.hasChildNodes())
@@ -155,7 +155,7 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
         prevActiveLink.current = null;
       } else if (container.current) {
         prevActiveLink.current = container.current.querySelector<HTMLElement>(
-          `a[href="${decodeURIComponent(linkHash)}"]`
+          `a[href="${decodeURIComponent(linkHash)}"]`,
         );
       }
 
@@ -168,12 +168,12 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
         setStyles({ top: 0, opacity: '0' });
       }
     },
-    [prevActiveLink, container]
+    [prevActiveLink, container],
   );
 
   const setActiveLink = useCallback(() => {
     const links = Array.from(
-      container.current?.querySelectorAll('.outline-link') ?? []
+      container.current?.querySelectorAll('.outline-link') ?? [],
     ) as HTMLAnchorElement[];
 
     const anchors = (
@@ -229,7 +229,7 @@ function getAnchorTop(anchor: HTMLAnchorElement): number {
 function isAnchorActive(
   index: number,
   anchor: HTMLAnchorElement,
-  nextAnchor: HTMLAnchorElement | undefined
+  nextAnchor: HTMLAnchorElement | undefined,
 ): [boolean, string | null] {
   const scrollTop = window.scrollY;
 

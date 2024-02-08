@@ -61,7 +61,7 @@ a {
 }
 
 .active:active {
-  transform: scale(0.97);
+  transform: translateY(1px);
 }
 
 .mantine-ScrollArea-viewport > div {
@@ -70,4 +70,8 @@ a {
 
 .mantine-List-itemWrapper {
   padding-right: 1.25rem;
+}
+
+.mantine-Notification-description {
+  white-space: pre-wrap;
 }

@@ -135,7 +135,7 @@ export default async function SportPage({
                 </Link>
               ))}
             </Fragment>
-          )
+          ),
         )}
       </Stack>
     </Flex>
@@ -172,19 +172,20 @@ function startDateReducer(array: Tables<'events'>[]) {
       { label: 'Active', data: [] },
       { label: 'Upcoming', data: [] },
       { label: 'Past', data: [] },
-    ] as EventGroups
+    ] as EventGroups,
   );
 }
 
 function sortedDateReducer(
   array: Tables<'events'>[],
   sort: Exclude<DateSortOption, 'starts_at'>,
-  asc: boolean
+  asc: boolean,
 ) {
   return [
     {
-      label: `${sort === 'created_at' ? 'Created' : 'Updated'} (${asc ? 'Oldest' : 'Newest'
-        } first)`,
+      label: `${sort === 'created_at' ? 'Created' : 'Updated'} (${
+        asc ? 'Oldest' : 'Newest'
+      } first)`,
       data: array.sort((aData, bData) => {
         const a = aData[sort];
         const b = bData[sort];

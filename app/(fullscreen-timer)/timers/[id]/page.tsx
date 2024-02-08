@@ -1,9 +1,9 @@
-import { FullscreenTimer } from '@/components/timer/fullscreen';
+import { FullscreenTimer } from '@/app/(fullscreen-timer)/timers/[id]/fullscreen-timer';
 import { PageProps } from '@/lib/types';
 import { notFound } from 'next/navigation';
-import { Chivo } from 'next/font/google'
+import { Chivo } from 'next/font/google';
 
-const chivo = Chivo({ subsets: ['latin'] })
+const chivo = Chivo({ subsets: ['latin'] });
 
 // export const dynamic = 'force-dynamic';
 
@@ -13,5 +13,5 @@ export default async function FullscreenTimerPage({
 }: PageProps<{ id: string }, {}>) {
   if (!params?.id) return notFound();
 
-  return <FullscreenTimer id={params.id} className={chivo.className} />
+  return <FullscreenTimer id={params.id} className={chivo.className} />;
 }

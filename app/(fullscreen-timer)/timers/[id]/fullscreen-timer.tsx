@@ -10,7 +10,7 @@ import { notifications } from '@mantine/notifications';
 import { useTimerDisplay } from '@/lib/hooks/use-timer-display';
 import { TimerAudioEvents } from '@/components/timer/audio-events';
 import { DbTimer } from '@/lib/db/custom';
-import { TimerDatastreamUpdates } from '@/components/timer/datastream-updates';
+import { useSyncTimerWithDatastream } from '@/lib/hooks/use-sync-timer-with-datastream';
 
 export function FullscreenTimer({ id, className }: { id: number | string; className?: string }) {
   const supabase = createBrowserClient();
@@ -66,13 +66,13 @@ export function FullscreenTimer({ id, className }: { id: number | string; classN
   return (
     <section
       className={clsx(
-        'text-white bg-black text-center h-full select-none',
+        'text-white bg-black text-center h-screen select-none',
         timer?.isRunning && 'invert',
         className,
       )}
     >
       <Text className="tracking-widest h-8 flex items-center justify-center" fw="bolder" fz="lg">
-        {timer?.name || 'Unnamed Timer'}
+        {timer ? timer.name || 'Unnamed Timer' : 'Loading...'}
       </Text>
       <div className="px-[5vw] h-[calc(100%-96px)]">{timer ? <Display timer={timer} /> : null}</div>
       <Text className="tracking-widest h-16 flex items-center justify-center" fw="bolder" fz="xl">
@@ -84,6 +84,7 @@ export function FullscreenTimer({ id, className }: { id: number | string; classN
 
 function Display({ timer }: { timer: DbTimer }) {
   const time = useTimerDisplay(timer, true);
+  useSyncTimerWithDatastream(timer);
 
   return (
     <>
@@ -96,17 +97,6 @@ function Display({ timer }: { timer: DbTimer }) {
           muted={timer.muted}
           sounds={timer.sounds}
           trailing
-        />
-      )}
-      {timer.datastream && (
-        <TimerDatastreamUpdates
-          datastream={timer.datastream}
-          UTC={timer.UTC}
-          value={timer.value}
-          isRunning={timer.isRunning}
-          end_hours={timer.end_hours}
-          end_mins={timer.end_mins}
-          end_secs={timer.end_secs}
         />
       )}
       <FullscreenText>{time.display}</FullscreenText>

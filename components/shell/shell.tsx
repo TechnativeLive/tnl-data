@@ -8,6 +8,7 @@ import {
   AppShellMain,
   Divider,
   Group,
+  Space,
   Text,
 } from '@mantine/core';
 import { IconSmartHome } from '@tabler/icons-react';
@@ -32,7 +33,12 @@ export function Shell({
   // const isHome = pathname === '/';
   // const isLogin = pathname.startsWith('/login');
   const isAsideOpen =
-    params.sport && params.event && !pathname.endsWith('/edit') && !pathname.endsWith('/debug');
+    params.sport &&
+    params.event &&
+    !pathname.endsWith('/edit') &&
+    !pathname.endsWith('/debug') &&
+    !pathname.includes('/climbing');
+  const isHeaderSegmentsDisabled = pathname.startsWith('/timers');
 
   return (
     <AppShell
@@ -58,7 +64,8 @@ export function Shell({
             TNL Data
           </Text>
           <Divider orientation="vertical" />
-          <HeaderSegments />
+          {!isHeaderSegmentsDisabled && <HeaderSegments />}
+          <Space ml="auto" />
           <ThemeSwitcher />
           <QuickProfile name={name} initials={initials} email={email} />
         </Group>

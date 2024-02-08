@@ -1,11 +1,13 @@
 'use client';
 
 import { Debug } from '@/components/debug';
-import { ScoringTable } from '@/components/scoring-table/scoring-table';
+import { ScoringTableJson } from '@/components/scoring-table-json/scoring-table-json';
 import { updateOutlineAtom } from '@/components/shell/event-outline';
 import { EventDateClassification, classifyEventByDate } from '@/lib/dates';
 import { createBrowserClient } from '@/lib/db/client';
 import { Sport } from '@/lib/event-data';
+import { getValidators } from '@/lib/json/functions';
+import { formatValidationError } from '@/lib/json/messages';
 import { Title, Button, Text, Loader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconEdit } from '@tabler/icons-react';
@@ -38,7 +40,7 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
       const { data } = await supabase
         .from('events')
         .select(
-          'name, format, format_options, results, starts_at, ends_at, created_at, updated_at, ds_keys(name, description, private, public, kind)',
+          'name, format, format_options, results, starts_at, ends_at, created_at, updated_at, timers, ds_keys(name, description, private, public, kind)',
         )
         .eq('slug', params.event || '')
         .single();
@@ -49,7 +51,7 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
     };
 
     fetchData();
-  }, [params.event, supabase, updateOutline]);
+  }, [params.event, params.sport, supabase, updateOutline]);
 
   useEffect(() => {
     const channel = supabase
@@ -81,7 +83,8 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
               starts_at: e.new.starts_at,
               updated_at: e.new.updated_at,
               created_at: e.new.created_at,
-              format_options: {},
+              format_options: e.new.format_options,
+              timers: e.new.timers,
             };
             setEvent(updatedEvent);
             updateOutline();
@@ -106,7 +109,7 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
   ) : (
     <>
       <div className="flex items-center gap-4">
-        <Title>{event?.name}</Title>
+        <Title size="h3">{event?.name}</Title>
         <Text size="sm" c="dimmed">
           {eventStatusTextMap[eventStatus]}
         </Text>
@@ -121,10 +124,11 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
         </Button>
       </div>
 
-      <ScoringTable
+      <ScoringTableJson
         sport={params.sport as Sport}
         format={event?.format}
-        initialResults={event?.results}
+        formatOptions={event?.format_options}
+        results={event?.results}
         dsPrivateKey={event?.ds_keys?.private}
       />
     </>

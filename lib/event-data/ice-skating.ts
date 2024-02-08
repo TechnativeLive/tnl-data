@@ -78,7 +78,7 @@ export function generateLiveDataIceSkating({
   const activeResults = results?.[active.round]?.[active.class];
   const segmentResults: Omit<LiveDataSegmentResult, 'rank'>[] = getEntrants(
     activeClass.entrants,
-    activeResults
+    activeResults,
   );
 
   liveData.results.segment = sortAndRank(segmentResults, {
@@ -95,28 +95,34 @@ export function generateLiveDataIceSkating({
     })
     .filter(Boolean);
 
-  const overallClassResultsObj = roundWithMatchingClass.reduce((acc, round) => {
-    const classResults = getEntrants(round.class.entrants, results?.[round.id]?.[activeClass.id]);
-    for (const entrant of classResults) {
-      if (acc[entrant.entrant.id]) {
-        acc[entrant.entrant.id].total += entrant.total;
-        acc[entrant.entrant.id].breakdown!.pres += entrant.pres;
-        acc[entrant.entrant.id].breakdown!.tech += entrant.tech;
-        acc[entrant.entrant.id].breakdown!.ddct += entrant.ddct;
-      } else {
-        acc[entrant.entrant.id] = {
-          total: entrant.total,
-          breakdown: {
-            tech: entrant.tech,
-            pres: entrant.pres,
-            ddct: entrant.ddct,
-          },
-          entrant: entrant.entrant,
-        };
+  const overallClassResultsObj = roundWithMatchingClass.reduce(
+    (acc, round) => {
+      const classResults = getEntrants(
+        round!.class.entrants,
+        results?.[round!.id]?.[activeClass.id],
+      );
+      for (const entrant of classResults) {
+        if (acc[entrant.entrant.id]) {
+          acc[entrant.entrant.id].total += entrant.total;
+          acc[entrant.entrant.id].breakdown!.pres += entrant.pres;
+          acc[entrant.entrant.id].breakdown!.tech += entrant.tech;
+          acc[entrant.entrant.id].breakdown!.ddct += entrant.ddct;
+        } else {
+          acc[entrant.entrant.id] = {
+            total: entrant.total,
+            breakdown: {
+              tech: entrant.tech,
+              pres: entrant.pres,
+              ddct: entrant.ddct,
+            },
+            entrant: entrant.entrant,
+          };
+        }
       }
-    }
-    return acc;
-  }, {} as Record<string, Omit<LiveDataOverallResult, 'rank'>>);
+      return acc;
+    },
+    {} as Record<string, Omit<LiveDataOverallResult, 'rank'>>,
+  );
 
   const overallClassResultsUnranked = Object.values(overallClassResultsObj);
   const overallClassResults = sortAndRank(overallClassResultsUnranked, {
@@ -125,8 +131,10 @@ export function generateLiveDataIceSkating({
 
   liveData.results.overall = overallClassResults;
 
+  // @ts-expect-error regression? array of union of types
   const _entrant = activeClass?.entrants.find(
-    (entrant) => (typeof entrant === 'number' ? entrant : entrant.id) === active.entrant
+    (entrant: (typeof activeClass.entrants)[number]) =>
+      (typeof entrant === 'number' ? entrant : entrant.id) === active.entrant,
   );
   const entrant = typeof _entrant === 'number' ? undefined : _entrant;
   liveData.active.entrant = {
@@ -143,7 +151,7 @@ export function generateLiveDataIceSkating({
 
 function getEntrants(
   entrants: Tables<'entrants'>[] | Tables<'entrants'>['id'][],
-  results: NonNullable<EventResults<'ice-skating'>[string]>[string]
+  results: NonNullable<EventResults<'ice-skating'>[string]>[string],
 ): Omit<LiveDataSegmentResult, 'rank'>[] {
   return entrants.map((e) => {
     const id = typeof e === 'number' ? e : e.id;

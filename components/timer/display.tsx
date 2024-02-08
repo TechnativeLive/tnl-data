@@ -1,32 +1,16 @@
-'use client';
-
-import { TimerAudioEvents } from '@/components/timer/audio-events';
-import { TimerEvent } from '@/lib/timer/utils';
-import { DbTimer } from '@/lib/db/custom';
+import { useTimerControls } from '@/app/(app-shell)/timers/controls';
 import { useTimerDisplay } from '@/lib/hooks/use-timer-display';
-import { Text, TextProps } from '@mantine/core';
+import { Text } from '@mantine/core';
 
-export function TimerDisplay({
-  sounds,
-  timer,
-  ...props
-}: { sounds?: Record<TimerEvent | number, string>; timer: DbTimer } & TextProps) {
-  const time = useTimerDisplay(timer);
+export function TimerControlsDisplay({
+  local = false,
+  className,
+}: {
+  local?: boolean;
+  className?: string;
+}) {
+  const [timer, { live }] = useTimerControls();
+  const { display } = useTimerDisplay(local ? timer : live);
 
-  return (
-    <>
-      <Text {...props}>{time.display}</Text>
-      {sounds && (
-        <TimerAudioEvents
-          value={timer.value}
-          isRunning={timer.isRunning}
-          rawTime={time.raw}
-          total={time.total}
-          muted={timer.muted}
-          sounds={sounds}
-          trailing
-        />
-      )}
-    </>
-  );
+  return <Text className={className}>{display}</Text>;
 }

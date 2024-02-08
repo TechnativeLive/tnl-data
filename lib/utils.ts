@@ -28,4 +28,9 @@ export function toNumOrZero(maybeNum: unknown): number {
   return Number.isNaN(asNum) ? 0 : asNum;
 }
 
+export function toNumOrNull(maybeNum: unknown): number | null {
+  const asNum = Number(maybeNum);
+  return Number.isNaN(asNum) ? null : asNum;
+}
+
 export const cn = clsx;

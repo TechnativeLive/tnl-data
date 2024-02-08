@@ -20,10 +20,13 @@ export default async function HomePage() {
     .select('starts_at, ends_at, sport, sports!inner(name)');
   // TODO: smart sql select to group by date/category and add dividers for each section
 
-  const dataGroupedBySport = data?.reduce((acc, event) => {
-    event.sport in acc ? acc[event.sport].push(event) : (acc[event.sport] = [event]);
-    return acc;
-  }, {} as Record<string, NonNullable<typeof data>>);
+  const dataGroupedBySport = data?.reduce(
+    (acc, event) => {
+      event.sport in acc ? acc[event.sport].push(event) : (acc[event.sport] = [event]);
+      return acc;
+    },
+    {} as Record<string, NonNullable<typeof data>>,
+  );
 
   const classifiedData =
     dataGroupedBySport &&
@@ -44,10 +47,20 @@ export default async function HomePage() {
   return (
     <Stack className="flex-1 p-16">
       {error && <Debug data={error} label="error" className="mb-8" />}
-      <Link
-        href='/timers'
-        className="active border bg-button rounded-lg px-3 py-1 flex gap-6 self-start"
-      >Timers</Link>
+      <div className="flex gap-4">
+        <Link
+          href="/timers"
+          className="active border bg-button rounded-lg px-3 py-1 flex gap-6 self-start"
+        >
+          Timers
+        </Link>
+        <Link
+          href="/entrants"
+          className="active border bg-button rounded-lg px-3 py-1 flex gap-6 self-start"
+        >
+          Entrants
+        </Link>
+      </div>
       <Info title="Getting Started">Select a sport from the menu</Info>
       {!sortedByCurrentEventCount ? null : (
         <div className="mt-16 grid gap-md grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">

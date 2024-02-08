@@ -35,11 +35,11 @@ export default async function Login({ searchParams }: { searchParams?: Record<st
 
         <TextInput
           name="email"
-          label="Email"
-          aria-label="Email"
-          type="email"
+          label="Username or Email"
+          aria-label="Username or Email"
           required
-          defaultValue="judge@technative.live"
+          placeholder="Username or email address"
+          pattern=".+"
           error={emailError}
         />
 

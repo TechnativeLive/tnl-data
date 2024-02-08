@@ -8,7 +8,7 @@ import {
 } from '@/app/(app-shell)/[sport]/[event]/edit/format';
 import { Select } from '@/components/select';
 import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
-import { Button, Divider, JsonInput, Text, TextInput, Tooltip } from '@mantine/core';
+import { Button, Divider, JsonInput, MultiSelect, Text, TextInput, Tooltip } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
@@ -19,7 +19,15 @@ import { type Simplify } from 'type-fest';
 type DSKeys = Pick<Tables<'ds_keys'>, 'name' | 'description' | 'private' | 'public'>;
 type EventData = Pick<
   Tables<'events'>,
-  'name' | 'format' | 'results' | 'starts_at' | 'ends_at' | 'created_at' | 'updated_at' | 'snapshot'
+  | 'name'
+  | 'format'
+  | 'results'
+  | 'starts_at'
+  | 'ends_at'
+  | 'created_at'
+  | 'updated_at'
+  | 'snapshot'
+  | 'timers'
 > &
   (null | {
     ds_keys: DSKeys | null;
@@ -30,11 +38,13 @@ export function EventDataEditForm({
   event,
   eventData,
   dsKeys,
+  timers,
 }: {
   sport: string;
   event: string;
   eventData: Simplify<EventData>;
   dsKeys: DSKeys[] | null;
+  timers: { label: string; value: string }[];
 }) {
   const [formatInput, setFormatInput] = useState(JSON.stringify(eventData.format, null, 2));
   const [state, formAction] = useFormState(updateEvent, { message: null, success: false });
@@ -100,12 +110,23 @@ export function EventDataEditForm({
         <input type="hidden" value={event} name="event" />
 
         <div className="flex items-end gap-4 flex-wrap justify-stretch">
+          <MultiSelect
+            className="grow"
+            disabled={pending}
+            name="timers"
+            label="Timers"
+            searchable
+            nothingFoundMessage="No timers found..."
+            data={timers}
+            defaultValue={(eventData.timers ?? []).map((timer) => timer.toString())}
+          />
           <Select
             className="grow"
             disabled={pending}
             name="ds_keys"
             label="Datastream Keys"
             searchable
+            nothingFoundMessage="No datastreams found..."
             allowDeselect={false}
             value={dsKeyName}
             onChange={(value) => setDsKeyName(value)}
@@ -177,7 +198,7 @@ export function EventDataEditForm({
           Save
         </Button>
       </form>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <Tooltip
           className="whitespace-pre-line"
           label={`Entrants can be written as a list of IDs.

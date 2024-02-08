@@ -5,7 +5,7 @@ import { Json } from '@/lib/db/types';
 import { Alert, Text, Title, TitleOrder } from '@mantine/core';
 import { IconExclamationCircle } from '@tabler/icons-react';
 
-export function ScoringTableFallback({ format, initialResults }: ScoringTableProps) {
+export function ScoringTableFallback({ format }: ScoringTableProps) {
   if (!isValidEventFormat(format, 'ice-skating'))
     return (
       <Alert color="red" icon={<IconExclamationCircle />} title="Invalid format">
@@ -60,7 +60,7 @@ function TieredList({
 
 function isValidEventFormat<S extends Sport>(
   format: Tables<'events'>['format'] | undefined,
-  sport: S
+  sport: S,
 ): format is EventFormat<S> {
   if (sport === 'ice-skating') {
     return !!(
