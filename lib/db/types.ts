@@ -330,6 +330,51 @@ export type Database = {
           }
         ]
       }
+      runs_bouldering: {
+        Row: {
+          active: boolean
+          bloc: number
+          category: number
+          ended_at: number | null
+          id: number
+          started_at: number
+          time_elapsed: number
+          top_at: number | null
+          top_at_provisional: number | null
+          top_override: number | null
+          zone_at: number | null
+          zone_override: number | null
+        }
+        Insert: {
+          active?: boolean
+          bloc: number
+          category: number
+          ended_at?: number | null
+          id?: number
+          started_at: number
+          time_elapsed: number
+          top_at?: number | null
+          top_at_provisional?: number | null
+          top_override?: number | null
+          zone_at?: number | null
+          zone_override?: number | null
+        }
+        Update: {
+          active?: boolean
+          bloc?: number
+          category?: number
+          ended_at?: number | null
+          id?: number
+          started_at?: number
+          time_elapsed?: number
+          top_at?: number | null
+          top_at_provisional?: number | null
+          top_override?: number | null
+          zone_at?: number | null
+          zone_override?: number | null
+        }
+        Relationships: []
+      }
       scorecards: {
         Row: {
           active: boolean

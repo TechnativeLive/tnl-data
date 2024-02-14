@@ -1,3 +1,4 @@
+import { createEntrant } from '@/app/(app-shell)/entrants/actions';
 import { SimpleForm } from '@/components/forms/simple-form';
 import { SubmitButton } from '@/components/forms/submit-button';
 import { PROJECT_ICONS } from '@/components/project-icons';
@@ -64,7 +65,7 @@ async function CreateEntrant() {
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <SimpleForm reset>
+      <SimpleForm action={createEntrant} reset>
         <Select
           className="grow max-w-md mb-lg"
           defaultValue="null"

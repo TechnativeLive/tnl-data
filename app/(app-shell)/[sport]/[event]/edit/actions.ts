@@ -34,7 +34,7 @@ export async function updateEvent(_prevState: FormState, formData: FormData): Pr
   const ends_at = formData.get('ends_at')?.toString() || null;
   const timersString = formData.get('timers')?.toString();
   const timers = timersString ? timersString.split(',').map(toNumOrZero) : null;
-  console.log({ timers, timersString });
+
   if (!format) return { success: false, message: 'No format provided' };
   if (!event) return { success: false, message: 'No event provided' };
 

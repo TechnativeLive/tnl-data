@@ -32,5 +32,13 @@ export function toNumOrNull(maybeNum: unknown): number | null {
   const asNum = Number(maybeNum);
   return Number.isNaN(asNum) ? null : asNum;
 }
+export function toNumOr<F>(maybeNum: unknown, fallback: F): number | F {
+  const asNum = Number(maybeNum);
+  return Number.isNaN(asNum) ? fallback : asNum;
+}
 
 export const cn = clsx;
+
+export function append<T>(value: T, obj: Record<string, T[]>, key: string) {
+  Array.isArray(obj[key]) ? obj[key].push(value) : (obj[key] = [value]);
+}

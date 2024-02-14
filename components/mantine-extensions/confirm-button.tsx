@@ -7,9 +7,9 @@ import { useMemo, useState } from 'react';
 export function ConfirmButton({
   onClick,
   children,
-  confirmColor,
-  confirmVariant,
-  confirmMessage = 'Are you sure?',
+  confirmColor = 'red',
+  confirmVariant = 'filled',
+  confirmMessage = 'Confirm',
   ...props
 }: ButtonProps &
   Omit<

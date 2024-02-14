@@ -58,7 +58,7 @@ export function HeaderSegments() {
   return (
     <div
       className={clsx(
-        'items-center flex-wrap gap-x-2 px-md grow transition-opacity hidden xs:flex',
+        'items-center flex-wrap gap-x-2 sm:px-md grow transition-opacity flex',
         loading ? 'opacity-0' : 'opacity-100',
       )}
     >

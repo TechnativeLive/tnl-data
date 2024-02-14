@@ -4,7 +4,7 @@ import { TimerControlsDuration } from '@/components/timer/duration';
 import { TimerControlsSoundsSettings } from '@/components/timer/sounds-settings';
 import { useTimerControls } from '@/app/(app-shell)/timers/controls';
 import { TimerControlsDatastreamSelection } from '@/components/timer/datastream-selection';
-import { ActionIcon, Text } from '@mantine/core';
+import { ActionIcon, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSettings } from '@tabler/icons-react';
 
@@ -36,9 +36,11 @@ export function TimerControlsSettingsDrawer() {
           </div>
         </div>
       </DrawerAutoHeight>
-      <ActionIcon className="shrink-0" size="lg" onClick={open} c="dimmed">
-        <IconSettings stroke={1.5} />
-      </ActionIcon>
+      <Tooltip label="Settings">
+        <ActionIcon className="shrink-0" size="lg" onClick={open} c="dimmed">
+          <IconSettings stroke={1.5} />
+        </ActionIcon>
+      </Tooltip>
     </>
   );
 }

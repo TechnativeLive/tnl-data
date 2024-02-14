@@ -1,13 +1,17 @@
+'use client';
+
 import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
 import { StackedButton } from '@/components/mantine-extensions/stacked-button';
 import { QueryLink } from '@/components/query-link';
 import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
 import { useUpdateJsonResults } from '@/components/scoring-table-json/use-update-json-results';
-import { useEventTimers } from '@/components/timer/event-timers-context';
+import { createBrowserClient } from '@/lib/db/client';
 import { EventResult } from '@/lib/event-data';
-import { elapsedTime } from '@/lib/timer/utils';
+import { generateLiveDataClimbing } from '@/lib/event-data/climbing';
+import { toNumOr } from '@/lib/utils';
 import {
   Badge,
+  BadgeProps,
   Button,
   ButtonGroup,
   ButtonProps,
@@ -17,31 +21,132 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { SetOptional, SetRequired } from 'type-fest';
 
-function getScoreState(attempt?: EventResult<'climbing'>['result'][number][number]): 0 | 1 | 2 | 3 {
-  if (attempt?.topAt !== undefined || attempt?.endedAt !== undefined) return 0;
-  if (attempt?.topAtProvisional !== undefined) return 3;
-  if (attempt?.zoneAt !== undefined) return 2;
-  if (attempt?.startedAt !== undefined) return 1;
+function getScoreState(attempt?: Tables<'runs_bouldering'>): 0 | 1 | 2 | 3 {
+  if (attempt?.top_at || attempt?.ended_at) return 0;
+  if (attempt?.top_at_provisional) return 3;
+  if (attempt?.zone_at) return 2;
+  if (attempt?.started_at) return 1;
   return 0;
 }
 
-export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
+type RunUpsert<T extends 'update' | 'insert'> = (
+  action: T,
+  run: T extends 'update' ? DbUpdate<'runs_bouldering'> : DbInsert<'runs_bouldering'>,
+  overwrite?: boolean,
+) => void;
+
+type MinorJudgeProps = {
+  category: Tables<'runs_bouldering'>['category'];
+  activeRoundId: string;
+} & Pick<ScoringTableProps<'climbing'>, 'format'>;
+
+export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJudgeProps) {
+  const supabase = createBrowserClient();
+  const [runs, setRuns] = useState<DbInsert<'runs_bouldering'>[]>([]);
+
+  const createRun = useCallback<(run: DbInsert<'runs_bouldering'>) => void>(
+    async (run) => {
+      setRuns((prevRuns) => [run, ...prevRuns]);
+
+      const { error } = await supabase.from('runs_bouldering').insert(run);
+      if (error) {
+        notifications.show({
+          title: 'Error creating run',
+          message: error.message,
+          color: 'red',
+        });
+      }
+    },
+    [supabase, setRuns],
+  );
+
+  const updateRun = useCallback<(run: DbUpdate<'runs_bouldering'>, overwrite?: boolean) => void>(
+    async (run, overwrite = false) => {
+      if (!run.id) {
+        console.warn('Run id is required', run);
+        return;
+      }
+      setRuns((prevRuns) => {
+        const newRuns = [...prevRuns];
+        const index = newRuns.findIndex((r) => r.id === run.id);
+        if (index === -1) {
+          console.warn('Run not found', run);
+          return prevRuns;
+        }
+        newRuns[index] = overwrite
+          ? (run as DbInsert<'runs_bouldering'>)
+          : { ...newRuns[index], ...run };
+        return newRuns;
+      });
+      const { error } = await supabase.from('runs_bouldering').update(run).eq('id', run.id);
+      if (error) {
+        notifications.show({
+          title: 'Error updating run',
+          message: error.message,
+          color: 'red',
+        });
+      }
+      return;
+    },
+    [supabase, setRuns],
+  );
+
+  const deleteRun = useCallback<(id: Tables<'runs_bouldering'>['id']) => void>(
+    async (id) => {
+      setRuns((prevRuns) => prevRuns.filter((r) => r.id !== id));
+
+      const { error } = await supabase.from('runs_bouldering').delete().eq('id', id);
+      if (error) {
+        notifications.show({
+          title: 'Error creating run',
+          message: error.message,
+          color: 'red',
+        });
+      }
+    },
+    [supabase, setRuns],
+  );
+
   const searchParams = useSearchParams();
-  const { results, updateResult } = useUpdateJsonResults(props);
-  const { format } = props;
-  const [timer] = useEventTimers();
+  const judge = searchParams.get('judge');
+  const bloc = toNumOr(judge?.charAt(1), undefined);
 
-  const station = searchParams.get('judge');
-  if (!station) return <div>This page should only be used with a `judge` search param</div>;
+  useEffect(() => {
+    const getRuns = async () => {
+      if (!bloc || !category) return;
+      const { data, error } = await supabase
+        .from('runs_bouldering')
+        .select('*')
+        .filter('category', 'eq', category)
+        .filter('bloc', 'eq', bloc)
+        .order('started_at', { ascending: false });
+      if (error) {
+        notifications.show({
+          title: 'Error fetching data',
+          message: error.message,
+          color: 'red',
+        });
+        return;
+      }
+      setRuns(data);
+    };
+    getRuns();
+  }, [setRuns, category, bloc, supabase]);
 
-  const stationClassId = station.charAt(0) === 'M' ? 'mens' : 'womens';
-  const activeRound = format.rounds.find((round) => round.id === results.active?.round);
+  if (!judge) return <div>This page should only be used with a `judge` search param</div>;
+
+  // const { results, updateResult } = useUpdateJsonResults(props, generateLiveDataClimbing);
+
+  const judgeClassId = judge.charAt(0) === 'M' ? 'mens' : 'womens';
+  const activeRound = format.rounds.find((round) => round.id === activeRoundId);
 
   if (!activeRound)
     return (
@@ -51,51 +156,45 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
       </div>
     );
 
-  const stationClass = activeRound.classes.find((cls) => cls.id === stationClassId);
-  if (!stationClass)
+  const judgeClass = activeRound.classes.find((cls) => cls.id === judgeClassId);
+  if (!judgeClass)
     return (
       <div className="py-8 w-full grid place-content-center justify-items-center gap-4">
-        No class found for Judge {station}
+        No class found for Judge {judge}
       </div>
     );
 
-  const classResults = stationClass ? results[activeRound.id]?.[stationClass.id] : undefined;
-  const position = Number(station.charAt(1));
+  // const classResults = judgeClass ? results[activeRound.id]?.[judgeClass.id] : undefined;
 
   const entrantId = Number(searchParams.get('entrant'));
-  const entrantIndex = stationClass.entrants.findIndex((ent) =>
+  const entrantIndex = judgeClass.entrants.findIndex((ent) =>
     typeof ent === 'number' ? ent === entrantId : ent.id === entrantId,
   );
-  const entrant = stationClass.entrants[entrantIndex > -1 ? entrantIndex : 0];
-  const prevEntrant = entrantIndex > 0 ? stationClass.entrants[entrantIndex - 1] : undefined;
+  const entrant = judgeClass.entrants[entrantIndex > -1 ? entrantIndex : 0];
+  const prevEntrant = entrantIndex > 0 ? judgeClass.entrants[entrantIndex - 1] : undefined;
   const nextEntrant =
-    entrantIndex > -1 && entrantIndex < stationClass.entrants.length - 1
-      ? stationClass.entrants[entrantIndex + 1]
+    entrantIndex > -1 && entrantIndex < judgeClass.entrants.length - 1
+      ? judgeClass.entrants[entrantIndex + 1]
       : undefined;
 
-  const entrantResults = classResults?.[entrant.id]?.result;
-  const blocResults = entrantResults?.[position - 1];
-  const latestAttempt = blocResults?.[blocResults.length - 1];
-
   function handleStart() {
-    const elapsed = elapsedTime(timer);
     if (!activeRound || !entrant) return;
-    const newResults = [...(entrantResults ?? [])];
-    if (!Array.isArray(newResults[position - 1])) newResults[position - 1] = [];
-    const bloc = newResults[position - 1];
+
+    // if (!Array.isArray(newResults[position - 1])) newResults[position - 1] = [];
+    // const bloc = newResults[position - 1];
 
     if (scoreState === 0) {
-      const newAttempt = { startedAt: elapsed };
-      bloc.push(newAttempt);
+      const newAttempt = { started_at: Date.now() };
+      createRun(newAttempt);
     } else {
       // if mid-attempt, wipe the zone/top/ended times but keep the original start time
       const attempt = bloc[bloc.length - 1];
-      bloc[bloc.length - 1] = { startedAt: attempt.startedAt };
+      bloc[bloc.length - 1] = { started_at: attempt.started_at };
     }
 
     updateResult({
       round: activeRound.id,
-      cls: stationClassId,
+      cls: judgeClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -104,21 +203,21 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
 
   function handleZone() {
     if (!activeRound || !entrant || scoreState === 0 || scoreState === 2) return;
-    const elapsed = elapsedTime(timer);
     const newResults = [...(entrantResults ?? [])];
     const bloc = newResults[position - 1];
-    const attempt = bloc[bloc.length - 1];
 
     if (scoreState === 1) {
-      bloc[bloc.length - 1] = { startedAt: attempt.startedAt, zoneAt: elapsed };
+      const attempt = bloc[bloc.length - 1];
+      bloc[bloc.length - 1] = { started_at: attempt.started_at, zone_at: Date.now() };
     } else {
       // scoreState === 3
-      bloc[bloc.length - 1] = { startedAt: attempt.startedAt, zoneAt: attempt.zoneAt };
+      const attempt = bloc[bloc.length - 1];
+      bloc[bloc.length - 1] = { started_at: attempt.started_at, zone_at: attempt.zone_at };
     }
 
     updateResult({
       round: activeRound.id,
-      cls: stationClassId,
+      cls: judgeClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -127,15 +226,14 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
 
   function handleTop() {
     if (!activeRound || !entrant || scoreState !== 2) return;
-    const elapsed = elapsedTime(timer);
     const newResults = [...(entrantResults ?? [])];
     const bloc = newResults[position - 1];
     const attempt = bloc[bloc.length - 1];
 
-    attempt.topAtProvisional = elapsed;
+    attempt.top_at_provisional = Date.now();
     updateResult({
       round: activeRound.id,
-      cls: stationClassId,
+      cls: judgeClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -144,21 +242,18 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
 
   function handleEnd() {
     if (!activeRound || !entrant || scoreState === 0) return;
-    const elapsed = elapsedTime(timer);
     const newResults = [...(entrantResults ?? [])];
     const bloc = newResults[position - 1];
     const attempt = bloc[bloc.length - 1];
 
+    attempt.ended_at = Date.now();
     if (scoreState === 3) {
-      attempt.topAt = attempt.topAtProvisional || elapsed;
-      attempt.endedAt = attempt.topAt;
-    } else {
-      attempt.endedAt = elapsed;
+      attempt.top_at = attempt.top_at_provisional || Date.now();
     }
 
     updateResult({
       round: activeRound.id,
-      cls: stationClassId,
+      cls: judgeClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -173,50 +268,20 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
 
     updateResult({
       round: activeRound.id,
-      cls: stationClassId,
+      cls: judgeClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
     });
   }
 
-  function handleEdit(attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') {
-    if (!activeRound || !entrant || !attemptNumber) return;
-    const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
-    const attempt = bloc[attemptNumber - 1];
-
-    if (target === 'start') {
-      delete bloc[attemptNumber - 1].topAt;
-      delete bloc[attemptNumber - 1].topAtProvisional;
-      delete bloc[attemptNumber - 1].zoneAt;
-    } else if (target === 'zone') {
-      delete bloc[attemptNumber - 1].topAt;
-      delete bloc[attemptNumber - 1].topAtProvisional;
-      bloc[attemptNumber - 1].zoneAt = attempt.zoneAt || attempt.endedAt || elapsedTime(timer);
-    } else if (target === 'top') {
-      const time =
-        attempt.topAt || attempt.topAtProvisional || attempt.endedAt || elapsedTime(timer);
-      bloc[attemptNumber - 1].topAtProvisional = time;
-      bloc[attemptNumber - 1].topAt = time;
-      bloc[attemptNumber - 1].zoneAt = Math.min(attempt.zoneAt ?? time, time);
-    }
-
-    updateResult({
-      round: activeRound.id,
-      cls: stationClassId,
-      id: entrant.id,
-      data: newResults,
-      feedback: `Attempt changed to ${target.toLocaleUpperCase()}`,
-    });
-  }
-
+  const latestAttempt = runs[0];
   const scoreState = getScoreState(latestAttempt);
 
   return (
     <div className="flex flex-col h-full rounded-lg border border-body-dimmed-hover overflow-hidden">
       <div className="px-4 py-2 text-center text-lg tracking-widest uppercase font-bold w-full border-b bg-body-dimmed">
-        {stationClassId} {position}
+        {judgeClassId} {position}
         {entrant && (
           <span>
             {' - '}
@@ -257,7 +322,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
               className="min-w-[6rem] py-2 items-center"
               component={QueryLink}
               query={{ entrant: nextEntrant?.id }}
-              variant={latestAttempt?.topAt ? 'outline' : 'default'}
+              variant={latestAttempt?.top_at ? 'outline' : 'default'}
               color="orange"
               leftSection={<IconChevronLeft className="opacity-0" />}
               rightSection={<IconChevronRight />}
@@ -274,8 +339,8 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mx-4 my-12">
             <ActiveButton
               active={scoreState === 1}
-              hint={scoreState === 0 && !latestAttempt?.topAt}
-              disabled={scoreState === 1 || latestAttempt?.topAt !== undefined}
+              hint={scoreState === 0 && !latestAttempt?.top_at}
+              disabled={scoreState === 1 || !!latestAttempt?.top_at}
               onClick={handleStart}
             >
               Start
@@ -314,13 +379,12 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
           <div className="flex flex-col gap-2 p-4">
             <Divider label="Attempts" mb="sm" />
             <div className="flex flex-col-reverse gap-2">
-              {blocResults?.map((attempt, i) => (
+              {runs?.map((attempt, i) => (
                 <Attempt
                   key={i}
                   attempt={attempt}
                   number={i + 1}
-                  active={i === blocResults.length - 1 && scoreState !== 0}
-                  handleEdit={handleEdit}
+                  active={i === runs.length - 1 && scoreState !== 0}
                   handleDelete={handleDelete}
                 />
               ))}
@@ -362,15 +426,10 @@ function ActiveButton({
   );
 }
 
-type BadgeLabel = 'Started' | 'Zone' | 'Top' | 'Top (Provisional)';
-function getBadge(attempt: EventResult<'climbing'>['result'][number][number]): {
-  label: BadgeLabel;
-  color: string;
-} {
-  if (attempt.topAt !== undefined) return { label: 'Top', color: 'teal' };
-  if (attempt.topAtProvisional !== undefined)
-    return { label: 'Top (Provisional)', color: 'orange' };
-  if (attempt.zoneAt !== undefined) return { label: 'Zone', color: 'blue' };
+function getBadge(attempt: Tables<'runs_bouldering'>) {
+  if (attempt.top_at) return { label: 'Top', color: 'teal' };
+  if (attempt.top_at_provisional) return { label: 'Top (Provisional)', color: 'orange' };
+  if (attempt.zone_at) return { label: 'Zone', color: 'blue' };
   return { label: 'Started', color: 'gray' };
 }
 
@@ -378,24 +437,22 @@ function Attempt({
   attempt,
   number,
   active,
-  handleEdit,
   handleDelete,
 }: {
-  attempt: EventResult<'climbing'>['result'][number][number];
+  attempt: Tables<'runs_bouldering'>;
   number: number;
   active: boolean;
-  handleEdit: (attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') => void;
   handleDelete: (attemptNumber: number) => void;
 }) {
   const [opened, { open, close }] = useDisclosure(false);
   const [editing, setEditing] = useState<number>();
 
+  const score = attempt.top_at ? 'Top' : attempt.zone_at ? 'Zone' : 'No Score';
   const badge = getBadge(attempt);
 
-  const attemptTime =
-    attempt.endedAt !== undefined
-      ? dayjs(attempt.endedAt - attempt.startedAt).format('m:ss')
-      : undefined;
+  const attemptTime = attempt.ended_at
+    ? dayjs(attempt.ended_at - attempt.started_at).format('m:ss')
+    : undefined;
 
   return (
     <>
@@ -403,31 +460,30 @@ function Attempt({
         {/* show no score / zonne / top options for `editing` attempt and update db on click */}
         <ButtonGroup>
           <Button
-            onClick={() => handleEdit(editing, 'start')}
+            onClick={() => console.warn('implement - set score no score')}
             className="flex-grow flex-shrink-0 basis-0"
             size="lg"
-            variant={badge.label === 'Started' ? 'filled' : 'default'}
+            variant={score === 'No Score' ? 'filled' : 'default'}
           >
             No Score
           </Button>
           <Button
-            onClick={() => handleEdit(editing, 'zone')}
+            onClick={() => console.warn('implement - set score zone')}
             className="flex-grow flex-shrink-0 basis-0"
             size="lg"
-            variant={badge.label === 'Zone' ? 'filled' : 'default'}
+            variant={score === 'Zone' ? 'filled' : 'default'}
           >
             Zone
           </Button>
           <Button
-            onClick={() => handleEdit(editing, 'top')}
+            onClick={() => console.warn('implement - set score top')}
             className="flex-grow flex-shrink-0 basis-0"
             size="lg"
-            variant={badge.label === 'Top' ? 'filled' : 'default'}
+            variant={score === 'Top' ? 'filled' : 'default'}
           >
             Top
           </Button>
         </ButtonGroup>
-        {JSON.stringify(attempt, null, 2)}
       </Modal>
       <div
         className={clsx(
@@ -470,7 +526,6 @@ function Attempt({
                 open();
                 setEditing(number);
               }}
-              disabled={active}
             >
               Edit
             </Button>

@@ -9,8 +9,13 @@ import {
 import { useState } from 'react';
 import styles from './scroll-area-with-shadow.module.css';
 
-export function ScrollAreaWithShadow({ children, ...props }: ScrollAreaProps) {
+export function ScrollAreaWithShadow({
+  children,
+  orientation = 'vertical',
+  ...props
+}: ScrollAreaProps & { orientation?: 'vertical' | 'horizontal' }) {
   const [scrollPosition, internalOnScrollPositionChange] = useState({ x: 0, y: 0 });
+  const rootClassNames = [styles.shadowed, styles[orientation]].join(' ');
 
   return (
     <ScrollArea
@@ -19,7 +24,7 @@ export function ScrollAreaWithShadow({ children, ...props }: ScrollAreaProps) {
         internalOnScrollPositionChange(position);
         props.onScrollPositionChange?.(position);
       }}
-      classNames={{ root: styles.shadowed, scrollbar: styles.scrollbar }}
+      classNames={{ root: rootClassNames, scrollbar: styles.scrollbar }}
       data-shadow={scrollPosition.y > 0}
     >
       {children}

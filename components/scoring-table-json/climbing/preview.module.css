@@ -1,0 +1,7 @@
+.control {
+  transition: all 100ms ease;
+}
+
+.control:hover {
+  color: var(--mantine-color-gray-6);
+}

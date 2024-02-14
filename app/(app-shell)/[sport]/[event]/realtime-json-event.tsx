@@ -5,16 +5,15 @@ import { ScoringTableJson } from '@/components/scoring-table-json/scoring-table-
 import { updateOutlineAtom } from '@/components/shell/event-outline';
 import { EventDateClassification, classifyEventByDate } from '@/lib/dates';
 import { createBrowserClient } from '@/lib/db/client';
-import { Sport } from '@/lib/event-data';
-import { getValidators } from '@/lib/json/functions';
-import { formatValidationError } from '@/lib/json/messages';
+import { EventResults, Sport } from '@/lib/event-data';
+import { updateResultsByTimestampInPlace } from '@/lib/json/update-results-by-timestamp';
 import { Title, Button, Text, Loader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconEdit } from '@tabler/icons-react';
 import { useSetAtom } from 'jotai';
 import { Route } from 'next';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 type Data = Omit<Tables<'events'>, 'slug' | 'snapshot' | 'sport' | 'ds_keys' | '_format'> & {
@@ -30,6 +29,7 @@ const eventStatusTextMap: Record<EventDateClassification, string> = {
 
 export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
   const params = useParams<{ sport?: string; event?: string }>();
+  const searchParams = useSearchParams();
   const supabase = createBrowserClient();
   const [event, setEvent] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,6 +71,13 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
               if (e.errors) console.warn('Realtime Event - UPDATE - Error', e.errors);
               return;
             }
+
+            const prevResults = event.results as EventResults<Sport>;
+            const newResults = e.new.results as EventResults<Sport> | undefined;
+            if (newResults) {
+              updateResultsByTimestampInPlace(prevResults, newResults);
+            }
+
             // TODO: validate format / results in tandem - results for entrants no longer in the fomrat should be removed
             const updatedEvent: Data = {
               ds_keys: event.ds_keys,
@@ -78,7 +85,7 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
               // supabase realtime events can skip columns with large data when there are no changes to that data
               // https://github.com/supabase/realtime/issues/223#issuecomment-1022653529
               format: e.new.format || event.format,
-              results: e.new.results || event.results,
+              results: newResults || prevResults,
               ends_at: e.new.ends_at,
               starts_at: e.new.starts_at,
               updated_at: e.new.updated_at,
@@ -100,6 +107,9 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
 
   const eventStatus = classifyEventByDate({ starts_at: event?.starts_at, ends_at: event?.ends_at });
 
+  const judge = searchParams.get('judge');
+  const hideTitle = judge && !!judge.match(/^\w\d$/);
+
   return loading ? (
     <div className="fixed inset-0 flex items-center justify-center">
       <Loader />
@@ -108,21 +118,23 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
     <Debug data={event} label="Event" />
   ) : (
     <>
-      <div className="flex items-center gap-4">
-        <Title size="h3">{event?.name}</Title>
-        <Text size="sm" c="dimmed">
-          {eventStatusTextMap[eventStatus]}
-        </Text>
-        <Button
-          className="ml-auto"
-          component={Link}
-          href={`/${params.sport}/${params.event}/edit` as Route}
-          variant="default"
-          leftSection={<IconEdit size={16} />}
-        >
-          Edit
-        </Button>
-      </div>
+      {hideTitle ? null : (
+        <div className="flex items-center gap-4">
+          <Title size="h3">{event?.name}</Title>
+          <Text size="sm" c="dimmed">
+            {eventStatusTextMap[eventStatus]}
+          </Text>
+          <Button
+            className="ml-auto"
+            component={Link}
+            href={`/${params.sport}/${params.event}/edit` as Route}
+            variant="default"
+            leftSection={<IconEdit size={16} />}
+          >
+            Edit
+          </Button>
+        </div>
+      )}
 
       <ScoringTableJson
         sport={params.sport as Sport}
@@ -130,6 +142,7 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
         formatOptions={event?.format_options}
         results={event?.results}
         dsPrivateKey={event?.ds_keys?.private}
+        timers={event?.timers}
       />
     </>
   );

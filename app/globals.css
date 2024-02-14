@@ -75,3 +75,25 @@ a {
 .mantine-Notification-description {
   white-space: pre-wrap;
 }
+
+@keyframes rotate-border {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+.animate-rotate-border {
+  animation: rotate-border 2.5s infinite linear;
+}
+.rotate-border-gradient {
+  background-image: conic-gradient(
+    from 90deg at 50% 50%,
+    #38d9a9 0deg,
+    /* #e92a67 0deg, */ #38d9a900 115deg,
+    #38d9a900 180deg,
+    #38d9a9 180deg,
+    #38d9a900 295deg
+  );
+}

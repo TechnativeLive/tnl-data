@@ -7,4 +7,6 @@ declare global {
   type Rpc<T extends keyof DB['public']['Functions']> = DB['public']['Functions'][T]['Returns'];
   type RpcArgs<T extends keyof DB['public']['Functions']> = DB['public']['Functions'][T]['Args'];
   type TableNames = keyof DB['public']['Tables'];
+  type DbInsert<T extends keyof DB['public']['Tables']> = DB['public']['Tables'][T]['Insert'];
+  type DbUpdate<T extends keyof DB['public']['Tables']> = DB['public']['Tables'][T]['Update'];
 }

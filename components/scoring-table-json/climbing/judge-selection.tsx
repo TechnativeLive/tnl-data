@@ -6,7 +6,7 @@ export function ClimbingJudgeSelection({ blocCount }: { blocCount: number }) {
   const judges = Array.from({ length: blocCount }, (_, i) => i + 1);
 
   return (
-    <SimpleGrid cols={4}>
+    <SimpleGrid cols={{ base: Math.ceil(blocCount / 2), sm: blocCount }} verticalSpacing="xl">
       <JudgeSelectButton head />
       <Divider className="col-span-full" />
       {judges.map((position) => (

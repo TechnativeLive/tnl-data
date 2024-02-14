@@ -2,13 +2,21 @@ import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
 import { useTimerControls } from '@/app/(app-shell)/timers/controls';
 import { deleteTimer } from '@/lib/timer/actions';
 import { timerPause, timerPlay, timerReset } from '@/lib/timer/utils';
-import { Button, ButtonGroup, MantineSize } from '@mantine/core';
+import { Button, ButtonGroup, ButtonGroupProps, MantineSize } from '@mantine/core';
 
-export function TimerControlsButtons({ size }: { size?: MantineSize }) {
+export function TimerControlsButtons({
+  size,
+  orientation,
+  compact,
+}: {
+  size?: MantineSize;
+  orientation?: ButtonGroupProps['orientation'];
+  compact?: boolean;
+}) {
   const [timer, { setTimer, sync }] = useTimerControls();
 
   return (
-    <ButtonGroup>
+    <ButtonGroup orientation={orientation}>
       <Button
         size={size}
         fullWidth
@@ -30,7 +38,7 @@ export function TimerControlsButtons({ size }: { size?: MantineSize }) {
         }}
         disabled={!timer.isRunning && timer.value === 0}
       >
-        {timer.isRunning ? 'Stop & Reset' : 'Reset'}
+        {timer.isRunning ? (compact ? 'Reset' : 'Stop & Reset') : 'Reset'}
       </Button>
     </ButtonGroup>
   );

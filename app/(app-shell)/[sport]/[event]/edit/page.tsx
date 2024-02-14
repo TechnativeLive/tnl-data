@@ -8,6 +8,7 @@ import { Info } from '@/components/info';
 import { tsReadable } from '@/lib/dates';
 import { day } from '@/lib/dayjs';
 import { createServerClient } from '@/lib/db/server';
+import { Sport } from '@/lib/event-data';
 import { Flex, Paper, Stack, Text } from '@mantine/core';
 
 export default async function EventPage({ params }: { params: { sport: string; event: string } }) {
@@ -85,7 +86,7 @@ export default async function EventPage({ params }: { params: { sport: string; e
         </Paper>
         {data ? (
           <EventDataEditForm
-            sport={params.sport}
+            sport={params.sport as Sport}
             event={params.event}
             eventData={data}
             dsKeys={allDsKeys}

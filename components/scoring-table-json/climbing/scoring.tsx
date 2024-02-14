@@ -4,30 +4,11 @@ import { ClimbingHeadJudge } from '@/components/scoring-table-json/climbing/head
 import { ClimbingJudgeSelection } from '@/components/scoring-table-json/climbing/judge-selection';
 import { ClimbingMinorJudge } from '@/components/scoring-table-json/climbing/minor-judge';
 import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
-import { createBrowserClient } from '@/lib/db/client';
-import { useDidUpdate } from '@mantine/hooks';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { EventTimersProvider } from '@/components/timer/event-timers-context';
+import { useSearchParams } from 'next/navigation';
 
-export function ScoringTableJsonClimbing({
-  format,
-  results: initialResults,
-  dsPrivateKey,
-}: ScoringTableProps<'climbing'>) {
+export function ScoringTableJsonClimbing(props: ScoringTableProps<'climbing'>) {
   const searchParams = useSearchParams();
-
-  const params = useParams();
-  const [results, setResults] = useState(initialResults);
-
-  useDidUpdate(() => {
-    setResults(initialResults);
-  }, [setResults, initialResults, format]);
-
-  const supabase = createBrowserClient();
-  const [loading, setLoading] = useState<
-    false | [string | undefined, string | undefined, number | undefined]
-  >(false);
-
   const station = searchParams.get('judge');
 
   if (!station) {
@@ -35,8 +16,12 @@ export function ScoringTableJsonClimbing({
   }
 
   if (station === 'head') {
-    return <ClimbingHeadJudge />;
+    return <ClimbingHeadJudge {...props} />;
   }
 
-  return <ClimbingMinorJudge station={station} />;
+  return (
+    <EventTimersProvider ids={props.timers}>
+      <ClimbingMinorJudge {...props} />
+    </EventTimersProvider>
+  );
 }

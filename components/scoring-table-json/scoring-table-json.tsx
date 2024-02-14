@@ -3,7 +3,7 @@
 import { ScoringTableJsonClimbing } from '@/components/scoring-table-json/climbing/scoring';
 import { ScoringTableFallback } from '@/components/scoring-table-json/fallback';
 import { ScoringTableJsonIceSkating } from '@/components/scoring-table-json/ice-skating/scoring';
-import { EventFormat, EventResults, Sport } from '@/lib/event-data';
+import { EventFormat, EventFormatOptions, EventResults, Sport } from '@/lib/event-data';
 import { getValidators } from '@/lib/json/functions';
 import { formatValidationError } from '@/lib/json/messages';
 import { notifications } from '@mantine/notifications';
@@ -13,13 +13,15 @@ export type ScoringTablePropsJson = {
   format: Tables<'events'>['format'] | undefined;
   formatOptions: Tables<'events'>['format_options'] | undefined;
   results: Tables<'events'>['results'] | undefined;
+  timers: Tables<'events'>['timers'] | undefined;
   dsPrivateKey?: string;
 };
 
 export type ScoringTableProps<T extends Sport> = {
   format: EventFormat<T>;
-  formatOptions: EventFormat<T>;
+  formatOptions: EventFormatOptions<T>;
   results: EventResults<T>;
+  timers: Tables<'events'>['timers'] | undefined;
   dsPrivateKey: string;
 };
 
@@ -33,6 +35,7 @@ export function ScoringTableJson({
   format,
   formatOptions,
   results,
+  timers,
   dsPrivateKey,
 }: {
   sport: Sport;
@@ -102,6 +105,7 @@ export function ScoringTableJson({
       format={format as any}
       formatOptions={formatOptions as any}
       results={results as any}
+      timers={timers}
       dsPrivateKey={dsPrivateKey!}
     />
   );

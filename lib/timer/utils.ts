@@ -1,6 +1,18 @@
 import { DbTimer } from '@/lib/db/custom';
 import dayjs from 'dayjs';
 
+export function elapsedTime(timer?: DbTimer) {
+  if (!timer) return 0;
+  let runningTime = timer.value;
+  if (timer.isRunning) {
+    const now = Date.now();
+    const currentStint = now - timer.UTC;
+    runningTime += currentStint;
+  }
+
+  return runningTime;
+}
+
 export function displayTime(timer: DbTimer, trailing = false) {
   let runningTime = timer.value;
   if (timer.isRunning) {

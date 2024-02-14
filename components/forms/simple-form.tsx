@@ -1,10 +1,11 @@
 'use client';
 
-import { createEntrant } from '@/app/(app-shell)/entrants/actions';
 import { useDidUpdate } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { useRef } from 'react';
 import { useFormState } from 'react-dom';
+
+const defaultFormState = { message: null, success: false };
 
 export type FormState<T> = {
   message: string | null;
@@ -12,16 +13,23 @@ export type FormState<T> = {
   data?: T;
 };
 
-export function SimpleForm({
+type SimpleFormAction<T> = (_prevState: FormState<T>, formData: FormData) => Promise<FormState<T>>;
+
+export function SimpleForm<T>({
+  action,
   reset,
   children,
   ...formProps
 }: {
+  action: SimpleFormAction<T>;
   reset?: boolean;
   children: React.ReactNode;
-} & React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>) {
+} & Omit<
+  React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>,
+  'action'
+>) {
   const form = useRef<HTMLFormElement>(null);
-  const [state, formAction] = useFormState(createEntrant, { message: null, success: false });
+  const [state, formAction] = useFormState(action, defaultFormState);
 
   useDidUpdate(() => {
     notifications.show({

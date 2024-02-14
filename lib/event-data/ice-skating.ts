@@ -11,6 +11,15 @@ export type EventFormatIceSkating = {
   rounds: { id: string; kind: RoundKind; name: string; classes: RoundClass[] }[];
 };
 
+export const roundKindIceSkatingSelection: { value: RoundKind; label: string }[] = [
+  { value: 'short-prog', label: 'Short Program' },
+  { value: 'free-skate', label: 'Free Skate' },
+  { value: 'free-prog', label: 'Free Program' },
+  { value: 'pattern-dance', label: 'Pattern Dance' },
+  { value: 'rhythm-dance', label: 'Rhythm Dance' },
+  { value: 'free-dance', label: 'Free Dance' },
+];
+
 type RoundKind =
   | 'short-prog'
   | 'free-skate'

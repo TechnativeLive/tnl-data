@@ -6,13 +6,25 @@ import {
   PopulateEntrantsInFormat,
   UpdateEntrantsInFormat,
 } from '@/app/(app-shell)/[sport]/[event]/edit/format';
+import { EventFormatRoundsInput } from '@/app/(app-shell)/[sport]/[event]/edit/format-rounds-input';
 import { Select } from '@/components/select';
+import { EventFormat, Sport } from '@/lib/event-data';
 import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
-import { Button, Divider, JsonInput, MultiSelect, Text, TextInput, Tooltip } from '@mantine/core';
+import {
+  Button,
+  Collapse,
+  Divider,
+  JsonInput,
+  MultiSelect,
+  Text,
+  TextInput,
+  Tooltip,
+} from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
+import { useDisclosure } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { type Simplify } from 'type-fest';
 
@@ -33,14 +45,14 @@ type EventData = Pick<
     ds_keys: DSKeys | null;
   });
 
-export function EventDataEditForm({
+export function EventDataEditForm<S extends Sport>({
   sport,
   event,
   eventData,
   dsKeys,
   timers,
 }: {
-  sport: string;
+  sport: S;
   event: string;
   eventData: Simplify<EventData>;
   dsKeys: DSKeys[] | null;
@@ -57,11 +69,23 @@ export function EventDataEditForm({
   const [dsKeyName, setDsKeyName] = useState(eventData.ds_keys?.name ?? null);
   const selectedDsKey = dsKeys?.find((dsKey) => dsKey.name === dsKeyName);
 
+  const [showFormatJson, { toggle: toggleShowFormatJson }] = useDisclosure();
+
   useFormFeedback(state);
 
   useEffect(() => {
     setFormatInput(JSON.stringify(eventData.format, null, 2));
   }, [eventData.format, setFormatInput]);
+
+  const [rounds, setRounds] = useState((eventData.format as EventFormat<S>).rounds);
+  useEffect(() => {
+    setRounds((eventData.format as EventFormat<S>).rounds);
+  }, [setRounds, eventData.format]);
+
+  const updateFormatRounds = useCallback(
+    (updateRounds: EventFormat<Sport>['rounds']) => setRounds(updateRounds),
+    [setRounds],
+  );
 
   // Show confirmation modal when updating event
   const openDeleteModal = () =>
@@ -179,18 +203,29 @@ export function EventDataEditForm({
           disabled={pending}
         />
 
-        <JsonInput
-          name="format"
-          minRows={1}
-          disabled={pending}
-          autosize
-          formatOnBlur
-          variant={'default'}
-          label="Event Format"
-          validationError="Invalid JSON (use double-quotes, remove trailing commas)"
-          value={formatInput}
-          onChange={setFormatInput}
+        <EventFormatRoundsInput
+          sport={sport}
+          rounds={rounds}
+          updateFormatRounds={updateFormatRounds}
         />
+
+        <Button variant="subtle" fz="sm" fw={500} color="gray" onClick={toggleShowFormatJson}>
+          Format (JSON)
+        </Button>
+        <Collapse in={showFormatJson}>
+          <JsonInput
+            name="format"
+            minRows={1}
+            disabled={pending}
+            autosize
+            formatOnBlur
+            variant={'default'}
+            // label="Event Format"
+            validationError="Invalid JSON (use double-quotes, remove trailing commas)"
+            value={formatInput}
+            onChange={setFormatInput}
+          />
+        </Collapse>
 
         {/* This button is opens a confirmation modal rendered in a portal, 
             so we need to submit the form via requestSubmit instead */}

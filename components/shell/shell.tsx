@@ -59,15 +59,16 @@ export function Shell({
             component={Link}
             href="/"
             fw={700}
-            className="px-md select-none rounded-md shrink-0"
+            className="hidden sm:block px-md select-none rounded-md shrink-0"
           >
             TNL Data
           </Text>
           <Divider orientation="vertical" />
           {!isHeaderSegmentsDisabled && <HeaderSegments />}
-          <Space ml="auto" />
-          <ThemeSwitcher />
-          <QuickProfile name={name} initials={initials} email={email} />
+          <div className="flex items-center gap-4 ml-auto">
+            <ThemeSwitcher />
+            <QuickProfile name={name} initials={initials} email={email} />
+          </div>
         </Group>
       </AppShellHeader>
       {/* <AppShellNavbar p="md">

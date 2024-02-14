@@ -1,20 +1,10 @@
 'use server';
 
+import { FormState } from '@/components/forms/simple-form';
 import { createServerActionClient } from '@/lib/db/server-action';
 import { Json } from '@/lib/db/types';
 import { toNumOrNull } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
-
-type FormState<T> =
-  | {
-      message: string | null;
-      success: false;
-    }
-  | {
-      message: string;
-      success: true;
-      data: T;
-    };
 
 export async function createEntrant(
   _prevState: FormState<Json>,

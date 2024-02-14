@@ -10,7 +10,7 @@ export const StackedButton = createPolymorphicComponent<'button', StackedButtonP
   forwardRef<HTMLButtonElement, StackedButtonProps>(
     ({ className, outerClassName, ...props }, ref) => (
       <Button
-        className={outerClassName}
+        className={clsx(outerClassName, props.disabled && 'pointer-events-none')}
         classNames={{
           root: styles.root,
           label: clsx('flex flex-col', className, !className && 'py-2 justify-center'),

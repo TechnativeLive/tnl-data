@@ -13,6 +13,14 @@ module.exports = {
     //   lg: '0 calc(0.0625rem * var(--mantine-scale)) calc(0.1875rem * var(--mantine-scale)) rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 calc(1.75rem * var(--mantine-scale)) calc(1.4375rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale)), rgba(0, 0, 0, 0.04) 0 calc(0.75rem * var(--mantine-scale)) calc(0.75rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale))',
     //   xl: '0 calc(0.0625rem * var(--mantine-scale)) calc(0.1875rem * var(--mantine-scale)) rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 calc(2.25rem * var(--mantine-scale)) calc(1.75rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale)), rgba(0, 0, 0, 0.04) 0 calc(1.0625rem * var(--mantine-scale)) calc(1.0625rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale))',
     // },
+    screens: {
+      xxs: '30em', // 480px
+      xs: '36em',
+      sm: '48em',
+      md: '62em',
+      lg: '75em',
+      xl: '88em',
+    },
     extend: {
       animationDuration: {
         DEFAULT: '300ms',
@@ -41,14 +49,6 @@ module.exports = {
         lg: '1.25rem',
         xl: '2rem',
       },
-      screens: {
-        xxs: '24em', // '384px',
-        xs: '36em',
-        sm: '48em',
-        md: '62em',
-        lg: '75em',
-        xl: '88em',
-      },
     },
   },
   plugins: [
@@ -65,6 +65,14 @@ module.exports = {
         '.mx-content': {
           marginLeft: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
           marginRight: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
+          // '@media (min-width: 1024px)': {
+          //   marginLeft: 'clamp(1rem, 5vw, 10rem)',
+          //   marginRight: 'clamp(1rem, 5vw, 10rem)',
+          // }
+        },
+        '.-mx-content': {
+          marginLeft: 'calc(0px - clamp(1rem, 10vw - 3.5rem, 16rem))',
+          marginRight: 'calc(0px - clamp(1rem, 10vw - 3.5rem, 16rem))',
           // '@media (min-width: 1024px)': {
           //   marginLeft: 'clamp(1rem, 5vw, 10rem)',
           //   marginRight: 'clamp(1rem, 5vw, 10rem)',

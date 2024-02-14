@@ -1,6 +1,7 @@
 'use client';
 
 import { useDidUpdate } from '@mantine/hooks';
+import clsx from 'clsx';
 import { Route } from 'next';
 import { RouteType } from 'next/dist/lib/load-custom-routes';
 import Link, { LinkProps } from 'next/link';
@@ -10,16 +11,16 @@ import { useState } from 'react';
 type QueryValue = string | number | boolean;
 
 type QueryLinkProps = Omit<LinkProps<RouteType>, 'href'> & {
-  query: Record<string, QueryValue>;
+  query: Record<string, QueryValue | undefined>;
   removeOthers?: boolean;
+  disabled?: boolean;
 };
 
 function createSearchParams(
-  query: Record<string, QueryValue>,
+  query: QueryLinkProps['query'],
   searchParams: ReadonlyURLSearchParams,
   removeOthers = false,
 ) {
-  console.count('createSearchParams');
   const newQuery = new URLSearchParams(searchParams);
   if (removeOthers) {
     newQuery.forEach((_, key) => {
@@ -29,12 +30,16 @@ function createSearchParams(
     });
   }
   for (const [key, value] of Object.entries(query)) {
-    newQuery.set(key, value.toString());
+    if (value) {
+      newQuery.set(key, value.toString());
+    } else {
+      newQuery.delete(key);
+    }
   }
   return newQuery;
 }
 
-export function QueryLink({ query, removeOthers, ...props }: QueryLinkProps) {
+export function QueryLink({ query, removeOthers, disabled, ...props }: QueryLinkProps) {
   const pathname = usePathname();
   const currentSearchParams = useSearchParams();
   const [searchParams, setSearchParams] = useState(() =>
@@ -47,5 +52,15 @@ export function QueryLink({ query, removeOthers, ...props }: QueryLinkProps) {
 
   const href = `${pathname}?${searchParams.toString()}`;
 
-  return <Link href={href as Route} {...props} />;
+  return (
+    <Link
+      href={href as Route}
+      className={clsx(props.className, disabled && 'pointer-events-none')}
+      {...(disabled && {
+        'aria-disabled': true,
+        tabIndex: -1,
+      })}
+      {...props}
+    />
+  );
 }
