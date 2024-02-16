@@ -1,10 +1,10 @@
 import { Debug } from '@/components/debug';
-import { ScoringTablePropsJson } from '@/components/scoring-table-json/scoring-table-json';
+import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
 import { Sport, EventFormat } from '@/lib/event-data';
 import { Json } from '@/lib/db/types';
 import { Title, TitleOrder } from '@mantine/core';
 
-export function ScoringTableFallback({ format }: Partial<ScoringTablePropsJson>) {
+export function ScoringTableFallback({ format }: Partial<ScoringTableProps<Sport>>) {
   return <TieredList data={format} tiers={['rounds', 'classes', 'entrants']} />;
 }
 

@@ -41,6 +41,7 @@ export function useUpdateJsonResults<S extends Sport>(
   liveDataGenerator?: (data: Pick<ScoringTableProps<S>, 'format' | 'results'>) => EventLiveData<S>,
 ) {
   const params = useParams();
+  const eventSlug = params.event;
   const [results, setResults] = useState(initialResults);
   const [liveDataPreview, setLiveDataPreview] = useState<EventLiveData<S> | undefined>(
     liveDataGenerator?.({
@@ -71,6 +72,10 @@ export function useUpdateJsonResults<S extends Sport>(
 
   const updateActive = useCallback<UpdateActiveHelper>(
     ({ round, cls, entrant, message, feedback }) => {
+      if (!eventSlug || typeof eventSlug !== 'string') {
+        console.warn("Can't update active without event slug");
+        return;
+      }
       setResults((current) => {
         const now = Date.now();
         const newResults: EventResults<S> = { ...current };
@@ -94,7 +99,7 @@ export function useUpdateJsonResults<S extends Sport>(
         supabase
           .from('events')
           .update({ results: newResults })
-          .eq('slug', params.event)
+          .eq('slug', eventSlug)
           .then(() => {
             setLoading(false);
             const message =
@@ -117,19 +122,23 @@ export function useUpdateJsonResults<S extends Sport>(
         return newResults;
       });
     },
-    [setResults, setLoading, supabase, params.event, dsPrivateKey, format, liveDataGenerator],
+    [setResults, setLoading, supabase, dsPrivateKey, format, liveDataGenerator, eventSlug],
   );
 
   const updateJudgeActive = useCallback<UpdateJudgeActiveHelper>(
     ({ station, cls, entrant, message, feedback }) => {
+      if (!eventSlug || typeof eventSlug !== 'string') {
+        console.warn("Can't update judge active without event slug");
+        return;
+      }
       setResults((current) => {
         const now = Date.now();
         const newResults: EventResults<S> = { ...current };
         if (!newResults.judgeActive) newResults.judgeActive = {};
         if (!newResults.judgeActive[station]) newResults.judgeActive[station] = { __ts: now };
-        newResults.judgeActive[station].class = cls;
-        newResults.judgeActive[station].entrant = entrant;
-        newResults.judgeActive[station].__ts = now;
+        newResults.judgeActive[station]!.class = cls;
+        newResults.judgeActive[station]!.entrant = entrant;
+        newResults.judgeActive[station]!.__ts = now;
 
         // update datastream
         if (liveDataGenerator) {
@@ -144,7 +153,7 @@ export function useUpdateJsonResults<S extends Sport>(
         supabase
           .from('events')
           .update({ results: newResults })
-          .eq('slug', params.event)
+          .eq('slug', eventSlug)
           .then(() => {
             setLoading(false);
             const message =
@@ -165,11 +174,15 @@ export function useUpdateJsonResults<S extends Sport>(
         return newResults;
       });
     },
-    [setResults, setLoading, supabase, params.event, dsPrivateKey, format, liveDataGenerator],
+    [setResults, setLoading, supabase, eventSlug, dsPrivateKey, format, liveDataGenerator],
   );
 
   const updateResult = useCallback<UpdateResultHelper<S>>(
     ({ round, cls, id, data, status, message, feedback }) => {
+      if (!eventSlug || typeof eventSlug !== 'string') {
+        console.warn("Can't update result without event slug");
+        return;
+      }
       setResults((current) => {
         const newResults = { ...current };
         if (!newResults[round]) newResults[round] = {};
@@ -197,7 +210,7 @@ export function useUpdateJsonResults<S extends Sport>(
         supabase
           .from('events')
           .update({ results: newResults })
-          .eq('slug', params.event)
+          .eq('slug', eventSlug)
           .then(() => {
             setLoading(false);
             if (feedback !== null)
@@ -211,7 +224,7 @@ export function useUpdateJsonResults<S extends Sport>(
         return newResults;
       });
     },
-    [setResults, setLoading, supabase, params.event, dsPrivateKey, format, liveDataGenerator],
+    [setResults, setLoading, supabase, eventSlug, dsPrivateKey, format, liveDataGenerator],
   );
 
   return {

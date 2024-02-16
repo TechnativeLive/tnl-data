@@ -13,7 +13,6 @@ import {
 } from '@/components/scoring-table-json/use-update-json-results';
 import { TimersRealtime } from '@/components/timer/controls/realtime';
 import { createBrowserClient } from '@/lib/db/client';
-import { Json } from '@/lib/db/types';
 import { EventLiveData, EventResult, EventResults, Sport } from '@/lib/event-data';
 import {
   generateLiveDataClimbing,
@@ -247,7 +246,7 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
                 rightSection={<IconArrowDown />}
                 onClick={open}
               >
-                Progress {round.name} to {props.format.rounds[i + 1].name}
+                Progress {round.name} to {props.format.rounds[i + 1]?.name}
               </Button>
             )}
           </Fragment>
@@ -448,7 +447,7 @@ function EventProgressionModalInternals({
 }: Pick<ScoringTableProps<'climbing'>, 'results' | 'format'> & Pick<ModalProps, 'onClose'>) {
   const supabase = createBrowserClient();
   const params = useParams() as { sport: Sport; event: string };
-  const [from, setFrom] = useState<string | null>(format.rounds[0]?.id);
+  const [from, setFrom] = useState<string | null>(format.rounds[0]?.id ?? null);
   const [to, setTo] = useState<string | null>(null);
   const [countInput, setCountInput] = useState<string | number>(6);
   const [reverseOrder, setReverseOrder] = useState(true);

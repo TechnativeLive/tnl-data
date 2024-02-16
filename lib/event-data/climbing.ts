@@ -11,7 +11,7 @@ export type EventResultClimbing = {
 }[][];
 
 export type EventFormatClimbing = {
-  rounds: { id: string; kind: RoundKind; name: string; classes: RoundClass[] }[];
+  rounds: { id: string; kind?: RoundKind; name: string; classes: RoundClass[] }[];
 };
 
 export type EventFormatOptionsClimbing = {

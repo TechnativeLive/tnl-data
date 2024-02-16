@@ -3,12 +3,15 @@
 import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/scroll-area-with-shadow';
 import { RealtimeHeartbeat } from '@/components/realtime-heartbeat';
 import { LiveDataPreviewIceSkating } from '@/components/scoring-table-json/ice-skating/preview';
-import { ScoringTablePropsJson } from '@/components/scoring-table-json/scoring-table-json';
+import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
+import {
+  UpdateActiveHelper,
+  UpdateResultHelper,
+  useUpdateJsonResults,
+} from '@/components/scoring-table-json/use-update-json-results';
 import { updateOutlineAtom } from '@/components/shell/event-outline';
-import { createBrowserClient } from '@/lib/db/client';
-import { Sport, EventFormat, EventResults, EventResult, EventLiveData } from '@/lib/event-data';
+import { EventResult } from '@/lib/event-data';
 import { generateLiveDataIceSkating } from '@/lib/event-data/ice-skating';
-import { updateDatastream } from '@/lib/singular/datastream';
 import {
   Alert,
   Button,
@@ -23,206 +26,26 @@ import {
   Title,
 } from '@mantine/core';
 import { useDidUpdate, useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import {
-  IconChevronsUp,
-  IconCircleCheck,
-  IconExclamationCircle,
-  IconInfoCircle,
-} from '@tabler/icons-react';
+import { IconChevronsUp, IconCircleCheck, IconInfoCircle } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment } from 'react';
 
 type Result = EventResult<'ice-skating'>;
-type Results = EventResults<'ice-skating'>;
 
-type UpdateResultHelper = (
-  round: string,
-  cls: string,
-  id: number,
-  data: Result,
-  message?: string,
-) => void;
-type UpdateActiveHelper = ({
-  round,
-  cls,
-  entrant,
-  message,
-}: {
-  round?: string | undefined;
-  cls?: string | undefined;
-  entrant?: number | undefined;
-  message?: string;
-}) => void;
-
-export function ScoringTableJsonIceSkating({
-  format,
-  results: initialResults,
-  dsPrivateKey,
-}: ScoringTablePropsJson) {
-  const params = useParams();
+export function ScoringTableJsonIceSkating(props: ScoringTableProps<'ice-skating'>) {
   const updateOutline = useSetAtom(updateOutlineAtom);
-  const [results, setResults] = useState(() => validateResults(initialResults));
-  const [liveDataPreview, setLiveDataPreview] = useState<EventLiveData<'ice-skating'>>(
-    generateLiveDataIceSkating({
-      format: format as EventFormat<'ice-skating'>,
-      results,
-    }),
+  const { results, updateActive, updateResult, loading, liveDataPreview } = useUpdateJsonResults(
+    props,
+    generateLiveDataIceSkating,
   );
+
   const [previewOpened, { toggle: togglePreview }] = useDisclosure(false);
-  // Keep results up to date with database changes
-  // Note: this causes unnecessary re-renders. Consider using an atom linked to the realtime event
+
   useDidUpdate(() => {
-    const newResults = validateResults(initialResults);
-    setResults(newResults);
-    setLiveDataPreview(
-      generateLiveDataIceSkating({
-        format: format as EventFormat<'ice-skating'>,
-        results: newResults,
-      }),
-    );
     updateOutline();
-  }, [setResults, validateResults, initialResults, format, setLiveDataPreview, updateOutline]);
-
-  const supabase = createBrowserClient();
-  const [loading, setLoading] = useState<
-    false | [string | undefined, string | undefined, number | undefined]
-  >(false);
-
-  const updateActive = useCallback<UpdateActiveHelper>(
-    ({ round, cls, entrant, message }) => {
-      if (!format || !dsPrivateKey) {
-        notifications.show({
-          color: 'red',
-          title: 'Error',
-          message: `${format ? '' : 'No format provided. '}${
-            dsPrivateKey ? '' : 'No datastream key provided'
-          }`,
-        });
-        return;
-      }
-      setResults((current) => {
-        const newResults = { ...current };
-        newResults.active.round = round;
-        newResults.active.class = cls;
-        newResults.active.entrant = entrant;
-
-        if (!params.event) {
-          notifications.show({
-            color: 'red',
-            title: 'Error',
-            message:
-              'Scoring Table is not in a valid state. Please contact a member of the Technative broadcast team.',
-          });
-        } else {
-          setLoading([round, cls, entrant]);
-          // update datastream
-          const liveData = generateLiveDataIceSkating({
-            format: format as EventFormat<'ice-skating'>,
-            results: newResults,
-          });
-          setLiveDataPreview(liveData);
-          updateDatastream(dsPrivateKey, liveData, message);
-
-          // update db
-          supabase
-            .from('events')
-            .update({ results: newResults })
-            .eq('slug', params.event)
-            .then(() => {
-              setLoading(false);
-              const message = entrant
-                ? 'Active entrant updated'
-                : cls
-                  ? 'Active class updated'
-                  : round
-                    ? 'Active round updated'
-                    : 'Active cleared';
-
-              notifications.show({
-                color: 'teal',
-                icon: <IconCircleCheck />,
-                message,
-              });
-            });
-        }
-
-        return newResults;
-      });
-      updateOutline();
-    },
-    [updateOutline, setResults, setLoading, supabase, params.event, format, dsPrivateKey],
-  );
-
-  const updateResult = useCallback<UpdateResultHelper>(
-    (round, cls, id, data, message) => {
-      if (!format || !dsPrivateKey) {
-        notifications.show({
-          color: 'red',
-          title: 'Error',
-          message: `${format ? '' : 'No format provided. '}${
-            dsPrivateKey ? '' : 'No datastream key provided'
-          }`,
-        });
-        return;
-      }
-
-      setResults((current) => {
-        const newResults = { ...current };
-        if (!newResults[round]) newResults[round] = {};
-        if (!newResults[round]![cls]) newResults[round]![cls] = {};
-        if (!newResults[round]![cls]![id]) newResults[round]![cls]![id] = {} as Result;
-        newResults[round]![cls]![id] = data;
-
-        if (!params.event) {
-          notifications.show({
-            color: 'red',
-            title: 'Error',
-            message:
-              'Scoring Table is not in a valid state. Please contact a member of the Technative broadcast team.',
-          });
-        } else {
-          setLoading([round, cls, id]);
-          // update datastream
-          const liveData = generateLiveDataIceSkating({
-            format: format as EventFormat<'ice-skating'>,
-            results: newResults,
-          });
-          setLiveDataPreview(liveData);
-          updateDatastream(dsPrivateKey, liveData, message);
-
-          // update db
-          supabase
-            .from('events')
-            .update({ results: newResults })
-            .eq('slug', params.event)
-            .then(() => {
-              setLoading(false);
-              notifications.show({
-                color: 'teal',
-                icon: <IconCircleCheck />,
-                message: 'Score submitted',
-              });
-            });
-        }
-
-        return newResults;
-      });
-    },
-    [setResults, setLoading, supabase, params.event, format, dsPrivateKey],
-  );
-
-  if (!isValidEventFormat(format, 'ice-skating'))
-    return (
-      <Alert color="red" icon={<IconExclamationCircle />} title="Invalid format">
-        <Text className="text-sm italic">
-          Please contact a member of the Technative broadcast team
-        </Text>
-      </Alert>
-    );
+  }, [results, updateOutline]);
 
   return (
     <Stack>
@@ -319,8 +142,8 @@ export function ScoringTableJsonIceSkating({
           </ScrollAreaAutosizeWithShadow>
         </Collapse>
       </div>
-      {format.rounds.map((round) => {
-        const isRoundActive = round.id === results.active.round;
+      {props.format.rounds.map((round) => {
+        const isRoundActive = round.id === results.active?.round;
         return (
           <Paper key={round.id} p="sm" mb={52} shadow="sm" className="bg-body-dimmed" withBorder>
             <div className="flex items-center gap-2 px-2 mb-sm group">
@@ -365,7 +188,7 @@ export function ScoringTableJsonIceSkating({
               {round.classes.map((cls) => {
                 const classId = `${round.id}.${cls.id}`;
                 const isClassActive =
-                  round.id === results.active.round && cls.id === results.active.class;
+                  round.id === results.active?.round && cls.id === results.active?.class;
 
                 return (
                   <Paper
@@ -411,7 +234,7 @@ export function ScoringTableJsonIceSkating({
                     <Divider />
                     {cls.entrants.map((entrant, i) => {
                       const row = typeof entrant === 'number' ? { id: entrant } : entrant;
-                      const isRowActive = row.id === results.active.entrant && isClassActive;
+                      const isRowActive = row.id === results.active?.entrant && isClassActive;
                       return (
                         <Fragment key={row.id}>
                           {i > 0 && <Divider />}
@@ -458,7 +281,7 @@ function Entrant({
 }: {
   entrant: Partial<Tables<'entrants'>>;
   initialResult: Result | undefined;
-  updateResults: UpdateResultHelper;
+  updateResults: UpdateResultHelper<'ice-skating'>;
   updateActive: UpdateActiveHelper;
   isActive: boolean;
   roundId: string;
@@ -472,15 +295,24 @@ function Entrant({
       onSubmit={(ev) => {
         ev.preventDefault();
         const formData = new FormData(ev.currentTarget);
-        const result = {
-          tech: Number(formData.get('tech')),
-          pres: Number(formData.get('pres')),
-          ddct: Number(formData.get('ddct')),
+        const result: Result = {
+          result: {
+            tech: Number(formData.get('tech')),
+            pres: Number(formData.get('pres')),
+            ddct: Number(formData.get('ddct')),
+          },
+          __ts: Date.now(),
         };
         const isActiveString = String(formData.get('isActive'));
         const isActiveBool = isActiveString === 'true';
         const message = isActiveString.length > 0 && !isActiveBool ? 'silent' : undefined;
-        updateResults(roundId, classId, entrant.id!, result, message);
+        updateResults({
+          round: roundId,
+          cls: classId,
+          id: entrant.id!,
+          data: result.result,
+          message,
+        });
       }}
     >
       <input type="hidden" name="isActive" value={isActive.toString()} />
@@ -542,8 +374,10 @@ function Entrant({
           name="tech"
           autoComplete="off"
           min={0}
-          defaultValue={initialResult?.tech}
-          placeholder={initialResult?.tech ? initialResult.tech.toString() : undefined}
+          defaultValue={initialResult?.result?.tech}
+          placeholder={
+            initialResult?.result?.tech ? initialResult?.result.tech.toString() : undefined
+          }
         />
         <NumberInput
           label="Presentation"
@@ -551,8 +385,10 @@ function Entrant({
           name="pres"
           autoComplete="off"
           min={0}
-          defaultValue={initialResult?.pres}
-          placeholder={initialResult?.pres ? initialResult.pres.toString() : undefined}
+          defaultValue={initialResult?.result?.pres}
+          placeholder={
+            initialResult?.result?.pres ? initialResult?.result.pres.toString() : undefined
+          }
         />
         <NumberInput
           label="Deductions"
@@ -560,8 +396,10 @@ function Entrant({
           name="ddct"
           autoComplete="off"
           min={0}
-          defaultValue={initialResult?.ddct}
-          placeholder={initialResult?.ddct ? initialResult.ddct.toString() : undefined}
+          defaultValue={initialResult?.result?.ddct}
+          placeholder={
+            initialResult?.result?.ddct ? initialResult?.result.ddct.toString() : undefined
+          }
         />
         <Button
           variant="light"
@@ -576,21 +414,22 @@ function Entrant({
   );
 }
 
-function isValidEventFormat<S extends Sport>(
-  format: Tables<'events'>['format'] | undefined,
-  sport: S,
-): format is EventFormat<S> {
-  return !!(
-    sport === 'ice-skating' &&
-    format &&
-    typeof format === 'object' &&
-    'rounds' in format &&
-    Array.isArray(format.rounds)
-  );
-}
+// function isValidEventFormat<S extends Sport>(
+//   format: Tables<'events'>['format'] | undefined,
+//   sport: S,
+// ): format is EventFormat<S> {
+//   return !!(
+//     sport === 'ice-skating' &&
+//     format &&
+//     typeof format === 'object' &&
+//     'rounds' in format &&
+//     Array.isArray(format.rounds)
+//   );
+// }
 
-function validateResults(results: Tables<'events'>['results'] | undefined): Results {
-  if (!results || typeof results !== 'object' || Array.isArray(results)) return { active: {} };
-  if (!('active' in results)) return { ...results, active: {} };
-  return results as Results;
-}
+// function validateResults(results: Tables<'events'>['results'] | undefined): Results {
+//   const now = Date.now()
+//   if (!results || typeof results !== 'object' || Array.isArray(results)) return { active: {__ts: now} };
+//   if (!('active' in results)) return { ...results, active: {__ts: now} };
+//   return results as Results;
+// }

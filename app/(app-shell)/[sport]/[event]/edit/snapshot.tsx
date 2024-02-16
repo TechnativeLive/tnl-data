@@ -52,7 +52,7 @@ export function PreviousSnapshotModal({ snapshot }: { snapshot?: Json }) {
           <DeleteSnapshotButton snapshot={snapshot} />
         </div>
       </Modal>
-      <Button onClick={open} variant="subtle" color="indigo" h="100%">
+      <Button onClick={open} variant="subtle" color="violet" h="100%">
         <div className="flex flex-col">
           <span>View Snapshot</span>
           <br />

@@ -19,8 +19,8 @@ export function isTied<D extends Record<string, unknown>>(
   criteria: SortCriteria,
 ): boolean {
   for (let i = 0; i < criteria.length; i++) {
-    const aValue = get(a, criteria[i].field);
-    const bValue = get(b, criteria[i].field);
+    const aValue = get(a, criteria[i]!.field);
+    const bValue = get(b, criteria[i]!.field);
 
     if (aValue !== bValue) {
       return false;

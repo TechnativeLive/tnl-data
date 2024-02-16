@@ -183,7 +183,8 @@ async function EntrantList() {
     <Accordion styles={outerAccordionStyles}>
       {Object.entries(sportGroups ?? {})?.map(([sport, entrants]) => {
         const slug = entrants[0]?.sports?.slug;
-        const Icon = slug && slug in PROJECT_ICONS ? PROJECT_ICONS[slug] : IconQuestionMark;
+        const Icon = slug && slug in PROJECT_ICONS ? PROJECT_ICONS[slug]! : IconQuestionMark;
+
         return (
           <AccordionItem value={sport} key={sport}>
             <AccordionControl icon={<Icon />}>{sport}</AccordionControl>

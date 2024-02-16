@@ -123,12 +123,12 @@ function resolveHeaders(headers: OutlineItem[]) {
   // https://github.com/vuejs/vitepress/blob/0761062790b441eccd0d57d51903271f30e713af/src/client/theme-default/composables/outline.ts#L59
   const ret: OutlineItem[] = [];
   outer: for (let i = 0; i < headers.length; i++) {
-    const cur = headers[i];
+    const cur = headers[i]!;
     if (i === 0) {
       ret.push(cur);
     } else {
       for (let j = i - 1; j >= 0; j--) {
-        const prev = headers[j];
+        const prev = headers[j]!;
         if (prev.level < cur.level) {
           (prev.children || (prev.children = [])).push(cur);
           continue outer;
@@ -187,18 +187,18 @@ export function useActiveAnchor(container: React.MutableRefObject<HTMLElement | 
 
     // page top - highlight first one
     if (anchors.length && scrollY === 0) {
-      activateLink(anchors[0].hash);
+      activateLink(anchors[0]!.hash);
       return;
     }
 
     // page bottom - highlight last one
     if (anchors.length && isBottom) {
-      activateLink(anchors[anchors.length - 1].hash);
+      activateLink(anchors[anchors.length - 1]!.hash);
       return;
     }
 
     for (let i = 0; i < anchors.length; i++) {
-      const anchor = anchors[i];
+      const anchor = anchors[i]!;
       const nextAnchor = anchors[i + 1];
 
       const [isActive, hash] = isAnchorActive(i, anchor, nextAnchor);

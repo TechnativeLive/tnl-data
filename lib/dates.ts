@@ -13,23 +13,23 @@ type ClassLabels = [Unknown: string, Current: string, Upcoming: string, Past: st
 const defaultLabels: ClassLabels = ['Unknown', 'Current', 'Upcoming', 'Past'];
 
 export function classifyEventsByDate<
-  E extends { starts_at?: string | null; ends_at?: string | null }
+  E extends { starts_at?: string | null; ends_at?: string | null },
 >(events: E[], labels = defaultLabels) {
   return events.reduce(
     (acc, event) => {
       const classification = classifyEventByDate(event);
       switch (classification) {
         case 'unknown':
-          acc[0].data.push(event);
+          acc[0]!.data.push(event);
           break;
         case 'current':
-          acc[1].data.push(event);
+          acc[1]!.data.push(event);
           break;
         case 'future':
-          acc[2].data.push(event);
+          acc[2]!.data.push(event);
           break;
         case 'past':
-          acc[3].data.push(event);
+          acc[3]!.data.push(event);
           break;
       }
 
@@ -40,13 +40,13 @@ export function classifyEventsByDate<
       { label: labels[1], data: [] as E[] },
       { label: labels[2], data: [] as E[] },
       { label: labels[3], data: [] as E[] },
-    ]
+    ],
   );
 }
 
 export type EventDateClassification = 'unknown' | 'current' | 'future' | 'past';
 export function classifyEventByDate<
-  E extends { starts_at?: string | null; ends_at?: string | null }
+  E extends { starts_at?: string | null; ends_at?: string | null },
 >(event: E): EventDateClassification {
   if (!event.starts_at) {
     return 'unknown';

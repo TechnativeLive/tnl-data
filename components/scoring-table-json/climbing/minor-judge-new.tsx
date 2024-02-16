@@ -83,7 +83,7 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
         }
         newRuns[index] = overwrite
           ? (run as DbInsert<'runs_bouldering'>)
-          : { ...newRuns[index], ...run };
+          : { ...newRuns[index]!, ...run };
         return newRuns;
       });
       const { error } = await supabase.from('runs_bouldering').update(run).eq('id', run.id);
@@ -177,111 +177,111 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
       ? judgeClass.entrants[entrantIndex + 1]
       : undefined;
 
-  function handleStart() {
-    if (!activeRound || !entrant) return;
+  // function handleStart() {
+  //   if (!activeRound || !entrant) return;
 
-    // if (!Array.isArray(newResults[position - 1])) newResults[position - 1] = [];
-    // const bloc = newResults[position - 1];
+  //   // if (!Array.isArray(newResults[position - 1])) newResults[position - 1] = [];
+  //   // const bloc = newResults[position - 1];
 
-    if (scoreState === 0) {
-      const newAttempt = { started_at: Date.now() };
-      createRun(newAttempt);
-    } else {
-      // if mid-attempt, wipe the zone/top/ended times but keep the original start time
-      const attempt = bloc[bloc.length - 1];
-      bloc[bloc.length - 1] = { started_at: attempt.started_at };
-    }
+  //   if (scoreState === 0) {
+  //     const newAttempt = { started_at: Date.now() };
+  //     createRun(newAttempt);
+  //   } else {
+  //     // if mid-attempt, wipe the zone/top/ended times but keep the original start time
+  //     const attempt = bloc[bloc.length - 1];
+  //     bloc[bloc.length - 1] = { started_at: attempt.started_at };
+  //   }
 
-    updateResult({
-      round: activeRound.id,
-      cls: judgeClassId,
-      id: entrant.id,
-      data: newResults,
-      feedback: null,
-    });
-  }
+  //   updateResult({
+  //     round: activeRound.id,
+  //     cls: judgeClassId,
+  //     id: entrant.id,
+  //     data: newResults,
+  //     feedback: null,
+  //   });
+  // }
 
-  function handleZone() {
-    if (!activeRound || !entrant || scoreState === 0 || scoreState === 2) return;
-    const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
+  // function handleZone() {
+  //   if (!activeRound || !entrant || scoreState === 0 || scoreState === 2) return;
+  //   const newResults = [...(entrantResults ?? [])];
+  //   const bloc = newResults[position - 1];
 
-    if (scoreState === 1) {
-      const attempt = bloc[bloc.length - 1];
-      bloc[bloc.length - 1] = { started_at: attempt.started_at, zone_at: Date.now() };
-    } else {
-      // scoreState === 3
-      const attempt = bloc[bloc.length - 1];
-      bloc[bloc.length - 1] = { started_at: attempt.started_at, zone_at: attempt.zone_at };
-    }
+  //   if (scoreState === 1) {
+  //     const attempt = bloc[bloc.length - 1];
+  //     bloc[bloc.length - 1] = { started_at: attempt.started_at, zone_at: Date.now() };
+  //   } else {
+  //     // scoreState === 3
+  //     const attempt = bloc[bloc.length - 1];
+  //     bloc[bloc.length - 1] = { started_at: attempt.started_at, zone_at: attempt.zone_at };
+  //   }
 
-    updateResult({
-      round: activeRound.id,
-      cls: judgeClassId,
-      id: entrant.id,
-      data: newResults,
-      feedback: null,
-    });
-  }
+  //   updateResult({
+  //     round: activeRound.id,
+  //     cls: judgeClassId,
+  //     id: entrant.id,
+  //     data: newResults,
+  //     feedback: null,
+  //   });
+  // }
 
-  function handleTop() {
-    if (!activeRound || !entrant || scoreState !== 2) return;
-    const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
-    const attempt = bloc[bloc.length - 1];
+  // function handleTop() {
+  //   if (!activeRound || !entrant || scoreState !== 2) return;
+  //   const newResults = [...(entrantResults ?? [])];
+  //   const bloc = newResults[position - 1];
+  //   const attempt = bloc[bloc.length - 1];
 
-    attempt.top_at_provisional = Date.now();
-    updateResult({
-      round: activeRound.id,
-      cls: judgeClassId,
-      id: entrant.id,
-      data: newResults,
-      feedback: null,
-    });
-  }
+  //   attempt.top_at_provisional = Date.now();
+  //   updateResult({
+  //     round: activeRound.id,
+  //     cls: judgeClassId,
+  //     id: entrant.id,
+  //     data: newResults,
+  //     feedback: null,
+  //   });
+  // }
 
-  function handleEnd() {
-    if (!activeRound || !entrant || scoreState === 0) return;
-    const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
-    const attempt = bloc[bloc.length - 1];
+  // function handleEnd() {
+  //   if (!activeRound || !entrant || scoreState === 0) return;
+  //   const newResults = [...(entrantResults ?? [])];
+  //   const bloc = newResults[position - 1];
+  //   const attempt = bloc[bloc.length - 1];
 
-    attempt.ended_at = Date.now();
-    if (scoreState === 3) {
-      attempt.top_at = attempt.top_at_provisional || Date.now();
-    }
+  //   attempt.ended_at = Date.now();
+  //   if (scoreState === 3) {
+  //     attempt.top_at = attempt.top_at_provisional || Date.now();
+  //   }
 
-    updateResult({
-      round: activeRound.id,
-      cls: judgeClassId,
-      id: entrant.id,
-      data: newResults,
-      feedback: null,
-    });
-  }
+  //   updateResult({
+  //     round: activeRound.id,
+  //     cls: judgeClassId,
+  //     id: entrant.id,
+  //     data: newResults,
+  //     feedback: null,
+  //   });
+  // }
 
-  function handleDelete(attemptNumber: number) {
-    if (!activeRound || !entrant) return;
-    const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
-    bloc.splice(attemptNumber - 1, 1);
+  // function handleDelete(attemptNumber: number) {
+  //   if (!activeRound || !entrant) return;
+  //   const newResults = [...(entrantResults ?? [])];
+  //   const bloc = newResults[position - 1];
+  //   bloc.splice(attemptNumber - 1, 1);
 
-    updateResult({
-      round: activeRound.id,
-      cls: judgeClassId,
-      id: entrant.id,
-      data: newResults,
-      feedback: null,
-    });
-  }
+  //   updateResult({
+  //     round: activeRound.id,
+  //     cls: judgeClassId,
+  //     id: entrant.id,
+  //     data: newResults,
+  //     feedback: null,
+  //   });
+  // }
 
   const latestAttempt = runs[0];
-  const scoreState = getScoreState(latestAttempt);
+  // const scoreState = getScoreState(latestAttempt);
 
   return (
     <div className="flex flex-col h-full rounded-lg border border-body-dimmed-hover overflow-hidden">
       <div className="px-4 py-2 text-center text-lg tracking-widest uppercase font-bold w-full border-b bg-body-dimmed">
-        {judgeClassId} {position}
+        {judgeClassId}
         {entrant && (
           <span>
             {' - '}
@@ -336,7 +336,7 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
             </StackedButton>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mx-4 my-12">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mx-4 my-12">
             <ActiveButton
               active={scoreState === 1}
               hint={scoreState === 0 && !latestAttempt?.top_at}
@@ -374,11 +374,11 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
             >
               {scoreState === 3 ? 'Confirm' : 'End'}
             </ActiveButton>
-          </div>
+          </div> */}
 
           <div className="flex flex-col gap-2 p-4">
             <Divider label="Attempts" mb="sm" />
-            <div className="flex flex-col-reverse gap-2">
+            {/* <div className="flex flex-col-reverse gap-2">
               {runs?.map((attempt, i) => (
                 <Attempt
                   key={i}
@@ -388,7 +388,7 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
                   handleDelete={handleDelete}
                 />
               ))}
-            </div>
+            </div> */}
           </div>
         </>
       )}

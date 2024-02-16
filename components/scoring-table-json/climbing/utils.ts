@@ -16,6 +16,7 @@ export function getBlocScores(
 
   for (let i = 0; i < result.length; i++) {
     const bloc = result[i];
+    if (!bloc) continue;
     scores.climbing ||= bloc.startedAt !== undefined && bloc.endedAt === undefined;
     scores.topProvisional ||= bloc.topAtProvisional !== undefined ? i + 1 : 0;
     scores.top ||= bloc.topAt !== undefined ? i + 1 : 0;

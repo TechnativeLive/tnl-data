@@ -5,7 +5,7 @@ import { ScoringTableJson } from '@/components/scoring-table-json/scoring-table-
 import { updateOutlineAtom } from '@/components/shell/event-outline';
 import { EventDateClassification, classifyEventByDate } from '@/lib/dates';
 import { createBrowserClient } from '@/lib/db/client';
-import { EventResults, Sport } from '@/lib/event-data';
+import { EventFormat, EventFormatOptions, EventResults, Sport } from '@/lib/event-data';
 import { updateResultsByTimestampInPlace } from '@/lib/json/update-results-by-timestamp';
 import { Title, Button, Text, Loader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -138,10 +138,10 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
 
       <ScoringTableJson
         sport={params.sport as Sport}
-        format={event?.format}
-        formatOptions={event?.format_options}
-        results={event?.results}
-        dsPrivateKey={event?.ds_keys?.private}
+        format={event?.format as EventFormat<Sport>}
+        formatOptions={event?.format_options as EventFormatOptions<Sport>}
+        results={event?.results as EventResults<Sport>}
+        dsPrivateKey={event?.ds_keys?.private!}
         timers={event?.timers}
       />
     </>

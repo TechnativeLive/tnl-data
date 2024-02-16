@@ -30,7 +30,7 @@ const Components = {
   'ice-skating': ScoringTableJsonIceSkating,
 };
 
-export function ScoringTableJson({
+export function ScoringTableJson<S extends Sport>({
   sport,
   format,
   formatOptions,
@@ -38,8 +38,8 @@ export function ScoringTableJson({
   timers,
   dsPrivateKey,
 }: {
-  sport: Sport;
-} & ScoringTablePropsJson) {
+  sport: S;
+} & ScoringTableProps<S>) {
   // validate format
   useEffect(() => {
     const validators = getValidators(sport);
@@ -97,16 +97,17 @@ export function ScoringTableJson({
     }
   }, [dsPrivateKey]);
 
-  const Component = Components[sport] || ScoringTableFallback;
+  const Component = (Components[sport] || ScoringTableFallback) as (
+    props: ScoringTableProps<S>,
+  ) => JSX.Element;
 
-  // cast as any due to validation occurring above
   return (
     <Component
-      format={format as any}
-      formatOptions={formatOptions as any}
-      results={results as any}
+      format={format as EventFormat<S>}
+      formatOptions={formatOptions as EventFormatOptions<S>}
+      results={results as EventResults<S>}
       timers={timers}
-      dsPrivateKey={dsPrivateKey!}
+      dsPrivateKey={dsPrivateKey}
     />
   );
 }

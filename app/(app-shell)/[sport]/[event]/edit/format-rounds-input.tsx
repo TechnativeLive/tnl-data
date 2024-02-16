@@ -38,7 +38,7 @@ export function EventFormatRoundsInput<S extends Sport>({
   const [nameInput, setNameInput] = useInputState(editingRound?.name ?? 'Default Round Name');
   const [idInput, setIdInput] = useInputState(editingRound?.id ?? 'default-round-id');
   const [kindInput, setKindInput] = useInputState<EventFormat<S>['rounds'][number]['kind']>(
-    editingRound?.kind ?? roundKindSelection[sport][0].value,
+    editingRound?.kind ?? roundKindSelection[sport]?.[0]?.value,
   );
 
   return (
@@ -90,7 +90,8 @@ export function EventFormatRoundsInput<S extends Sport>({
                   classes: [newClass],
                 });
               } else {
-                newRounds[editRoundIndex].classes.push(newClass);
+                if (newRounds[editRoundIndex]?.classes)
+                  newRounds[editRoundIndex]!.classes.push(newClass);
               }
               updateFormatRounds(newRounds as EventFormat<S>['rounds']);
             }}

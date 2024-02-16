@@ -9,7 +9,8 @@ import { tsReadable } from '@/lib/dates';
 import { day } from '@/lib/dayjs';
 import { createServerClient } from '@/lib/db/server';
 import { Sport } from '@/lib/event-data';
-import { Flex, Paper, Stack, Text } from '@mantine/core';
+import { Flex, Loader, Paper, Stack, Text } from '@mantine/core';
+import { Suspense } from 'react';
 
 export default async function EventPage({ params }: { params: { sport: string; event: string } }) {
   const supabase = createServerClient();
@@ -42,48 +43,51 @@ export default async function EventPage({ params }: { params: { sport: string; e
           py="sm"
           className="bg-body-dimmed gap-4 items-center justify-between"
         >
-          <div className="flex gap-4 flex-wrap justify-center">
-            {data?.created_at && (
-              <div className="flex flex-col">
-                <Text size="sm" c="dimmed">
-                  Created At
-                </Text>
-                <Text size="sm">{tsReadable.format(createdAtDate)}</Text>
-                <Text size="sm">{day.fromNow(createdAtDate)}</Text>
-              </div>
-            )}
-            {data?.updated_at && (
-              <div className="flex flex-col">
-                <Text size="sm" c="dimmed">
-                  Updated At
-                </Text>
-                <Text size="sm">{tsReadable.format(updatedAtDate)}</Text>
-                <Text size="sm">{day.fromNow(updatedAtDate)}</Text>
-              </div>
-            )}
-          </div>
-          <div className="flex gap-4 flex-wrap justify-center items-stretch">
-            {data?.snapshot ? (
-              <div>
-                <PreviousSnapshotModal snapshot={data?.snapshot} />
-              </div>
-            ) : null}
-            <div className="flex flex-col gap-2">
-              <TakeSnapshotButton
-                hasSnapshot={!!data?.snapshot}
-                event={params.event}
-                sport={params.sport}
-                format={data?.format}
-                results={data?.results}
-              />
-              <RestoreFromSnapshotButton
-                event={params.event}
-                sport={params.sport}
-                snapshot={data?.snapshot}
-              />
+          <Suspense fallback={<Loader />}>
+            <div className="flex gap-4 flex-wrap justify-center">
+              {data?.created_at && (
+                <div className="flex flex-col">
+                  <Text size="sm" c="dimmed">
+                    Created At
+                  </Text>
+                  <Text size="sm">{tsReadable.format(createdAtDate)}</Text>
+                  <Text size="sm">{day.fromNow(createdAtDate)}</Text>
+                </div>
+              )}
+              {data?.updated_at && (
+                <div className="flex flex-col">
+                  <Text size="sm" c="dimmed">
+                    Updated At
+                  </Text>
+                  <Text size="sm">{tsReadable.format(updatedAtDate)}</Text>
+                  <Text size="sm">{day.fromNow(updatedAtDate)}</Text>
+                </div>
+              )}
             </div>
-          </div>
+            <div className="flex gap-4 flex-wrap justify-center items-stretch">
+              {data?.snapshot ? (
+                <div>
+                  <PreviousSnapshotModal snapshot={data?.snapshot} />
+                </div>
+              ) : null}
+              <div className="flex flex-col gap-2">
+                <TakeSnapshotButton
+                  hasSnapshot={!!data?.snapshot}
+                  event={params.event}
+                  sport={params.sport}
+                  format={data?.format}
+                  results={data?.results}
+                />
+                <RestoreFromSnapshotButton
+                  event={params.event}
+                  sport={params.sport}
+                  snapshot={data?.snapshot}
+                />
+              </div>
+            </div>
+          </Suspense>
         </Paper>
+
         {data ? (
           <EventDataEditForm
             sport={params.sport as Sport}

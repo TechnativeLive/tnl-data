@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "tsc": "tsc",
     "typia": "typia generate --input lib/json/templates --output lib/json/generated --project tsconfig.json",
     "gen:types": "supabase gen types typescript --project-id dinxiwhaebootclzzzmr > lib/db/types.ts"
   },

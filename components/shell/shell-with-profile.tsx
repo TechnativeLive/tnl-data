@@ -18,7 +18,7 @@ export async function ShellWithProfile({ children }: { children: React.ReactNode
 
   const definedNameParts = [user?.first_name, user?.last_name].filter(Boolean);
   const name = definedNameParts.join(' ');
-  const initials = definedNameParts.map((name) => name.charAt(0)).join('') ?? '?';
+  const initials = definedNameParts.map((name) => name?.charAt(0)).join('') ?? '?';
 
   return (
     <Shell name={name} email={session?.user.email} initials={initials}>

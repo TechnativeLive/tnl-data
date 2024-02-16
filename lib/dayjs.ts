@@ -1,33 +1,30 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-const test = dayjs(new Date());
+let hasExtended = false;
+function extendDayJs() {
+  if (hasExtended) return;
+  dayjs.extend(relativeTime);
+  hasExtended = true;
+}
 
 type DateValue = string | number | Date | dayjs.Dayjs | null | undefined;
 
 export const day = {
   to: (dateString: DateValue, futureDateString: DateValue) => {
-    if (!test.to) {
-      dayjs.extend(relativeTime);
-    }
+    extendDayJs();
     return dayjs(futureDateString).to(dateString);
   },
   from: (date: DateValue, pastDate: DateValue) => {
-    if (!test.from) {
-      dayjs.extend(relativeTime);
-    }
+    extendDayJs();
     return dayjs(pastDate).from(date);
   },
   toNow: (futureDateString: DateValue) => {
-    if (!test.toNow) {
-      dayjs.extend(relativeTime);
-    }
+    extendDayJs();
     return dayjs(futureDateString).toNow();
   },
   fromNow: (pastDateString: DateValue) => {
-    if (!test.toNow) {
-      dayjs.extend(relativeTime);
-    }
+    extendDayJs();
     return dayjs(pastDateString).fromNow();
   },
 };

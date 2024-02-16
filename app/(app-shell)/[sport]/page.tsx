@@ -18,7 +18,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Fragment, Suspense } from 'react';
 
-type EventGroups = { label: string; data: Tables<'events'>[] }[];
+type EventGroup = { label: string; data: Tables<'events'>[] };
 
 export const dynamic = 'force-dynamic';
 
@@ -172,7 +172,7 @@ function startDateReducer(array: Tables<'events'>[]) {
       { label: 'Active', data: [] },
       { label: 'Upcoming', data: [] },
       { label: 'Past', data: [] },
-    ] as EventGroups,
+    ] as [EventGroup, EventGroup, EventGroup, EventGroup],
   );
 }
 

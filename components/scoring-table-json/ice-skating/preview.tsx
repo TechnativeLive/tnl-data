@@ -12,13 +12,13 @@ import {
 import { Fragment } from 'react';
 import styles from './preview.module.css';
 
-export function LiveDataPreviewIceSkating(liveData: EventLiveData<'ice-skating'>) {
-  return (
+export function LiveDataPreviewIceSkating(props: Partial<EventLiveData<'ice-skating'>>) {
+  return props.active && props.message && props.results && props.startlist ? (
     <Accordion multiple variant="contained" defaultValue={['active', 'results']}>
-      <ActiveAndStartlistPreview active={liveData.active} startlist={liveData.startlist} />
-      <ResultsPreview segment={liveData.results.segment} overall={liveData.results.overall} />
+      <ActiveAndStartlistPreview active={props.active} startlist={props.startlist} />
+      <ResultsPreview segment={props.results.segment} overall={props.results.overall} />
     </Accordion>
-  );
+  ) : null;
 }
 
 type RowPreview<T> = {
@@ -108,7 +108,7 @@ function PreviewGrid({ rows, data }: { rows: RowPreview<any>[]; data?: any[] }) 
               </Text>
             </Fragment>
           );
-        })
+        }),
       )}
     </div>
   );

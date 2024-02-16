@@ -22,7 +22,7 @@ export default async function HomePage() {
 
   const dataGroupedBySport = data?.reduce(
     (acc, event) => {
-      event.sport in acc ? acc[event.sport].push(event) : (acc[event.sport] = [event]);
+      event.sport in acc ? acc[event.sport]!.push(event) : (acc[event.sport] = [event]);
       return acc;
     },
     {} as Record<string, NonNullable<typeof data>>,
@@ -33,7 +33,7 @@ export default async function HomePage() {
     Object.entries(dataGroupedBySport).map(([sport, statData]) => {
       const classification = classifyEventsByDate(statData);
       const stat: SportStatProp = {
-        label: statData[0].sports?.name || 'Unknown',
+        label: statData[0]?.sports?.name || 'Unknown',
         slug: sport,
         count: statData.length,
         events: classification.map((c) => ({ label: c.label, count: c.data.length })),

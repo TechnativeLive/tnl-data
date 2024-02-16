@@ -7,7 +7,7 @@ export function sort<Datum extends Record<string, unknown>>(
   criteria: SortCriteria,
 ): Datum[] {
   if (criteria.length === 0) return data;
-  const [firstPass, firstPassTies] = splitAndSort(data, criteria[0]);
+  const [firstPass, firstPassTies] = splitAndSort(data, criteria[0]!);
   return breakTies(firstPass, criteria.slice(1), firstPassTies);
 }
 
@@ -26,7 +26,7 @@ function breakTies<Datum extends Record<string, unknown>>(
     for (const tieGroup of ties) {
       const [sorted, furtherTies] = splitAndSort(
         data.slice(tieGroup[0], tieGroup[1] + 1),
-        criteria[i],
+        criteria[i]!,
       );
       tiesToBreak = furtherTies;
       if (sorted.length !== tieGroup[1] - tieGroup[0] + 1) {

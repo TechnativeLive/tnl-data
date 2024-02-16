@@ -10,7 +10,7 @@ export function getRanks<Datum extends Record<string, unknown>>(
   let assignableRanks: number[] = [];
 
   for (let i = 0; i < data.length - 1; i++) {
-    tiedRanks.push(isTied(data[i], data[i + 1], criteria));
+    tiedRanks.push(isTied(data[i]!, data[i + 1]!, criteria));
   }
   tiedRanks.push(false); // don't forget about our last person, we care even though no one else does.
 
@@ -53,7 +53,7 @@ export function getRanks<Datum extends Record<string, unknown>>(
           rank = avg;
         } else if (tiedRanks[i - 1]) {
           // this is the last element of a tied group
-          rank = assignableRanks[i - 1];
+          rank = assignableRanks[i - 1]!;
           avg = undefined;
         }
         // if the element is not tied with any other, fallback to default ranking
@@ -67,7 +67,7 @@ export function getRanks<Datum extends Record<string, unknown>>(
       for (let i = 1; i < tiedRanks.length; i++) {
         rank = i + 1;
         if (tiedRanks[i - 1]) {
-          rank = assignableRanks[i - 1];
+          rank = assignableRanks[i - 1]!;
         }
         assignableRanks.push(rank);
       }
