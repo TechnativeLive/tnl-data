@@ -23,6 +23,23 @@ function fallthrough(
   };
 }
 
+export const getParsers = (sport: LiteralUnion<Sport, string>) => {
+  switch (sport) {
+    case 'climbing':
+      return {
+        results: results.parseResultsClimbing,
+        format: format.parseFormatClimbing,
+      };
+    case 'ice-skating':
+      return {
+        results: results.parseResultsIceSkating,
+        format: format.parseFormatIceSkating,
+      };
+    default:
+      return fallthrough(sport);
+  }
+};
+
 export const getValidators = (sport?: LiteralUnion<Sport, string>) => {
   switch (sport) {
     case 'climbing':

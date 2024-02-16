@@ -1,10 +1,12 @@
 'use server';
 
-import { EventFormat } from '@/lib/event-data';
+import { EventFormat, Sport } from '@/lib/event-data';
 import { createServerActionClient } from '@/lib/db/server-action';
 import { Json } from '@/lib/db/types';
 import { isObject, toNumOrZero } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
+import error from 'next/error';
+import { getValidators } from '@/lib/json/functions';
 
 type FormState = {
   message: string | null;
@@ -24,8 +26,8 @@ type FormState = {
  */
 export async function updateEvent(_prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = createServerActionClient();
-  const sport = formData.get('sport');
-  const event = formData.get('event');
+  const sport = String(formData.get('sport'));
+  const event = String(formData.get('event'));
 
   const name = formData.get('name')?.toString();
   const format = formData.get('format')?.toString();
@@ -37,9 +39,21 @@ export async function updateEvent(_prevState: FormState, formData: FormData): Pr
 
   if (!format) return { success: false, message: 'No format provided' };
   if (!event) return { success: false, message: 'No event provided' };
+  if (!sport) return { success: false, message: 'No sport provided' };
 
   try {
     const validFormat = JSON.parse(format) as Json;
+    const validator = getValidators(sport).format;
+
+    const { success, errors } = validator(validFormat);
+    if (!success) {
+      console.log(errors);
+      return {
+        success: false,
+        message: `Invalid format: ${errors.map((error) => `@ ${error.path}, got ${error.value} instead of ${error.expected}`).join('\n')}`,
+      };
+    }
+
     const { data, error } = await supabase
       .from('events')
       .update({ format: validFormat, starts_at, ends_at, name, ds_keys, timers })
@@ -175,219 +189,6 @@ export async function deleteSnapshot(
 
     revalidateEventPages({ event, sport });
     return { success: true, message: 'Snapshot deleted' };
-  } catch (e) {
-    return {
-      success: false,
-      message: e instanceof Error ? e.message : 'Unknown error occurred',
-    };
-  }
-}
-
-// TODO: uses saved event data, not local state of format
-export async function populateFormatEntrants(
-  _prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const supabase = createServerActionClient();
-  const format = formData.get('format')?.toString();
-  const event = formData.get('event');
-  const sport = formData.get('sport');
-
-  if (!format) return { success: false, message: 'No format provided' };
-  if (!event) return { success: false, message: 'No event provided' };
-
-  try {
-    const validFormat = JSON.parse(format) as Partial<EventFormat<'ice-skating'>>;
-    const entrantIds = validFormat?.rounds
-      ?.flatMap((round) => round?.classes?.map((cls) => cls?.entrants))
-      .flat()
-      .filter((entrant) => typeof entrant === 'number') as number[] | undefined;
-
-    if (!entrantIds) {
-      return { success: false, message: 'Unexpected structure of format' };
-    }
-
-    if (entrantIds.length === 0) {
-      return { success: true, message: 'All entrants were already populated' };
-    }
-
-    const uniqueIds = [...new Set(entrantIds)];
-
-    const entrants = await supabase
-      .from('entrants')
-      .select('id, dob, first_name, last_name, nick_name, country, data')
-      .in('id', uniqueIds);
-
-    const entrantMap = entrants.data?.reduce(
-      (acc, entrant) => {
-        acc[entrant.id] = entrant;
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
-
-    if (!entrantMap) {
-      return { success: false, message: 'No entrants found' };
-    }
-
-    const populatedRounds = validFormat?.rounds?.map((round) => ({
-      ...round,
-      classes: round.classes.map((cls) => ({
-        ...cls,
-        entrants: cls.entrants.map((entrant) =>
-          typeof entrant === 'number' ? entrantMap[entrant] : entrant,
-        ),
-      })),
-    }));
-    const populatedFormat = { ...validFormat, rounds: populatedRounds };
-
-    const { data, error } = await supabase
-      .from('events')
-      .update({ format: populatedFormat })
-      .eq('slug', event)
-      .select('format')
-      .single();
-
-    if (error) {
-      return { success: false, message: error.message };
-    }
-
-    revalidateEventPages({ event, sport });
-    return { success: true, message: 'Event updated', data };
-  } catch (e) {
-    return {
-      success: false,
-      message: e instanceof Error ? e.message : 'Unknown error occurred',
-    };
-  }
-}
-
-export async function updateFormatEntrants(
-  _prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const supabase = createServerActionClient();
-  const format = formData.get('format')?.toString();
-  const event = formData.get('event');
-  const sport = formData.get('sport');
-
-  if (!format) return { success: false, message: 'No format provided' };
-  if (!event) return { success: false, message: 'No event provided' };
-
-  try {
-    const validFormat = JSON.parse(format) as Partial<EventFormat<'ice-skating'>>;
-    const entrantIds = validFormat?.rounds
-      ?.flatMap((round) => round?.classes?.map((cls) => cls?.entrants))
-      .flat()
-      .map((entrant) => (typeof entrant === 'number' ? entrant : entrant?.id));
-
-    if (!entrantIds) {
-      return { success: false, message: 'Unexpected structure of format' };
-    }
-
-    if (entrantIds.length === 0) {
-      return { success: true, message: 'All entrants were already populated' };
-    }
-
-    const uniqueIds = [...new Set(entrantIds)];
-
-    const entrants = await supabase
-      .from('entrants')
-      .select('id, dob, first_name, last_name, nick_name, country, data')
-      .in('id', uniqueIds);
-
-    const entrantMap = entrants.data?.reduce(
-      (acc, entrant) => {
-        acc[entrant.id] = entrant;
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
-
-    if (!entrantMap) {
-      return { success: false, message: 'No entrants found' };
-    }
-
-    const updatedRounds = validFormat?.rounds?.map((round) => ({
-      ...round,
-      classes: round.classes.map((cls) => ({
-        ...cls,
-        entrants: cls.entrants.map((entrant) =>
-          typeof entrant === 'number' ? entrantMap[entrant] : entrant,
-        ),
-      })),
-    }));
-    const updatedFormat = { ...validFormat, rounds: updatedRounds };
-
-    const { data, error } = await supabase
-      .from('events')
-      .update({ format: updatedFormat })
-      .eq('slug', event)
-      .select('format')
-      .single();
-
-    if (error) {
-      return { success: false, message: error.message };
-    }
-
-    revalidateEventPages({ event, sport });
-    return { success: true, message: 'Event updated', data };
-  } catch (e) {
-    return {
-      success: false,
-      message: e instanceof Error ? e.message : 'Unknown error occurred',
-    };
-  }
-}
-
-export async function depopulateFormatEntrants(
-  _prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const supabase = createServerActionClient();
-  const format = formData.get('format')?.toString();
-  const event = formData.get('event');
-  const sport = formData.get('sport');
-
-  if (!format) return { success: false, message: 'No format provided' };
-  if (!event) return { success: false, message: 'No event provided' };
-
-  try {
-    const validFormat = JSON.parse(format) as Partial<EventFormat<'ice-skating'>>;
-
-    const depopulatedRounds = validFormat?.rounds?.map((round) => ({
-      ...round,
-      classes: round?.classes?.map((cls) => ({
-        ...cls,
-        entrants: cls.entrants.map((entrant) =>
-          typeof entrant === 'object' ? entrant.id : entrant,
-        ),
-      })),
-    }));
-
-    if (!depopulatedRounds) {
-      return { success: false, message: 'Unexpected structure of format' };
-    }
-
-    if (depopulatedRounds.length === 0) {
-      return { success: true, message: 'All entrants were already depopulated' };
-    }
-
-    const depopulatedFormat = { ...validFormat, rounds: depopulatedRounds };
-
-    const { data, error } = await supabase
-      .from('events')
-      .update({ format: depopulatedFormat })
-      .eq('slug', event)
-      .select('format')
-      .single();
-
-    if (error) {
-      return { success: false, message: error.message };
-    }
-
-    revalidateEventPages({ event, sport });
-    return { success: true, message: 'Event updated', data };
   } catch (e) {
     return {
       success: false,

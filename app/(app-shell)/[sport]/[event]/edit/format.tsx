@@ -1,108 +1,66 @@
+'use client';
+
 import {
   depopulateFormatEntrants,
   populateFormatEntrants,
   updateFormatEntrants,
-} from '@/app/(app-shell)/[sport]/[event]/edit/actions';
-import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
+} from '@/app/(app-shell)/[sport]/[event]/edit/utils';
 import { Button } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { IconDatabaseMinus, IconDatabasePlus, IconRefreshDot } from '@tabler/icons-react';
-import { forwardRef } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { forwardRef, useState } from 'react';
 
 type Params = { sport: string; event: string };
+type FormatUtilsProps = Params & {
+  format?: string;
+  setFormat: React.Dispatch<React.SetStateAction<string>>;
+  method: 'populate' | 'update' | 'depopulate';
+};
 
-export const PopulateEntrantsInFormat = forwardRef<
-  HTMLFormElement,
-  Partial<Pick<Tables<'events'>, 'format'>> & Params
->(({ event, format, sport }, ref) => {
-  const [state, formAction] = useFormState(populateFormatEntrants, {
-    message: null,
-    success: false,
-  });
-  const { pending } = useFormStatus();
+const methods = {
+  populate: populateFormatEntrants,
+  update: updateFormatEntrants,
+  depopulate: depopulateFormatEntrants,
+} satisfies Record<FormatUtilsProps['method'], unknown>;
+const icons = {
+  populate: IconDatabasePlus,
+  update: IconRefreshDot,
+  depopulate: IconDatabaseMinus,
+} satisfies Record<FormatUtilsProps['method'], unknown>;
 
-  useFormFeedback(state);
+export const FormatUtilsButton = forwardRef<HTMLButtonElement, FormatUtilsProps>(
+  ({ method, setFormat, ...props }, ref) => {
+    const [loading, setLoading] = useState(false);
+    const Icon = icons[method];
 
-  return (
-    <form action={formAction} ref={ref}>
-      <input type="hidden" name="event" value={event} />
-      <input type="hidden" name="sport" value={sport} />
-      <input type="hidden" name="format" value={JSON.stringify(format)} />
+    return (
       <Button
+        ref={ref}
         fullWidth
         color="blue"
         variant="light"
-        loading={pending}
+        loading={loading}
+        onClick={async () => {
+          setLoading(true);
+          const { success, message, data } = await methods[method](props);
+          setLoading(false);
+          if (!success) {
+            notifications.show({
+              title: 'Error',
+              color: 'red',
+              message,
+            });
+            return;
+          }
+          setFormat(data);
+        }}
         type="submit"
-        leftSection={<IconDatabasePlus size={16} />}
+        leftSection={<Icon size={16} />}
       >
-        Populate Entrants
+        {method.charAt(0).toLocaleUpperCase()}
+        {method.slice(1)} Entrants
       </Button>
-    </form>
-  );
-});
-PopulateEntrantsInFormat.displayName = 'PopulateEntrantsInFormat';
-
-export const UpdateEntrantsInFormat = forwardRef<
-  HTMLFormElement,
-  Partial<Pick<Tables<'events'>, 'format'>> & Params
->(({ event, format, sport }, ref) => {
-  const [state, formAction] = useFormState(updateFormatEntrants, {
-    message: null,
-    success: false,
-  });
-  const { pending } = useFormStatus();
-
-  useFormFeedback(state);
-
-  return (
-    <form action={formAction} ref={ref}>
-      <input type="hidden" name="event" value={event} />
-      <input type="hidden" name="sport" value={sport} />
-      <input type="hidden" name="format" value={JSON.stringify(format)} />
-      <Button
-        fullWidth
-        color="blue"
-        variant="light"
-        loading={pending}
-        type="submit"
-        leftSection={<IconRefreshDot size={16} />}
-      >
-        Update All Entrants
-      </Button>
-    </form>
-  );
-});
-UpdateEntrantsInFormat.displayName = 'UpdateEntrantsInFormat';
-
-export const DepopulateEntrantsInFormat = forwardRef<
-  HTMLFormElement,
-  Partial<Pick<Tables<'events'>, 'format'>> & Params
->(({ event, format, sport }, ref) => {
-  const [state, formAction] = useFormState(depopulateFormatEntrants, {
-    message: null,
-    success: false,
-  });
-  const { pending } = useFormStatus();
-
-  useFormFeedback(state);
-
-  return (
-    <form action={formAction} ref={ref}>
-      <input type="hidden" name="event" value={event} />
-      <input type="hidden" name="sport" value={sport} />
-      <input type="hidden" name="format" value={JSON.stringify(format)} />
-      <Button
-        fullWidth
-        color="orange"
-        variant="light"
-        loading={pending}
-        type="submit"
-        leftSection={<IconDatabaseMinus size={16} />}
-      >
-        Depopulate Entrants
-      </Button>
-    </form>
-  );
-});
-DepopulateEntrantsInFormat.displayName = 'DepopulateEntrantsInFormat';
+    );
+  },
+);
+FormatUtilsButton.displayName = 'FormatUtilsButton';

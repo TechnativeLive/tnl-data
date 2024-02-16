@@ -1,11 +1,7 @@
 'use client';
 
 import { updateEvent } from '@/app/(app-shell)/[sport]/[event]/edit/actions';
-import {
-  DepopulateEntrantsInFormat,
-  PopulateEntrantsInFormat,
-  UpdateEntrantsInFormat,
-} from '@/app/(app-shell)/[sport]/[event]/edit/format';
+import { FormatUtilsButton } from '@/app/(app-shell)/[sport]/[event]/edit/format';
 import { EventFormatRoundsInput } from '@/app/(app-shell)/[sport]/[event]/edit/format-rounds-input';
 import { Select } from '@/components/select';
 import { EventFormat, Sport } from '@/lib/event-data';
@@ -87,6 +83,8 @@ export function EventDataEditForm<S extends Sport>({
     [setRounds],
   );
 
+  const isDirty = JSON.stringify(eventData.format, null, 2) !== formatInput;
+
   // Show confirmation modal when updating event
   const openDeleteModal = () =>
     modals.openConfirmModal({
@@ -125,7 +123,13 @@ export function EventDataEditForm<S extends Sport>({
       <form action={formAction} className="flex flex-col gap-4" ref={formRef}>
         {/* This button is opens a confirmation modal rendered in a portal, 
             so we need to submit the form via requestSubmit instead */}
-        <Button onClick={openDeleteModal} disabled={pending} fullWidth variant="light" mb="xs">
+        <Button
+          onClick={openDeleteModal}
+          disabled={pending}
+          fullWidth
+          variant={isDirty ? 'filled' : 'light'}
+          mb="xs"
+        >
           Save
         </Button>
         {/* Used by action to revalidate specific paths, falls back to revalidating root */}
@@ -229,7 +233,13 @@ export function EventDataEditForm<S extends Sport>({
 
         {/* This button is opens a confirmation modal rendered in a portal, 
             so we need to submit the form via requestSubmit instead */}
-        <Button onClick={openDeleteModal} disabled={pending} fullWidth variant="light" mb="xs">
+        <Button
+          onClick={openDeleteModal}
+          disabled={pending}
+          fullWidth
+          variant={isDirty ? 'filled' : 'light'}
+          mb="xs"
+        >
           Save
         </Button>
       </form>
@@ -240,15 +250,33 @@ export function EventDataEditForm<S extends Sport>({
         This will replace each ID with the lastest data.
         Existing entrants will not be altered.`}
         >
-          <PopulateEntrantsInFormat sport={sport} event={event} format={eventData.format} />
+          <FormatUtilsButton
+            method="populate"
+            sport={sport}
+            event={event}
+            format={formatInput}
+            setFormat={setFormatInput}
+          />
         </Tooltip>
 
         <Tooltip label="This will update all entrants with the latest data available">
-          <UpdateEntrantsInFormat sport={sport} event={event} format={eventData.format} />
+          <FormatUtilsButton
+            method="update"
+            sport={sport}
+            event={event}
+            format={formatInput}
+            setFormat={setFormatInput}
+          />
         </Tooltip>
 
         <Tooltip label="Entrants will be changed to a list of IDs">
-          <DepopulateEntrantsInFormat sport={sport} event={event} format={eventData.format} />
+          <FormatUtilsButton
+            method="depopulate"
+            sport={sport}
+            event={event}
+            format={formatInput}
+            setFormat={setFormatInput}
+          />
         </Tooltip>
 
         {/* TODO: Add prune results - remove any rounds/classes that no longer exist in the format */}

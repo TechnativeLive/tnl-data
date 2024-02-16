@@ -7,6 +7,9 @@ export const isFormatIceSkating = typia.createIs<EventFormat<'ice-skating'>>();
 export const validateFormatClimbing = typia.createValidate<EventFormat<'climbing'>>();
 export const validateFormatIceSkating = typia.createValidate<EventFormat<'ice-skating'>>();
 
+export const parseFormatClimbing = typia.json.createIsParse<EventFormat<'climbing'>>();
+export const parseFormatIceSkating = typia.json.createIsParse<EventFormat<'ice-skating'>>();
+
 // format options
 
 export const isFormatOptionsClimbing = typia.createIs<EventFormatOptions<'climbing'>>();

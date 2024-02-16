@@ -2,13 +2,13 @@ import { EventFormat, EventFormatOptions } from '@/lib/event-data';
 import typia from 'typia';
 export const isFormatClimbing = (input: any): input is EventFormat<'climbing'> => {
     const $io0 = (input: any): boolean => Array.isArray(input.rounds) && input.rounds.every((elem: any) => "object" === typeof elem && null !== elem && $io1(elem));
-    const $io1 = (input: any): boolean => "string" === typeof input.id && ("qualifying" === input.kind || "semifinal" === input.kind || "final" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
+    const $io1 = (input: any): boolean => "string" === typeof input.id && (undefined === input.kind || "qualifying" === input.kind || "semifinal" === input.kind || "final" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
     const $io2 = (input: any): boolean => "string" === typeof input.id && "string" === typeof input.name && (undefined === input.active || "boolean" === typeof input.active) && Array.isArray(input.entrants);
     return "object" === typeof input && null !== input && $io0(input);
 };
 export const isFormatIceSkating = (input: any): input is EventFormat<'ice-skating'> => {
     const $io0 = (input: any): boolean => Array.isArray(input.rounds) && input.rounds.every((elem: any) => "object" === typeof elem && null !== elem && $io1(elem));
-    const $io1 = (input: any): boolean => "string" === typeof input.id && ("short-prog" === input.kind || "free-skate" === input.kind || "free-prog" === input.kind || "pattern-dance" === input.kind || "rhythm-dance" === input.kind || "free-dance" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
+    const $io1 = (input: any): boolean => "string" === typeof input.id && (undefined === input.kind || "short-prog" === input.kind || "free-skate" === input.kind || "free-prog" === input.kind || "pattern-dance" === input.kind || "rhythm-dance" === input.kind || "free-dance" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
     const $io2 = (input: any): boolean => "string" === typeof input.id && "string" === typeof input.name && (undefined === input.active || "boolean" === typeof input.active) && Array.isArray(input.entrants);
     return "object" === typeof input && null !== input && $io0(input);
 };
@@ -16,7 +16,7 @@ export const validateFormatClimbing = (input: any): typia.IValidation<EventForma
     const errors = [] as any[];
     const __is = (input: any): input is EventFormat<'climbing'> => {
         const $io0 = (input: any): boolean => Array.isArray(input.rounds) && input.rounds.every((elem: any) => "object" === typeof elem && null !== elem && $io1(elem));
-        const $io1 = (input: any): boolean => "string" === typeof input.id && ("qualifying" === input.kind || "semifinal" === input.kind || "final" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
+        const $io1 = (input: any): boolean => "string" === typeof input.id && (undefined === input.kind || "qualifying" === input.kind || "semifinal" === input.kind || "final" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
         const $io2 = (input: any): boolean => "string" === typeof input.id && "string" === typeof input.name && (undefined === input.active || "boolean" === typeof input.active) && Array.isArray(input.entrants);
         return "object" === typeof input && null !== input && $io0(input);
     };
@@ -44,9 +44,9 @@ export const validateFormatClimbing = (input: any): typia.IValidation<EventForma
                     path: _path + ".id",
                     expected: "string",
                     value: input.id
-                }), "qualifying" === input.kind || "semifinal" === input.kind || "final" === input.kind || $report(_exceptionable, {
+                }), undefined === input.kind || "qualifying" === input.kind || "semifinal" === input.kind || "final" === input.kind || $report(_exceptionable, {
                     path: _path + ".kind",
-                    expected: "(\"final\" | \"qualifying\" | \"semifinal\")",
+                    expected: "(\"final\" | \"qualifying\" | \"semifinal\" | undefined)",
                     value: input.kind
                 }), "string" === typeof input.name || $report(_exceptionable, {
                     path: _path + ".name",
@@ -108,7 +108,7 @@ export const validateFormatIceSkating = (input: any): typia.IValidation<EventFor
     const errors = [] as any[];
     const __is = (input: any): input is EventFormat<'ice-skating'> => {
         const $io0 = (input: any): boolean => Array.isArray(input.rounds) && input.rounds.every((elem: any) => "object" === typeof elem && null !== elem && $io1(elem));
-        const $io1 = (input: any): boolean => "string" === typeof input.id && ("short-prog" === input.kind || "free-skate" === input.kind || "free-prog" === input.kind || "pattern-dance" === input.kind || "rhythm-dance" === input.kind || "free-dance" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
+        const $io1 = (input: any): boolean => "string" === typeof input.id && (undefined === input.kind || "short-prog" === input.kind || "free-skate" === input.kind || "free-prog" === input.kind || "pattern-dance" === input.kind || "rhythm-dance" === input.kind || "free-dance" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
         const $io2 = (input: any): boolean => "string" === typeof input.id && "string" === typeof input.name && (undefined === input.active || "boolean" === typeof input.active) && Array.isArray(input.entrants);
         return "object" === typeof input && null !== input && $io0(input);
     };
@@ -136,9 +136,9 @@ export const validateFormatIceSkating = (input: any): typia.IValidation<EventFor
                     path: _path + ".id",
                     expected: "string",
                     value: input.id
-                }), "short-prog" === input.kind || "free-skate" === input.kind || "free-prog" === input.kind || "pattern-dance" === input.kind || "rhythm-dance" === input.kind || "free-dance" === input.kind || $report(_exceptionable, {
+                }), undefined === input.kind || "short-prog" === input.kind || "free-skate" === input.kind || "free-prog" === input.kind || "pattern-dance" === input.kind || "rhythm-dance" === input.kind || "free-dance" === input.kind || $report(_exceptionable, {
                     path: _path + ".kind",
-                    expected: "(\"free-dance\" | \"free-prog\" | \"free-skate\" | \"pattern-dance\" | \"rhythm-dance\" | \"short-prog\")",
+                    expected: "(\"free-dance\" | \"free-prog\" | \"free-skate\" | \"pattern-dance\" | \"rhythm-dance\" | \"short-prog\" | undefined)",
                     value: input.kind
                 }), "string" === typeof input.name || $report(_exceptionable, {
                     path: _path + ".name",
@@ -196,6 +196,18 @@ export const validateFormatIceSkating = (input: any): typia.IValidation<EventFor
         data: success ? input : undefined
     } as any;
 };
+export const parseFormatClimbing = (input: any): typia.Primitive<EventFormat<'climbing'>> => { const is = (input: any): input is EventFormat<'climbing'> => {
+    const $io0 = (input: any): boolean => Array.isArray(input.rounds) && input.rounds.every((elem: any) => "object" === typeof elem && null !== elem && $io1(elem));
+    const $io1 = (input: any): boolean => "string" === typeof input.id && (undefined === input.kind || "qualifying" === input.kind || "semifinal" === input.kind || "final" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
+    const $io2 = (input: any): boolean => "string" === typeof input.id && "string" === typeof input.name && (undefined === input.active || "boolean" === typeof input.active) && Array.isArray(input.entrants);
+    return "object" === typeof input && null !== input && $io0(input);
+}; input = JSON.parse(input); return is(input) ? input as any : null; };
+export const parseFormatIceSkating = (input: any): typia.Primitive<EventFormat<'ice-skating'>> => { const is = (input: any): input is EventFormat<'ice-skating'> => {
+    const $io0 = (input: any): boolean => Array.isArray(input.rounds) && input.rounds.every((elem: any) => "object" === typeof elem && null !== elem && $io1(elem));
+    const $io1 = (input: any): boolean => "string" === typeof input.id && (undefined === input.kind || "short-prog" === input.kind || "free-skate" === input.kind || "free-prog" === input.kind || "pattern-dance" === input.kind || "rhythm-dance" === input.kind || "free-dance" === input.kind) && "string" === typeof input.name && (Array.isArray(input.classes) && input.classes.every((elem: any) => "object" === typeof elem && null !== elem && $io2(elem)));
+    const $io2 = (input: any): boolean => "string" === typeof input.id && "string" === typeof input.name && (undefined === input.active || "boolean" === typeof input.active) && Array.isArray(input.entrants);
+    return "object" === typeof input && null !== input && $io0(input);
+}; input = JSON.parse(input); return is(input) ? input as any : null; };
 // format options
 export const isFormatOptionsClimbing = (input: any): input is EventFormatOptions<'climbing'> => {
     return "object" === typeof input && null !== input && "number" === typeof (input as any).blocCount;

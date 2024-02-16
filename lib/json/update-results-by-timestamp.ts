@@ -12,7 +12,7 @@ export function updateResultsByTimestampInPlace(
     }
 
     if (roundKey === 'active') {
-      if (prevResults.active.__ts > newResults.active.__ts) {
+      if ((prevResults.active?.__ts || 0) > (newResults.active?.__ts || 0)) {
         newResults.active = prevResults.active;
       }
       continue;
@@ -27,12 +27,12 @@ export function updateResultsByTimestampInPlace(
       ];
       for (const judgeKey of allJudgeKeys) {
         if (!newJudgeActive[judgeKey]) {
-          newJudgeActive[judgeKey] = prevJudgeActive[judgeKey];
+          newJudgeActive[judgeKey] = prevJudgeActive[judgeKey]!;
         } else if (!prevJudgeActive[judgeKey]) {
           continue;
         } else {
-          if (prevJudgeActive[judgeKey].__ts > newJudgeActive[judgeKey].__ts) {
-            newJudgeActive[judgeKey] = prevJudgeActive[judgeKey];
+          if ((prevJudgeActive[judgeKey]?.__ts || 0) > (newJudgeActive[judgeKey]?.__ts || 0)) {
+            newJudgeActive[judgeKey] = prevJudgeActive[judgeKey]!;
           }
         }
       }

@@ -69,11 +69,9 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   const classResults = stationClass ? results[activeRound.id]?.[stationClass.id] : undefined;
   const position = Number(station.charAt(1));
 
-  const entrantId = toNumOr(searchParams.get('entrant'), undefined);
-  const entrantIndex = entrantId
-    ? stationClass.entrants.findIndex((ent) => ent.id === entrantId)
-    : 0;
-  const entrant = stationClass.entrants[entrantIndex > -1 ? entrantIndex : 0];
+  // const entrantId = toNumOr(searchParams.get('entrant'), undefined);
+  const entrantIndex = toNumOr(searchParams.get('entrant'), 1) - 1;
+  const entrant = stationClass.entrants[entrantIndex >= 0 ? entrantIndex : 0];
   if (!entrant) {
     return (
       <div className="py-8 w-full grid place-content-center justify-items-center gap-4">
@@ -98,7 +96,8 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     if (!activeRound || !entrant) return;
     const newResults = [...(entrantResults ?? [])];
     if (!Array.isArray(newResults[position - 1])) newResults[position - 1] = [];
-    const bloc = newResults[position - 1];
+    if (!newResults[position - 1]) newResults[position - 1] = [];
+    const bloc = newResults[position - 1]!;
 
     if (scoreState === 0) {
       const newAttempt = { startedAt: elapsed };
@@ -106,7 +105,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     } else {
       // if mid-attempt, wipe the zone/top/ended times but keep the original start time
       const attempt = bloc[bloc.length - 1];
-      bloc[bloc.length - 1] = { startedAt: attempt.startedAt };
+      bloc[bloc.length - 1] = { startedAt: attempt?.startedAt || Date.now() };
     }
 
     updateResult({
@@ -122,8 +121,14 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     if (!activeRound || !entrant || scoreState === 0 || scoreState === 2) return;
     const elapsed = elapsedTime(timer);
     const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
+    if (!newResults[position - 1]) newResults[position - 1] = [];
+    const bloc = newResults[position - 1]!;
     const attempt = bloc[bloc.length - 1];
+
+    if (!attempt) {
+      console.warn('No attempt found');
+      return;
+    }
 
     if (scoreState === 1) {
       bloc[bloc.length - 1] = { startedAt: attempt.startedAt, zoneAt: elapsed };
@@ -145,10 +150,17 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     if (!activeRound || !entrant || scoreState !== 2) return;
     const elapsed = elapsedTime(timer);
     const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
+    if (!newResults[position - 1]) newResults[position - 1] = [];
+    const bloc = newResults[position - 1]!;
     const attempt = bloc[bloc.length - 1];
 
+    if (!attempt) {
+      console.warn('No attempt found');
+      return;
+    }
+
     attempt.topAtProvisional = elapsed;
+
     updateResult({
       round: activeRound.id,
       cls: stationClassId,
@@ -162,9 +174,14 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     if (!activeRound || !entrant || scoreState === 0) return;
     const elapsed = elapsedTime(timer);
     const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
+    if (!newResults[position - 1]) newResults[position - 1] = [];
+    const bloc = newResults[position - 1]!;
     const attempt = bloc[bloc.length - 1];
 
+    if (!attempt) {
+      console.warn('No attempt found');
+      return;
+    }
     if (scoreState === 3) {
       attempt.topAt = attempt.topAtProvisional || elapsed;
       attempt.endedAt = attempt.topAt;
@@ -184,7 +201,8 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   function handleDelete(attemptNumber: number) {
     if (!activeRound || !entrant) return;
     const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
+    if (!newResults[position - 1]) newResults[position - 1] = [];
+    const bloc = newResults[position - 1]!;
     bloc.splice(attemptNumber - 1, 1);
 
     updateResult({
@@ -199,23 +217,29 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   function handleEdit(attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') {
     if (!activeRound || !entrant || !attemptNumber) return;
     const newResults = [...(entrantResults ?? [])];
-    const bloc = newResults[position - 1];
+    if (!newResults[position - 1]) newResults[position - 1] = [];
+    const bloc = newResults[position - 1]!;
     const attempt = bloc[attemptNumber - 1];
 
+    if (!attempt) {
+      console.warn('No attempt found');
+      return;
+    }
+
     if (target === 'start') {
-      delete bloc[attemptNumber - 1].topAt;
-      delete bloc[attemptNumber - 1].topAtProvisional;
-      delete bloc[attemptNumber - 1].zoneAt;
+      delete bloc[attemptNumber - 1]!.topAt;
+      delete bloc[attemptNumber - 1]!.topAtProvisional;
+      delete bloc[attemptNumber - 1]!.zoneAt;
     } else if (target === 'zone') {
-      delete bloc[attemptNumber - 1].topAt;
-      delete bloc[attemptNumber - 1].topAtProvisional;
-      bloc[attemptNumber - 1].zoneAt = attempt.zoneAt || attempt.endedAt || elapsedTime(timer);
+      delete bloc[attemptNumber - 1]!.topAt;
+      delete bloc[attemptNumber - 1]!.topAtProvisional;
+      bloc[attemptNumber - 1]!.zoneAt = attempt.zoneAt || attempt.endedAt || elapsedTime(timer);
     } else if (target === 'top') {
       const time =
         attempt.topAt || attempt.topAtProvisional || attempt.endedAt || elapsedTime(timer);
-      bloc[attemptNumber - 1].topAtProvisional = time;
-      bloc[attemptNumber - 1].topAt = time;
-      bloc[attemptNumber - 1].zoneAt = Math.min(attempt.zoneAt ?? time, time);
+      bloc[attemptNumber - 1]!.topAtProvisional = time;
+      bloc[attemptNumber - 1]!.topAt = time;
+      bloc[attemptNumber - 1]!.zoneAt = Math.min(attempt.zoneAt ?? time, time);
     }
 
     updateResult({
@@ -239,19 +263,16 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
             : isActive
               ? 'bg-teal-5 text-dark-7'
               : 'bg-body-dimmed',
-          'px-4 py-2 text-center text-lg tracking-widest uppercase font-bold w-full border-b',
+          'flex relative text-center text-lg tracking-widest uppercase font-bold w-full border-b',
         )}
       >
-        {stationClassId} {position}
-        {entrant && (
-          <span>
-            {' - '}
-            <span className="text-white">
-              {entrant.first_name} {entrant.last_name}
-            </span>
-          </span>
-        )}
-        {entrantStatus && ` - ${entrantStatus}`}
+        <div className="py-2 px-4 border-r absolute top-0 left-0">{station}</div>
+        <div className="py-2 px-4 grow text-black dark:text-white">
+          {entrant.first_name} {entrant.last_name}
+          {entrantStatus && ` - ${entrantStatus}`}
+        </div>
+
+        <div className="py-2 px-4 border-l absolute top-0 right-0">#{entrantIndex + 1}</div>
       </div>
 
       {!entrant && (
@@ -268,7 +289,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
               disabled={!prevEntrant}
               className="min-w-[6rem] py-2 items-center"
               component={QueryLink}
-              query={{ entrant: prevEntrant?.id }}
+              query={{ entrant: entrantIndex }}
               leftSection={<IconChevronLeft />}
               rightSection={<IconChevronRight className="opacity-0" />}
             >
@@ -283,7 +304,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
               disabled={!nextEntrant}
               className="min-w-[6rem] py-2 items-center"
               component={QueryLink}
-              query={{ entrant: nextEntrant?.id }}
+              query={{ entrant: entrantIndex + 2 }}
               variant={latestAttempt?.topAt ? 'outline' : 'default'}
               color="orange"
               leftSection={<IconChevronLeft className="opacity-0" />}

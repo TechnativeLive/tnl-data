@@ -8,7 +8,7 @@ export type EventResultIceSkating = {
 };
 
 export type EventFormatIceSkating = {
-  rounds: { id: string; kind: RoundKind; name: string; classes: RoundClass[] }[];
+  rounds: { id: string; kind?: RoundKind; name: string; classes: RoundClass[] }[];
 };
 
 export const roundKindIceSkatingSelection: { value: RoundKind; label: string }[] = [
@@ -32,7 +32,7 @@ type RoundClass = {
   id: string;
   name: string;
   active?: boolean;
-  entrants: Tables<'entrants'>[] | Tables<'entrants'>['id'][];
+  entrants: Tables<'entrants'>[];
 };
 
 type LiveDataSegmentResult = {
@@ -112,10 +112,10 @@ export function generateLiveDataIceSkating({
       );
       for (const entrant of classResults) {
         if (acc[entrant.entrant.id]) {
-          acc[entrant.entrant.id].total += entrant.total;
-          acc[entrant.entrant.id].breakdown!.pres += entrant.pres;
-          acc[entrant.entrant.id].breakdown!.tech += entrant.tech;
-          acc[entrant.entrant.id].breakdown!.ddct += entrant.ddct;
+          acc[entrant.entrant.id]!.total += entrant.total;
+          acc[entrant.entrant.id]!.breakdown!.pres += entrant.pres;
+          acc[entrant.entrant.id]!.breakdown!.tech += entrant.tech;
+          acc[entrant.entrant.id]!.breakdown!.ddct += entrant.ddct;
         } else {
           acc[entrant.entrant.id] = {
             total: entrant.total,
@@ -140,11 +140,7 @@ export function generateLiveDataIceSkating({
 
   liveData.results.overall = overallClassResults;
 
-  // @ts-expect-error regression? array of union of types
-  const _entrant = activeClass?.entrants.find(
-    (entrant: (typeof activeClass.entrants)[number]) =>
-      (typeof entrant === 'number' ? entrant : entrant.id) === active.entrant,
-  );
+  const _entrant = activeClass?.entrants.find((entrant) => entrant.id === active.entrant);
   const entrant = typeof _entrant === 'number' ? undefined : _entrant;
   liveData.active.entrant = {
     entrant,
@@ -159,23 +155,22 @@ export function generateLiveDataIceSkating({
 }
 
 function getEntrants(
-  entrants: Tables<'entrants'>[] | Tables<'entrants'>['id'][],
+  entrants: Tables<'entrants'>[],
   results:
     | {
         [entrant: string]: EventResult<'ice-skating'> | undefined;
       }
     | undefined,
 ): Omit<LiveDataSegmentResult, 'rank'>[] {
-  return entrants.map((e) => {
-    const id = typeof e === 'number' ? e : e.id;
-    const eResult = results?.[id]?.result;
-    const total = (eResult?.tech ?? 0) + (eResult?.pres ?? 0) - (eResult?.ddct ?? 0);
+  return entrants.map((entrant) => {
+    const result = results?.[entrant.id]?.result;
+    const total = (result?.tech ?? 0) + (result?.pres ?? 0) - (result?.ddct ?? 0);
     return {
       total,
-      entrant: typeof e === 'number' ? ({ id: e } as Tables<'entrants'>) : e,
-      tech: eResult?.tech ?? 0,
-      pres: eResult?.pres ?? 0,
-      ddct: eResult?.ddct ?? 0,
+      entrant: entrant,
+      tech: result?.tech ?? 0,
+      pres: result?.pres ?? 0,
+      ddct: result?.ddct ?? 0,
     };
   });
 }
