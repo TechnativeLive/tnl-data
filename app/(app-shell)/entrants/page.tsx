@@ -11,10 +11,8 @@ import {
   AccordionItem,
   AccordionPanel,
   Alert,
-  Avatar,
   Card,
   Flex,
-  Group,
   JsonInput,
   Loader,
   SimpleGrid,
@@ -124,7 +122,7 @@ async function CreateEntrant() {
   );
 }
 
-export async function PrimarySportSelection() {
+async function PrimarySportSelection() {
   const supabase = createServerClient();
   const { data } = await supabase.from('sports').select('id, name');
   const options = (data ?? []).map((sport) => ({ value: sport.id.toString(), label: sport.name }));
