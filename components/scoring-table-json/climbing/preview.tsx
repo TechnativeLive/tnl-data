@@ -4,7 +4,6 @@ import {
   AccordionControl,
   Title,
   AccordionPanel,
-  Divider,
   Text,
   Accordion,
 } from '@mantine/core';
@@ -15,7 +14,15 @@ export function LiveDataPreviewClimbing(liveData: EventLiveData<'climbing'>) {
   return (
     <Accordion multiple variant="contained" defaultValue={['results']}>
       <ActiveAndStartlistPreview active={liveData.active} startlist={liveData.startlist} />
-      <ResultsPreview overall={liveData.results.overall} />
+      {liveData.active.map((activeData) =>
+        activeData.classId ? (
+          <ResultsPreview
+            key={activeData.class}
+            overall={liveData.results[activeData.classId]}
+            class={activeData.class}
+          />
+        ) : null,
+      )}
     </Accordion>
   );
 }
@@ -26,34 +33,33 @@ type RowPreview<T> = {
   get: (row: T) => string | number | undefined | null;
 };
 
-const overallRows: RowPreview<
-  NonNullable<EventLiveData<'climbing'>['results']['overall']>[number]
->[] = [
-  { field: 'id', label: 'entrant.id', get: (row) => row.entrant?.id },
-  { field: 'rank', label: 'rank', get: (row) => row.rank },
-  { field: 'total', label: 'total', get: (row) => row.total },
-  { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant?.first_name },
-  { field: 'last_name', label: 'entrant.last_name', get: (row) => row.entrant?.last_name },
-  { field: 'breakdown', label: 'breakdown', get: (row) => JSON.stringify(row.breakdown) },
-];
+const overallRows: RowPreview<NonNullable<EventLiveData<'climbing'>['results'][number]>[number]>[] =
+  [
+    { field: 'id', label: 'entrant.id', get: (row) => row.entrant?.id },
+    { field: 'rank', label: 'rank', get: (row) => row.rank },
+    { field: 'tops', label: 'tops', get: (row) => row.tops },
+    { field: 'zones', label: 'zones', get: (row) => row.zones },
+    { field: 'ta', label: 'TA', get: (row) => row.ta },
+    { field: 'za', label: 'ZA', get: (row) => row.za },
+    { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant?.first_name },
+    { field: 'last_name', label: 'entrant.last_name', get: (row) => row.entrant?.last_name },
+    { field: 'status', label: 'status', get: (row) => row.status },
+  ];
 
-function ResultsPreview({ overall }: { overall: EventLiveData<'climbing'>['results']['overall'] }) {
+function ResultsPreview({
+  overall,
+  class: cls,
+}: {
+  overall: EventLiveData<'climbing'>['results'][number];
+  class?: string;
+}) {
   return (
-    <AccordionItem value="results">
+    <AccordionItem value={cls || 'results'}>
       <AccordionControl classNames={{ control: styles.control }}>
-        <Title order={3}>Results</Title>
+        <Title order={3}>Results - {cls}</Title>
       </AccordionControl>
       <AccordionPanel>
-        {/* <div className="flex flex-wrap gap-8">
-          <div className="grow">
-            <Title order={4} mb="xs">
-              Overall
-            </Title>
-            <Divider /> */}
         <PreviewGrid rows={overallRows} data={overall} />
-        {/* <Divider />
-          </div>
-        </div> */}
       </AccordionPanel>
     </AccordionItem>
   );
@@ -89,7 +95,9 @@ function PreviewGrid({ rows, data }: { rows: RowPreview<any>[]; data?: any[] }) 
   );
 }
 
-const startlistRows: RowPreview<NonNullable<EventLiveData<'climbing'>['startlist']>[number]>[] = [
+const startlistRows: RowPreview<
+  NonNullable<EventLiveData<'climbing'>['startlist']>[number][number]
+>[] = [
   { field: 'id', label: 'entrant.id', get: (row) => row.entrant.id },
   { field: 'pos', label: 'pos', get: (row) => row.pos },
   { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant.first_name },
@@ -114,8 +122,10 @@ function ActiveAndStartlistPreview({
         <div className="flex items-center gap-6">
           <Title order={3}>Startlist</Title>
           <Text>
-            <span className="text-dimmed italic">Active Round: </span>
-            <span className="text-teal-7 dark:text-teal-4 font-bold">{active.round}</span>
+            <span className="text-dimmed italic">Active Rounds: </span>
+            <span className="text-teal-7 dark:text-teal-4 font-bold">
+              {active.map((a) => a.round).join(',')}
+            </span>
           </Text>
         </div>
       </AccordionControl>

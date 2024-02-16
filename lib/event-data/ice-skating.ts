@@ -39,11 +39,11 @@ type LiveDataSegmentResult = {
   rank: number;
   total: number;
   entrant: Tables<'entrants'>;
-} & EventResult<'ice-skating'>;
+} & EventResult<'ice-skating'>['result'];
 type LiveDataOverallResult = {
   rank: number;
   total: number;
-  breakdown?: EventResult<'ice-skating'>;
+  breakdown?: EventResult<'ice-skating'>['result'];
   entrant?: Tables<'entrants'>;
 };
 export type EventLiveDataIceSkating = {
@@ -67,7 +67,7 @@ export function generateLiveDataIceSkating({
   const liveData: EventLiveDataIceSkating = { active: {}, results: {} };
 
   const active = results.active;
-  if (!active.round) return liveData;
+  if (!active?.round) return liveData;
 
   const activeRound = format.rounds.find((round) => round.id === active.round);
   if (!activeRound) return liveData;
@@ -160,11 +160,15 @@ export function generateLiveDataIceSkating({
 
 function getEntrants(
   entrants: Tables<'entrants'>[] | Tables<'entrants'>['id'][],
-  results: NonNullable<EventResults<'ice-skating'>[string]>[string],
+  results:
+    | {
+        [entrant: string]: EventResult<'ice-skating'> | undefined;
+      }
+    | undefined,
 ): Omit<LiveDataSegmentResult, 'rank'>[] {
   return entrants.map((e) => {
     const id = typeof e === 'number' ? e : e.id;
-    const eResult = results?.[id];
+    const eResult = results?.[id]?.result;
     const total = (eResult?.tech ?? 0) + (eResult?.pres ?? 0) - (eResult?.ddct ?? 0);
     return {
       total,

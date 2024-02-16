@@ -37,28 +37,26 @@ type SportJsonTypes = {
 export type EventFormat<S extends Sport> = SportJsonTypes[S]['format'];
 export type EventFormatOptions<S extends Sport> = SportJsonTypes[S]['formatOptions'];
 export type EventLiveData<S extends Sport> = SportJsonTypes[S]['liveData'];
-export type EventResult<S extends Sport> = { result: SportJsonTypes[S]['results']; __ts: number };
-export type EventResults<S extends Sport, Exact extends boolean = false> = Results<
-  EventResult<S>,
-  Exact
->;
+export type EventResult<S extends Sport> = {
+  result: SportJsonTypes[S]['results'];
+  __ts: number;
+  status?: 'DNS' | 'DNF' | 'DQ';
+};
+export type EventResults<S extends Sport> = Results<EventResult<S>>;
 
-type Results<Result extends unknown = unknown, Exact extends boolean = false> = (Exact extends true
-  ? {
-      [round: string]: {
-        [cls: string]: {
-          [entrant: string]: Result;
-        };
-      };
-    }
-  : {
-      [round: string]:
-        | {
-            [cls: string]:
-              | {
-                  [entrant: string]: Result | undefined;
-                }
-              | undefined;
-          }
-        | undefined;
-    }) & { active?: { round?: string; class?: string; entrant?: number; __ts: number } };
+type Results<Result extends unknown = unknown> = {
+  [round: string]:
+    | {
+        [cls: string]:
+          | {
+              [entrant: string]: Result | undefined;
+            }
+          | undefined;
+      }
+    | undefined;
+} & {
+  active: { round?: string; class?: string; entrant?: number; __ts: number } | undefined;
+  judgeActive?:
+    | { [station: string]: { class?: string; entrant?: number; __ts: number } }
+    | undefined;
+};

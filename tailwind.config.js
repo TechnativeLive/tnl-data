@@ -78,6 +78,19 @@ module.exports = {
           //   marginRight: 'clamp(1rem, 5vw, 10rem)',
           // }
         },
+        '.subgrid': {
+          display: 'grid',
+          'grid-template-columns': 'subgrid',
+          'grid-template-rows': 'subgrid',
+        },
+        '.subgrid-cols': {
+          display: 'grid',
+          'grid-template-columns': 'subgrid',
+        },
+        '.subgrid-rows': {
+          display: 'grid',
+          'grid-template-rows': 'subgrid',
+        },
       });
     }),
 

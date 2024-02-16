@@ -11,6 +11,34 @@ export function updateResultsByTimestampInPlace(
       newResults[roundKey] = prevResults[roundKey];
     }
 
+    if (roundKey === 'active') {
+      if (prevResults.active.__ts > newResults.active.__ts) {
+        newResults.active = prevResults.active;
+      }
+      continue;
+    }
+
+    if (roundKey === 'judgeActive') {
+      const prevJudgeActive = prevResults.judgeActive || {};
+      const newJudgeActive = newResults.judgeActive || {};
+
+      const allJudgeKeys = [
+        ...new Set([...Object.keys(prevJudgeActive), ...Object.keys(newJudgeActive)]),
+      ];
+      for (const judgeKey of allJudgeKeys) {
+        if (!newJudgeActive[judgeKey]) {
+          newJudgeActive[judgeKey] = prevJudgeActive[judgeKey];
+        } else if (!prevJudgeActive[judgeKey]) {
+          continue;
+        } else {
+          if (prevJudgeActive[judgeKey].__ts > newJudgeActive[judgeKey].__ts) {
+            newJudgeActive[judgeKey] = prevJudgeActive[judgeKey];
+          }
+        }
+      }
+      continue;
+    }
+
     // This silently fails if the new results are not an object
     const prevClasses = prevResults[roundKey] || {};
     const newClasses = newResults[roundKey] || {};

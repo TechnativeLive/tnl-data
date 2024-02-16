@@ -2,10 +2,14 @@ import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
 import { StackedButton } from '@/components/mantine-extensions/stacked-button';
 import { QueryLink } from '@/components/query-link';
 import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
-import { useUpdateJsonResults } from '@/components/scoring-table-json/use-update-json-results';
+import {
+  UpdateActiveHelper,
+  useUpdateJsonResults,
+} from '@/components/scoring-table-json/use-update-json-results';
 import { useEventTimers } from '@/components/timer/event-timers-context';
 import { EventResult } from '@/lib/event-data';
 import { elapsedTime } from '@/lib/timer/utils';
+import { toNumOr } from '@/lib/utils';
 import {
   Badge,
   Button,
@@ -17,11 +21,12 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useWhatChanged } from '@simbathesailor/use-what-changed';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function getScoreState(attempt?: EventResult<'climbing'>['result'][number][number]): 0 | 1 | 2 | 3 {
   if (attempt?.topAt !== undefined || attempt?.endedAt !== undefined) return 0;
@@ -33,11 +38,13 @@ function getScoreState(attempt?: EventResult<'climbing'>['result'][number][numbe
 
 export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   const searchParams = useSearchParams();
-  const { results, updateResult } = useUpdateJsonResults(props);
+  const { results, updateResult, updateJudgeActive } = useUpdateJsonResults(props);
   const { format } = props;
   const [timer] = useEventTimers();
+  // const [isActive, setIsActive] = useState(false)
 
   const station = searchParams.get('judge');
+
   if (!station) return <div>This page should only be used with a `judge` search param</div>;
 
   const stationClassId = station.charAt(0) === 'M' ? 'mens' : 'womens';
@@ -62,11 +69,19 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   const classResults = stationClass ? results[activeRound.id]?.[stationClass.id] : undefined;
   const position = Number(station.charAt(1));
 
-  const entrantId = Number(searchParams.get('entrant'));
-  const entrantIndex = stationClass.entrants.findIndex((ent) =>
-    typeof ent === 'number' ? ent === entrantId : ent.id === entrantId,
-  );
+  const entrantId = toNumOr(searchParams.get('entrant'), undefined);
+  const entrantIndex = entrantId
+    ? stationClass.entrants.findIndex((ent) => ent.id === entrantId)
+    : 0;
   const entrant = stationClass.entrants[entrantIndex > -1 ? entrantIndex : 0];
+  if (!entrant) {
+    return (
+      <div className="py-8 w-full grid place-content-center justify-items-center gap-4">
+        Waiting for the head judge to add entrants
+        <Loader type="bars" />
+      </div>
+    );
+  }
   const prevEntrant = entrantIndex > 0 ? stationClass.entrants[entrantIndex - 1] : undefined;
   const nextEntrant =
     entrantIndex > -1 && entrantIndex < stationClass.entrants.length - 1
@@ -74,6 +89,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
       : undefined;
 
   const entrantResults = classResults?.[entrant.id]?.result;
+  const entrantStatus = classResults?.[entrant.id]?.status;
   const blocResults = entrantResults?.[position - 1];
   const latestAttempt = blocResults?.[blocResults.length - 1];
 
@@ -212,10 +228,20 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   }
 
   const scoreState = getScoreState(latestAttempt);
+  const isActive = results.judgeActive?.[station]?.entrant === entrant.id;
 
   return (
     <div className="flex flex-col h-full rounded-lg border border-body-dimmed-hover overflow-hidden">
-      <div className="px-4 py-2 text-center text-lg tracking-widest uppercase font-bold w-full border-b bg-body-dimmed">
+      <div
+        className={clsx(
+          entrantStatus
+            ? 'bg-red-5 text-dark-7'
+            : isActive
+              ? 'bg-teal-5 text-dark-7'
+              : 'bg-body-dimmed',
+          'px-4 py-2 text-center text-lg tracking-widest uppercase font-bold w-full border-b',
+        )}
+      >
         {stationClassId} {position}
         {entrant && (
           <span>
@@ -225,6 +251,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
             </span>
           </span>
         )}
+        {entrantStatus && ` - ${entrantStatus}`}
       </div>
 
       {!entrant && (
@@ -271,10 +298,28 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
             </StackedButton>
           </div>
 
+          <Button
+            size="lg"
+            className="self-center mt-8"
+            variant={isActive ? 'filled' : 'outline'}
+            color={isActive ? 'teal.5' : 'orange'}
+            c={isActive ? 'dark.7' : undefined}
+            onClick={() =>
+              updateJudgeActive({
+                station,
+                cls: !isActive ? stationClassId : undefined,
+                entrant: !isActive ? entrant.id : undefined,
+                feedback: null,
+              })
+            }
+          >
+            {isActive ? 'Clear Active' : 'Set Active'}
+          </Button>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mx-4 my-12">
             <ActiveButton
               active={scoreState === 1}
-              hint={scoreState === 0 && !latestAttempt?.topAt}
+              hint={scoreState === 0 && !latestAttempt?.topAt && isActive}
               disabled={scoreState === 1 || latestAttempt?.topAt !== undefined}
               onClick={handleStart}
             >
@@ -427,7 +472,6 @@ function Attempt({
             Top
           </Button>
         </ButtonGroup>
-        {JSON.stringify(attempt, null, 2)}
       </Modal>
       <div
         className={clsx(
@@ -449,14 +493,14 @@ function Attempt({
 
         <div className="flex flex-wrap grow items-center gap-x-4 gap-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="light" size="lg" color={badge.color || 'gray'}>
-              {badge.label}
-            </Badge>
             {attemptTime && (
               <Badge variant="light" size="lg" color="gray">
                 {attemptTime}
               </Badge>
             )}
+            <Badge variant="light" size="lg" color={badge.color || 'gray'}>
+              {badge.label}
+            </Badge>
           </div>
           {/* <Badge variant="light" size="lg">
           {status}

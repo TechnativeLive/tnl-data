@@ -4,7 +4,7 @@ import { findNextFalsey, isTied } from '@/lib/sort-and-rank/helpers';
 export function getRanks<Datum extends Record<string, unknown>>(
   data: Datum[],
   criteria: SortCriteria,
-  strategem?: Strategy
+  strategem?: Strategy,
 ): number[] {
   const tiedRanks: boolean[] = [];
   let assignableRanks: number[] = [];
@@ -21,7 +21,7 @@ export function getRanks<Datum extends Record<string, unknown>>(
     // Modified: 1334 - ties are ranked as the lowest rank in the group
     case 'modified':
       assignableRanks = tiedRanks.map((isTied, index) =>
-        isTied ? findNextFalsey(index + 1, tiedRanks) : index + 1
+        isTied ? findNextFalsey(index + 1, tiedRanks) : index + 1,
       );
       break;
 

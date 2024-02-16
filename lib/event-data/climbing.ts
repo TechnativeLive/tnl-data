@@ -1,6 +1,6 @@
-import { EventFormat, EventResult, EventResults } from '@/lib/event-data';
+import { getBlocScores } from '@/components/scoring-table-json/climbing/utils';
+import { EventFormat, EventLiveData, EventResult, EventResults } from '@/lib/event-data';
 import { sortAndRank } from '@/lib/sort-and-rank';
-import { append } from '@/lib/utils';
 
 export type EventResultClimbing = {
   startedAt: number;
@@ -8,7 +8,6 @@ export type EventResultClimbing = {
   topAt?: number;
   topAtProvisional?: number;
   endedAt?: number;
-  active?: boolean;
 }[][];
 
 export type EventFormatClimbing = {
@@ -34,27 +33,29 @@ type RoundClass = {
   entrants: Tables<'entrants'>[];
 };
 
-type LiveDataSegmentResult = {
+type LiveDataResult = {
   rank: number;
-  total: number;
+  tops: number;
+  zones: number;
+  ta: number;
+  za: number;
+  status: EventResult<'climbing'>['status'];
   entrant: Tables<'entrants'>;
-  runs: EventResult<'climbing'>;
+  runs: EventResult<'climbing'>['result'];
 };
-type LiveDataOverallResult = {
-  rank: number;
-  total: number;
-  breakdown?: EventResult<'climbing'>;
-  entrant?: Tables<'entrants'>;
-};
+
 export type EventLiveDataClimbing = {
   active: {
     round?: string;
     class?: string;
-    entrants?: Partial<LiveDataSegmentResult>[];
-    results: LiveDataOverallResult[];
-    startlist?: { entrant: Tables<'entrants'>; pos: number }[];
+    classId?: string;
+    entrants?: Partial<LiveDataResult>[];
+    // results: LiveDataResult[];
+    // startlist?: { entrant: Tables<'entrants'>; pos: number }[];
   }[];
-  results: LiveDataOverallResult[][];
+  results: {
+    [cls: string]: LiveDataResult[] | undefined;
+  };
   startlist?: { entrant: Tables<'entrants'>; pos: number }[][];
   message?: unknown;
 };
@@ -66,121 +67,108 @@ export function generateLiveDataClimbing({
   format: EventFormat<'climbing'>;
   results: EventResults<'climbing'>;
 }): EventLiveDataClimbing {
-  const liveData: EventLiveDataClimbing = { active: [], results: [] };
+  const liveData: EventLiveDataClimbing = { active: [], results: {} };
   const active = results.active;
+
   if (!active?.round) return liveData;
 
   const activeRound = format.rounds.find((round) => round.id === active.round);
-  if (!activeRound || 1 === 1) return liveData;
+  if (!activeRound) return liveData;
 
   liveData.active = activeRound.classes.map((cls) => {
-    const activeResults = results?.[activeRound.id]?.[cls.id];
-    const activeEntrants = Object.values(activeResults ?? {}).filter((entrant) => entrant);
+    // const activeResults = results?.[activeRound.id]?.[cls.id];
+
+    // const liveDataResults = getEntrants(cls.entrants, activeResults);
+    // const rankedResults = sortAndRank(liveDataResults, {
+    //   criteria: [
+    //     { field: 'status', undefinedFirst: true },
+    //     { field: 'tops' },
+    //     { field: 'zones' },
+    //     { field: 'ta' },
+    //     { field: 'za' },
+    //   ],
+    //   stabilize: { field: 'entrant.last_name', asc: true },
+    // });
+
+    // liveData.results[cls.id] = rankedResults;
 
     return {
       round: activeRound.name,
       class: cls.name,
-      entrants: results[activeRound.id]?.[cls.id],
+      classId: cls.id,
+      // nasty
+      // entrants: liveDataResults.filter((entrant) => active),
+      startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
     };
   });
 
-  for (const cls of activeRound.classes) {
-    append(cls.name, liveData.active, '');
-  }
-
-  liveData.active.round = activeRound.name;
-  if (!active.class) return liveData;
-
-  liveData.active.class = activeClass.name;
-  liveData.startlist = activeClass.entrants.map((e, i) => ({
-    entrant: typeof e === 'number' ? { id: e } : e,
-    pos: i + 1,
-  })) as NonNullable<EventLiveDataClimbing['startlist']>;
-
-  const activeResults = results?.[active.round]?.[active.class];
-  const segmentResults: Omit<LiveDataSegmentResult, 'rank'>[] = getEntrants(
-    activeClass.entrants,
-    activeResults,
-  );
-
-  liveData.results.segment = sortAndRank(segmentResults, {
-    criteria: [{ field: 'total' }, { field: 'pres' }, { field: 'tech' }],
+  liveData.results = generateLiveDataResultsClimbing({
+    round: activeRound,
+    results,
   });
-
-  const rankedEntrant = liveData.results.segment.find((e) => e.entrant?.id === active.entrant);
-
-  const roundWithMatchingClass = format.rounds
-    .map((round) => {
-      const { classes, ...roundInfo } = round;
-      const matchingClass = round.classes.find((cls) => cls.id === active.class);
-      return matchingClass ? { ...roundInfo, class: matchingClass } : undefined;
-    })
-    .filter(Boolean);
-
-  // const overallClassResultsObj = roundWithMatchingClass.reduce(
-  //   (acc, round) => {
-  //     const classResults = getEntrants(
-  //       round!.class.entrants,
-  //       results?.[round!.id]?.[activeClass.id],
-  //     );
-  //     for (const entrant of classResults) {
-  //       if (acc[entrant.entrant.id]) {
-  //         acc[entrant.entrant.id].total += entrant.total;
-  //         acc[entrant.entrant.id].breakdown!.pres += entrant.pres;
-  //         acc[entrant.entrant.id].breakdown!.tech += entrant.tech;
-  //         acc[entrant.entrant.id].breakdown!.ddct += entrant.ddct;
-  //       } else {
-  //         acc[entrant.entrant.id] = {
-  //           total: entrant.total,
-  //           breakdown: {
-  //             tech: entrant.tech,
-  //             pres: entrant.pres,
-  //             ddct: entrant.ddct,
-  //           },
-  //           entrant: entrant.entrant,
-  //         };
-  //       }
-  //     }
-  //     return acc;
-  //   },
-  //   {} as Record<string, Omit<LiveDataOverallResult, 'rank'>>,
-  // );
-
-  // const overallClassResultsUnranked = Object.values(overallClassResultsObj);
-  // const overallClassResults = sortAndRank(overallClassResultsUnranked, {
-  //   criteria: [{ field: 'total' }, { field: 'breakdown.pres' }, { field: 'breakdown.tech' }],
-  // });
-
-  // liveData.results.overall = overallClassResults;
-
-  const _entrant = activeClass?.entrants.find((entrant) => entrant.id === active.entrant);
-  const entrant = typeof _entrant === 'number' ? undefined : _entrant;
-  liveData.active.entrant = {
-    entrant,
-    rank: rankedEntrant?.rank,
-    total: rankedEntrant?.total,
-    // ddct: rankedEntrant?.ddct,
-    // pres: rankedEntrant?.pres,
-    // tech: rankedEntrant?.tech,
-  };
 
   return liveData;
 }
 
+export function generateLiveDataResultsClimbing({
+  round,
+  results,
+}: {
+  round: EventFormat<'climbing'>['rounds'][number];
+  results: EventResults<'climbing'>;
+}): EventLiveData<'climbing'>['results'] {
+  return round.classes.reduce(
+    (live, cls) => {
+      const activeResults = results?.[round.id]?.[cls.id];
+
+      const liveDataResults = getEntrants(cls.entrants, activeResults);
+      live[cls.id] = sortAndRank(liveDataResults, {
+        criteria: [
+          { field: 'status', undefinedFirst: true },
+          { field: 'tops' },
+          { field: 'zones' },
+          { field: 'ta' },
+          { field: 'za' },
+        ],
+        stabilize: { field: 'entrant.last_name', asc: true },
+      });
+
+      return live;
+    },
+    {} as EventLiveData<'climbing'>['results'],
+  );
+}
+
 function getEntrants(
   entrants: Tables<'entrants'>[],
-  results: NonNullable<EventResults<'climbing'>[string]>[string],
-): Omit<LiveDataSegmentResult, 'rank'>[] {
+  results:
+    | {
+        [entrant: string]: EventResult<'climbing'> | undefined;
+      }
+    | undefined,
+): Omit<LiveDataResult, 'rank'>[] {
   return entrants.map((entrant) => {
-    const eResult = results?.[entrant.id];
-    // const total = (eResult?.tech ?? 0) + (eResult?.pres ?? 0) - (eResult?.ddct ?? 0);
+    const result = results?.[entrant.id]?.result;
+    const runs = result?.map((bloc) => getBlocScores(bloc)) ?? [];
+
+    const scores = runs.reduce(
+      (scores, run) => {
+        scores.tops += run?.top ? 1 : 0;
+        scores.zones += run?.zone ? 1 : 0;
+
+        scores.ta += run?.top ?? 0;
+        scores.za += run?.zone ?? 0;
+        return scores;
+      },
+      { tops: 0, zones: 0, ta: 0, za: 0 },
+    );
+
+    // TODO: find values here
     return {
-      total: 0,
+      ...scores,
+      status: results?.[entrant.id]?.status,
       entrant,
-      runs: [],
-      // tech: eResult?.tech ?? 0,
-      // pres: eResult?.pres ?? 0,
-      // ddct: eResult?.ddct ?? 0,
+      runs: result ?? [],
     };
   });
 }
