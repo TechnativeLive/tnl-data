@@ -91,7 +91,7 @@ export function Shell({
               {slug
                 .replaceAll('-', ' ')
                 .split(' ')
-                .map((part) => `${part.charAt(0).toLocaleUpperCase()}${part.substring(1)}`)
+                .map((part) => capitalize(part))
                 .join(' ')}
             </Button>
           ))}

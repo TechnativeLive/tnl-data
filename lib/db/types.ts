@@ -12,6 +12,7 @@ export type Database = {
       ds_keys: {
         Row: {
           description: string | null
+          id: number
           kind: Database["public"]["Enums"]["datastream_kind"]
           name: string
           private: string
@@ -19,6 +20,7 @@ export type Database = {
         }
         Insert: {
           description?: string | null
+          id: number
           kind?: Database["public"]["Enums"]["datastream_kind"]
           name: string
           private: string
@@ -26,6 +28,7 @@ export type Database = {
         }
         Update: {
           description?: string | null
+          id?: number
           kind?: Database["public"]["Enums"]["datastream_kind"]
           name?: string
           private?: string

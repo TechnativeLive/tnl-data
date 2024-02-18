@@ -60,6 +60,12 @@ export default async function HomePage() {
         >
           Entrants
         </Link>
+        <Link
+          href="/datastream"
+          className="active border bg-button rounded-lg px-3 py-1 flex gap-6 self-start"
+        >
+          DS Keys
+        </Link>
       </div>
       <Info title="Getting Started">Select a sport from the menu</Info>
       {!sortedByCurrentEventCount ? null : (

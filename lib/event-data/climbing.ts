@@ -2,13 +2,16 @@ import { getBlocScores } from '@/components/scoring-table-json/climbing/utils';
 import { EventFormat, EventLiveData, EventResult, EventResults } from '@/lib/event-data';
 import { sortAndRank } from '@/lib/sort-and-rank';
 
-export type EventResultClimbing = {
-  startedAt: number;
-  zoneAt?: number;
-  topAt?: number;
-  topAtProvisional?: number;
-  endedAt?: number;
-}[][];
+export type EventResultClimbing = (
+  | {
+      startedAt: number;
+      zoneAt?: number;
+      topAt?: number;
+      topAtProvisional?: number;
+      endedAt?: number;
+    }[]
+  | null
+)[];
 
 export type EventFormatClimbing = {
   rounds: { id: string; kind?: RoundKind; name: string; classes: RoundClass[] }[];
@@ -49,14 +52,21 @@ export type EventLiveDataClimbing = {
     round?: string;
     class?: string;
     classId?: string;
-    entrants?: Partial<LiveDataResult>[];
-    // results: LiveDataResult[];
-    // startlist?: { entrant: Tables<'entrants'>; pos: number }[];
+    entrants?: {
+      station: string;
+      class: string | undefined;
+      entrant: LiveDataResult | undefined;
+    }[];
+  }[];
+  judgeActive?: {
+    station: string;
+    class: string | undefined;
+    entrant: LiveDataResult | undefined;
   }[];
   results: {
     [cls: string]: LiveDataResult[] | undefined;
   };
-  startlist?: { entrant: Tables<'entrants'>; pos: number }[][];
+  startlist?: { class: string; startlist: { entrant: Tables<'entrants'>; pos: number }[] }[];
   message?: unknown;
 };
 
@@ -75,36 +85,48 @@ export function generateLiveDataClimbing({
   const activeRound = format.rounds.find((round) => round.id === active.round);
   if (!activeRound) return liveData;
 
-  liveData.active = activeRound.classes.map((cls) => {
-    // const activeResults = results?.[activeRound.id]?.[cls.id];
-
-    // const liveDataResults = getEntrants(cls.entrants, activeResults);
-    // const rankedResults = sortAndRank(liveDataResults, {
-    //   criteria: [
-    //     { field: 'status', undefinedFirst: true },
-    //     { field: 'tops' },
-    //     { field: 'zones' },
-    //     { field: 'ta' },
-    //     { field: 'za' },
-    //   ],
-    //   stabilize: { field: 'entrant.last_name', asc: true },
-    // });
-
-    // liveData.results[cls.id] = rankedResults;
-
-    return {
-      round: activeRound.name,
-      class: cls.name,
-      classId: cls.id,
-      // nasty
-      // entrants: liveDataResults.filter((entrant) => active),
-      startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
-    };
-  });
+  liveData.startlist = activeRound.classes.map((cls) => ({
+    class: cls.name,
+    startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
+  }));
 
   liveData.results = generateLiveDataResultsClimbing({
     round: activeRound,
     results,
+  });
+  console.log('liveData.results', liveData.results);
+  const liveDataResultsEntrantMap = Object.entries(liveData.results).reduce(
+    (map, [_cls, results]) => {
+      console.log({ map, _cls, results });
+      if (!results) return map;
+      results.forEach((result) => {
+        map[result.entrant.id] = result;
+      });
+      return map;
+    },
+    {} as Record<string, LiveDataResult>,
+  );
+  console.log('liveDataResultsEntrantMap', liveDataResultsEntrantMap);
+  const judgeActive = Object.entries(results.judgeActive ?? {})
+    .map(([station, { class: cls, entrant }]) => {
+      return {
+        station,
+        class: cls,
+        entrant: entrant ? liveDataResultsEntrantMap[entrant] : undefined,
+      };
+    })
+    .sort((a, b) => a.station.localeCompare(b.station));
+
+  liveData.judgeActive = judgeActive;
+
+  liveData.active = activeRound.classes.map((cls) => {
+    return {
+      round: activeRound.name,
+      class: cls.name,
+      classId: cls.id,
+      entrants: judgeActive.filter((judge) => judge.class === cls.id),
+      startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
+    };
   });
 
   return liveData;
@@ -143,7 +165,7 @@ function getEntrants(
   entrants: Tables<'entrants'>[],
   results:
     | {
-        [entrant: string]: EventResult<'climbing'> | undefined;
+        [entrant: string]: EventResult<'climbing'> | null | undefined;
       }
     | undefined,
 ): Omit<LiveDataResult, 'rank'>[] {

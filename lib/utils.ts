@@ -33,6 +33,7 @@ export function toNumOrNull(maybeNum: unknown): number | null {
   return Number.isNaN(asNum) ? null : asNum;
 }
 export function toNumOr<F>(maybeNum: unknown, fallback: F): number | F {
+  if (maybeNum === null) return fallback;
   const asNum = Number(maybeNum);
   return Number.isNaN(asNum) ? fallback : asNum;
 }
@@ -41,4 +42,16 @@ export const cn = clsx;
 
 export function append<T>(value: T, obj: Record<string, T[]>, key: string) {
   Array.isArray(obj[key]) ? obj[key]!.push(value) : (obj[key] = [value]);
+}
+
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export type SafeData<D = unknown> =
+  | { data: D; error: undefined }
+  | { data: undefined; error: SafeError };
+export type SafeError = { code: number | string; message: string };
+export function safeError(err: SafeError) {
+  return { data: undefined, error: { code: err.code, message: err.message } };
 }

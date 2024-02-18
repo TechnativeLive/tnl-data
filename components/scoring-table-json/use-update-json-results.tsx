@@ -56,12 +56,12 @@ export function useUpdateJsonResults<S extends Sport>(
     const newResults = initialResults;
     setResults(newResults);
     if (liveDataGenerator) {
-      setLiveDataPreview(
-        liveDataGenerator({
-          format,
-          results: newResults,
-        }),
-      );
+      const liveData = liveDataGenerator({
+        format,
+        results: newResults,
+      });
+      setLiveDataPreview(liveData);
+      updateDatastream(dsPrivateKey, liveData);
     }
   }, [setResults, initialResults, format, liveDataGenerator, setLiveDataPreview]);
 

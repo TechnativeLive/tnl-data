@@ -260,7 +260,7 @@ type EntrantProps = {
   index?: number;
   entrant: Partial<Tables<'entrants'>>;
   judgeActive: EventResults<'climbing'>['judgeActive'];
-  initialResult: EventResult<'climbing'> | undefined;
+  initialResult: EventResult<'climbing'> | null | undefined;
   updateResults: UpdateResultHelper<'climbing'>;
   roundId: string;
   classId: string;
@@ -372,8 +372,9 @@ function EntrantScores({
   return (
     <div className="flex flex-wrap gap-2 items-center justify-around">
       {Array.from({ length: blocCount }).map((_, i) => {
+        const classInitial = classId.charAt(0).toUpperCase();
         const blocScores = getBlocScores(initialResult?.result[i]);
-        const station = `${classId.charAt(0).toUpperCase()}${i + 1}`;
+        const station = `${classInitial}${i + 1}`;
         const isActive = judgeActive?.[station]?.entrant === entrantId;
 
         return (
@@ -382,8 +383,8 @@ function EntrantScores({
             <Button
               component={QueryLink}
               query={{
-                judge: `${classId.charAt(0).toUpperCase()}${i + 1}`,
-                entrant: entrantId,
+                judge: `${classInitial}${i + 1}`,
+                entrant: (index ?? 0) + 1,
               }}
               removeOthers
               size="compact-md"
@@ -567,9 +568,7 @@ function EventProgressionModalInternals({
                     className={clsx(
                       (i >= cutoff || isManualDQ) &&
                         'border-red-5 text-gray-6 border-dashed bg-red-5/10',
-                      i === results.length - 1 && 'rounded-b border-b',
-
-                      'border-x border-t',
+                      'border-x border-t last:border-b last:rounded-b',
                       'py-2 px-4 subgrid-cols col-span-full items-center',
                     )}
                   >

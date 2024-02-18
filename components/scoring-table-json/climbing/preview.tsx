@@ -13,7 +13,7 @@ import styles from './preview.module.css';
 export function LiveDataPreviewClimbing(liveData: EventLiveData<'climbing'>) {
   return (
     <Accordion multiple variant="contained" defaultValue={['results']}>
-      <ActiveAndStartlistPreview active={liveData.active} startlist={liveData.startlist} />
+      <ActiveAndStartlistPreview active={liveData.active} startlists={liveData.startlist} />
       {liveData.active.map((activeData) =>
         activeData.classId ? (
           <ResultsPreview
@@ -27,24 +27,25 @@ export function LiveDataPreviewClimbing(liveData: EventLiveData<'climbing'>) {
   );
 }
 
-type RowPreview<T> = {
+type PreviewCols<T> = {
   field: string;
   label: string;
   get: (row: T) => string | number | undefined | null;
 };
 
-const overallRows: RowPreview<NonNullable<EventLiveData<'climbing'>['results'][number]>[number]>[] =
-  [
-    { field: 'id', label: 'entrant.id', get: (row) => row.entrant?.id },
-    { field: 'rank', label: 'rank', get: (row) => row.rank },
-    { field: 'tops', label: 'tops', get: (row) => row.tops },
-    { field: 'zones', label: 'zones', get: (row) => row.zones },
-    { field: 'ta', label: 'TA', get: (row) => row.ta },
-    { field: 'za', label: 'ZA', get: (row) => row.za },
-    { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant?.first_name },
-    { field: 'last_name', label: 'entrant.last_name', get: (row) => row.entrant?.last_name },
-    { field: 'status', label: 'status', get: (row) => row.status },
-  ];
+type ResultRow = NonNullable<EventLiveData<'climbing'>['results'][number]>[number];
+
+const overallRows: PreviewCols<ResultRow>[] = [
+  { field: 'id', label: 'e.id', get: (row) => row.entrant?.id },
+  { field: 'rank', label: 'rank', get: (row) => row.rank },
+  { field: 'tops', label: 'tops', get: (row) => row.tops },
+  { field: 'zones', label: 'zones', get: (row) => row.zones },
+  { field: 'ta', label: 'TA', get: (row) => row.ta },
+  { field: 'za', label: 'ZA', get: (row) => row.za },
+  { field: 'first_name', label: 'e.first_name', get: (row) => row.entrant?.first_name },
+  { field: 'last_name', label: 'e.last_name', get: (row) => row.entrant?.last_name },
+  { field: 'status', label: 'status', get: (row) => row.status },
+];
 
 function ResultsPreview({
   overall,
@@ -59,50 +60,67 @@ function ResultsPreview({
         <Title order={3}>Results - {cls}</Title>
       </AccordionControl>
       <AccordionPanel>
-        <PreviewGrid rows={overallRows} data={overall} />
+        <PreviewGrid cols={overallRows} data={overall} />
       </AccordionPanel>
     </AccordionItem>
   );
 }
 
-function PreviewGrid({ rows, data }: { rows: RowPreview<any>[]; data?: any[] }) {
+function PreviewGrid<T>({
+  title,
+  cols,
+  data,
+}: {
+  title?: string;
+  cols: PreviewCols<T>[];
+  data?: T[];
+}) {
   return (
-    <div
-      className="grid gap-y-2 gap-x-4 justify-start p-4 items-baseline"
-      style={{ gridTemplateColumns: `repeat(${rows.length},auto)` }}
-    >
-      {rows.map(({ field, label }) => {
-        const isId = field === 'id';
-        return (
-          <Text key={field} c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
-            {label}
-          </Text>
-        );
-      })}
-      {data?.map((row) =>
-        rows.map(({ field, get }) => {
+    <div className="flex flex-col bg-body rounded-md border overflow-hidden">
+      {title && (
+        <Title order={4} className="bg-body-dimmed px-12 py-2 border-b">
+          {title}
+        </Title>
+      )}
+      <div
+        className="grid gap-y-2 gap-x-4 justify-start items-baseline px-4 py-2"
+        style={{ gridTemplateColumns: `max-content repeat(${cols.length - 1}, auto)` }}
+      >
+        {cols.map(({ field, label }) => {
           const isId = field === 'id';
           return (
-            <Fragment key={field}>
-              <Text c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
-                {get(row)}
-              </Text>
-            </Fragment>
+            <Text key={field} c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
+              {label}
+            </Text>
           );
-        }),
-      )}
+        })}
+        {data?.map((row) =>
+          cols.map(({ field, get }) => {
+            const isId = field === 'id';
+            return (
+              <Fragment key={field}>
+                <Text c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
+                  {get(row)}
+                </Text>
+              </Fragment>
+            );
+          }),
+        )}
+      </div>
     </div>
   );
 }
 
-const startlistRows: RowPreview<
-  NonNullable<EventLiveData<'climbing'>['startlist']>[number][number]
->[] = [
-  { field: 'id', label: 'entrant.id', get: (row) => row.entrant.id },
-  { field: 'pos', label: 'pos', get: (row) => row.pos },
-  { field: 'first_name', label: 'entrant.first_name', get: (row) => row.entrant.first_name },
-  { field: 'last_name', label: 'entrant.last_name', get: (row) => row.entrant.last_name },
-  { field: 'country', label: 'entrant.country', get: (row) => row.entrant.country },
+type StartlistCols = NonNullable<
+  EventLiveData<'climbing'>['startlist']
+>[number]['startlist'][number];
+
+const startlistCols: PreviewCols<StartlistCols>[] = [
+  { field: 'id', label: 'e.id', get: (row) => row.entrant.id },
+  { field: 'pos', label: '#', get: (row) => row.pos },
+  { field: 'first_name', label: 'e.first_name', get: (row) => row.entrant.first_name },
+  { field: 'last_name', label: 'e.last_name', get: (row) => row.entrant.last_name },
+  { field: 'country', label: 'e.country', get: (row) => row.entrant.country },
   // {
   //   field: 'dob',
   //   label: 'dob',
@@ -111,26 +129,36 @@ const startlistRows: RowPreview<
 ];
 function ActiveAndStartlistPreview({
   active,
-  startlist,
+  startlists,
 }: {
   active: EventLiveData<'climbing'>['active'];
-  startlist: EventLiveData<'climbing'>['startlist'];
+  startlists: EventLiveData<'climbing'>['startlist'];
 }) {
+  const activeRoundName = active[0]?.round;
   return (
     <AccordionItem value="active">
       <AccordionControl classNames={{ control: styles.control }}>
         <div className="flex items-center gap-6">
           <Title order={3}>Startlist</Title>
-          <Text>
-            <span className="text-dimmed italic">Active Rounds: </span>
-            <span className="text-teal-7 dark:text-teal-4 font-bold">
-              {active.map((a) => a.round).join(',')}
-            </span>
-          </Text>
+          {activeRoundName && (
+            <Text>
+              <span className="text-dimmed italic">Active Round: </span>
+              <span className="text-teal-7 dark:text-teal-4 font-bold">{activeRoundName}</span>
+            </Text>
+          )}
         </div>
       </AccordionControl>
       <AccordionPanel>
-        <PreviewGrid rows={startlistRows} data={startlist} />
+        <div className="flex flex-wrap justify-around gap-6">
+          {startlists?.map((startlist) => (
+            <PreviewGrid
+              key={startlist.class}
+              title={startlist.class}
+              cols={startlistCols}
+              data={startlist.startlist}
+            />
+          ))}
+        </div>
       </AccordionPanel>
     </AccordionItem>
   );

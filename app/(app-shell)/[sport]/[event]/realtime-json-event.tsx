@@ -40,7 +40,7 @@ export function RealtimeJsonEvent({ debug }: { debug?: boolean }) {
       const { data } = await supabase
         .from('events')
         .select(
-          'name, format, format_options, results, starts_at, ends_at, created_at, updated_at, timers, ds_keys(name, description, private, public, kind)',
+          'name, format, format_options, results, starts_at, ends_at, created_at, updated_at, timers, ds_keys(name, description, private, public, kind, id)',
         )
         .eq('slug', params.event || '')
         .single();

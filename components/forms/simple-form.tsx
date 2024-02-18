@@ -37,7 +37,7 @@ export function SimpleForm<T>({
       message: state.message,
       color: state.success ? 'teal' : 'red',
     });
-  }, [state.success]);
+  }, [state.success, state.message]);
 
   return (
     <form

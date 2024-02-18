@@ -36,7 +36,6 @@ export const FormatUtilsButton = forwardRef<HTMLButtonElement, FormatUtilsProps>
     return (
       <Button
         ref={ref}
-        fullWidth
         color="blue"
         variant="light"
         loading={loading}
@@ -56,9 +55,9 @@ export const FormatUtilsButton = forwardRef<HTMLButtonElement, FormatUtilsProps>
         }}
         type="submit"
         leftSection={<Icon size={16} />}
+        className="capitalize"
       >
-        {method.charAt(0).toLocaleUpperCase()}
-        {method.slice(1)} Entrants
+        {method} Entrants
       </Button>
     );
   },

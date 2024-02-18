@@ -37,7 +37,7 @@ export const isResultsClimbing = (input: any): input is EventResults<'climbing'>
             return undefined === value || "object" === typeof value && null !== value && $io6(value);
         return true;
     });
-    const $io6 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => Array.isArray(elem) && elem.every((elem: any) => "object" === typeof elem && null !== elem && $io7(elem))) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
+    const $io6 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => null === elem || Array.isArray(elem) && elem.every((elem: any) => "object" === typeof elem && null !== elem && $io7(elem))) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
     const $io7 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
     return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
 };
@@ -120,7 +120,7 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                 return undefined === value || "object" === typeof value && null !== value && $io6(value);
             return true;
         });
-        const $io6 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => Array.isArray(elem) && elem.every((elem: any) => "object" === typeof elem && null !== elem && $io7(elem))) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
+        const $io6 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => null === elem || Array.isArray(elem) && elem.every((elem: any) => "object" === typeof elem && null !== elem && $io7(elem))) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
         const $io7 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
         return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
     };
@@ -244,9 +244,9 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     path: _path + ".result",
                     expected: "EventResultClimbing",
                     value: input.result
-                })) && input.result.map((elem: any, _index1: number) => (Array.isArray(elem) || $report(_exceptionable, {
+                })) && input.result.map((elem: any, _index1: number) => null === elem || (Array.isArray(elem) || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "]",
-                    expected: "Array<__type>",
+                    expected: "(Array<__type> | null)",
                     value: elem
                 })) && elem.map((elem: any, _index2: number) => ("object" === typeof elem && null !== elem || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "][" + _index2 + "]",
@@ -258,7 +258,7 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     value: elem
                 })).every((flag: boolean) => flag) || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "]",
-                    expected: "Array<__type>",
+                    expected: "(Array<__type> | null)",
                     value: elem
                 })).every((flag: boolean) => flag) || $report(_exceptionable, {
                     path: _path + ".result",

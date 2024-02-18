@@ -2,10 +2,7 @@ import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
 import { StackedButton } from '@/components/mantine-extensions/stacked-button';
 import { QueryLink } from '@/components/query-link';
 import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
-import {
-  UpdateActiveHelper,
-  useUpdateJsonResults,
-} from '@/components/scoring-table-json/use-update-json-results';
+import { useUpdateJsonResults } from '@/components/scoring-table-json/use-update-json-results';
 import { useEventTimers } from '@/components/timer/event-timers-context';
 import { EventResult } from '@/lib/event-data';
 import { elapsedTime } from '@/lib/timer/utils';
@@ -21,14 +18,15 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useWhatChanged } from '@simbathesailor/use-what-changed';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-function getScoreState(attempt?: EventResult<'climbing'>['result'][number][number]): 0 | 1 | 2 | 3 {
+type Attempt = NonNullable<EventResult<'climbing'>['result'][number]>[number];
+
+function getScoreState(attempt?: Attempt): 0 | 1 | 2 | 3 {
   if (attempt?.topAt !== undefined || attempt?.endedAt !== undefined) return 0;
   if (attempt?.topAtProvisional !== undefined) return 3;
   if (attempt?.zoneAt !== undefined) return 2;
@@ -71,6 +69,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
 
   // const entrantId = toNumOr(searchParams.get('entrant'), undefined);
   const entrantIndex = toNumOr(searchParams.get('entrant'), 1) - 1;
+  console.log(entrantIndex, searchParams.get('entrant'), toNumOr(searchParams.get('entrant'), 1));
   const entrant = stationClass.entrants[entrantIndex >= 0 ? entrantIndex : 0];
   if (!entrant) {
     return (
@@ -429,7 +428,7 @@ function ActiveButton({
 }
 
 type BadgeLabel = 'Started' | 'Zone' | 'Top' | 'Top (Provisional)';
-function getBadge(attempt: EventResult<'climbing'>['result'][number][number]): {
+function getBadge(attempt: Attempt): {
   label: BadgeLabel;
   color: string;
 } {
@@ -447,7 +446,7 @@ function Attempt({
   handleEdit,
   handleDelete,
 }: {
-  attempt: EventResult<'climbing'>['result'][number][number];
+  attempt: Attempt;
   number: number;
   active: boolean;
   handleEdit: (attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') => void;
