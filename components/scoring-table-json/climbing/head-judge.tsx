@@ -373,7 +373,7 @@ function EntrantScores({
     <div className="flex flex-wrap gap-2 items-center justify-around">
       {Array.from({ length: blocCount }).map((_, i) => {
         const classInitial = classId.charAt(0).toUpperCase();
-        const blocScores = getBlocScores(initialResult?.result[i]);
+        const blocScores = getBlocScores(initialResult?.result[i] ?? null);
         const station = `${classInitial}${i + 1}`;
         const isActive = judgeActive?.[station]?.entrant === entrantId;
 

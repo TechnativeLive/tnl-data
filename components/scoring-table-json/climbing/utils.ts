@@ -1,18 +1,16 @@
 import { EventResult } from '@/lib/event-data';
+import { BlocScores } from '@/lib/event-data/climbing';
 
-export type BlocScores = {
-  climbing: boolean;
-  top: number;
-  topProvisional: number;
-  zone: number;
-  attempts: number;
-};
-
-export function getBlocScores(
-  result?: EventResult<'climbing'>['result'][number],
-): BlocScores | undefined {
-  if (!result) return undefined;
-  const scores = { attempts: result.length } as BlocScores;
+export function getBlocScores(result: EventResult<'climbing'>['result'][number]): BlocScores {
+  const scores: BlocScores = {
+    attempts: result?.length ?? 0,
+    data: result,
+    climbing: false,
+    top: 0,
+    topProvisional: 0,
+    zone: 0,
+  };
+  if (!result) return scores;
 
   for (let i = 0; i < result.length; i++) {
     const bloc = result[i];

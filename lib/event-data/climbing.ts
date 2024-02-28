@@ -43,8 +43,18 @@ type LiveDataResult = {
   ta: number;
   za: number;
   status: EventResult<'climbing'>['status'];
+  station?: string;
   entrant: Tables<'entrants'>;
-  runs: EventResult<'climbing'>['result'];
+  runs: BlocScores[];
+};
+
+export type BlocScores = {
+  climbing: boolean;
+  top: number;
+  topProvisional: number;
+  zone: number;
+  attempts: number;
+  data: EventResult<'climbing'>['result'][number];
 };
 
 export type EventLiveDataClimbing = {
@@ -94,10 +104,10 @@ export function generateLiveDataClimbing({
     round: activeRound,
     results,
   });
-  console.log('liveData.results', liveData.results);
+  // console.log('liveData.results', liveData.results);
   const liveDataResultsEntrantMap = Object.entries(liveData.results).reduce(
     (map, [_cls, results]) => {
-      console.log({ map, _cls, results });
+      // console.log({ map, _cls, results });
       if (!results) return map;
       results.forEach((result) => {
         map[result.entrant.id] = result;
@@ -106,7 +116,7 @@ export function generateLiveDataClimbing({
     },
     {} as Record<string, LiveDataResult>,
   );
-  console.log('liveDataResultsEntrantMap', liveDataResultsEntrantMap);
+  // console.log('liveDataResultsEntrantMap', liveDataResultsEntrantMap);
   const judgeActive = Object.entries(results.judgeActive ?? {})
     .map(([station, { class: cls, entrant }]) => {
       return {
@@ -119,13 +129,46 @@ export function generateLiveDataClimbing({
 
   liveData.judgeActive = judgeActive;
 
+  if (liveData.results) {
+    // for each class, map through the results and find the matching entrant in the judgeActive array
+    // for (const cls in liveData.results) {
+    //   if (liveData.results[cls]) {
+    //     liveData.results[cls] = liveData.results[cls]?.map((entrant, i) => {
+    //       const activeStation = judgeActive.find(
+    //         (judge) => judge.entrant?.entrant.id === entrant.entrant.id,
+    //       );
+    //       return { ...entrant, station: activeStation?.station };
+    //     });
+    //   }
+    // }
+
+    // for each station, map through the results specific to their class and add the station to the matching entrant
+
+    for (const judge of liveData.judgeActive) {
+      if (!judge.class || !judge.entrant) continue;
+      // console.log(judge);
+      liveData.results[judge.class]?.forEach((result) => {
+        if (result.entrant.id === judge.entrant?.entrant.id) {
+          result.station = judge.station;
+        }
+      });
+
+      // liveData.results[judge.class] = liveData.results[judge.class]?.map((entrant) => {
+      //   const activeStation =
+      //     judge.entrant?.entrant.id === entrant.entrant.id ? judge.station : undefined;
+      //   console.log(entrant.entrant.last_name, activeStation);
+      //   return { ...entrant, station: activeStation };
+      // });
+    }
+  }
+
   liveData.active = activeRound.classes.map((cls) => {
     return {
       round: activeRound.name,
       class: cls.name,
       classId: cls.id,
       entrants: judgeActive.filter((judge) => judge.class === cls.id),
-      startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
+      // startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
     };
   });
 
@@ -185,12 +228,11 @@ function getEntrants(
       { tops: 0, zones: 0, ta: 0, za: 0 },
     );
 
-    // TODO: find values here
     return {
       ...scores,
       status: results?.[entrant.id]?.status,
       entrant,
-      runs: result ?? [],
+      runs,
     };
   });
 }
