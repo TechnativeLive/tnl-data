@@ -54,6 +54,9 @@ export function ClimbingMinorJudge({
 
   const stationClassId = station.charAt(0) === 'M' ? 'mens' : 'womens';
   const activeRound = format.rounds.find((round) => round.id === results.active?.round);
+  const stationClass = activeRound?.classes.find((cls) => cls.id === stationClassId);
+  const entrantIndex = toNumOr(searchParams.get('entrant'), 1) - 1;
+  const entrant = stationClass?.entrants[entrantIndex >= 0 ? entrantIndex : 0];
 
   const { judgeData, updateActive, updateResult } = useJudgeJson({
     judgeData: initialJudgeData,
@@ -71,7 +74,6 @@ export function ClimbingMinorJudge({
       </div>
     );
 
-  const stationClass = activeRound.classes.find((cls) => cls.id === stationClassId);
   if (!stationClass)
     return (
       <div className="py-8 w-full grid place-content-center justify-items-center gap-4">
@@ -79,8 +81,6 @@ export function ClimbingMinorJudge({
       </div>
     );
 
-  const entrantIndex = toNumOr(searchParams.get('entrant'), 1) - 1;
-  const entrant = stationClass.entrants[entrantIndex >= 0 ? entrantIndex : 0];
   if (!entrant) {
     return (
       <div className="py-8 w-full grid place-content-center justify-items-center gap-4">
@@ -258,13 +258,13 @@ export function ClimbingMinorJudge({
           'flex relative text-center text-lg tracking-widest uppercase font-bold w-full border-b',
         )}
       >
-        <div className="py-2 px-4 border-r absolute top-0 left-0">{station}</div>
+        <div className="py-2 px-4 border-r flex items-center shrink-0">{station}</div>
         <div className="py-2 px-4 grow text-black dark:text-white">
           {entrant.first_name} {entrant.last_name}
           {entrantStatus && ` - ${entrantStatus}`}
         </div>
 
-        <div className="py-2 px-4 border-l absolute top-0 right-0">#{entrantIndex + 1}</div>
+        <div className="py-2 px-4 border-l flex items-center shrink-0">#{entrantIndex + 1}</div>
       </div>
 
       {!entrant && (
@@ -279,7 +279,7 @@ export function ClimbingMinorJudge({
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 p-4">
             <StackedButton
               disabled={!prevEntrant}
-              className="min-w-[6rem] py-2 items-center"
+              className="min-w-[6rem] py-2 items-center active:bg-red-400"
               component={QueryLink}
               query={{ entrant: entrantIndex }}
               leftSection={<IconChevronLeft />}
@@ -313,7 +313,7 @@ export function ClimbingMinorJudge({
 
           <Button
             size="lg"
-            className="self-center mt-8"
+            className="self-center mt-8 min-w-[15ch]"
             variant={isActive ? 'filled' : 'outline'}
             color={isActive ? 'teal.5' : 'orange'}
             c={isActive ? 'dark.7' : undefined}
@@ -334,13 +334,12 @@ export function ClimbingMinorJudge({
               disabled={scoreState === 1 || latestAttempt?.topAt !== undefined}
               onClick={handleStart}
             >
-              Start
+              Start Attempt
             </ActiveButton>
             <div className="flex flex-wrap gap-1 grow">
               <ActiveButton
                 active={scoreState === 2}
                 hint={scoreState === 1}
-                size="md"
                 disabled={scoreState === 0 || scoreState === 2}
                 onClick={handleZone}
               >
@@ -349,7 +348,6 @@ export function ClimbingMinorJudge({
               <ActiveButton
                 active={scoreState === 3}
                 hint={scoreState === 2}
-                size="md"
                 disabled={scoreState !== 2}
                 onClick={handleTop}
               >
@@ -359,11 +357,10 @@ export function ClimbingMinorJudge({
             <ActiveButton
               hint={scoreState !== 0}
               active={false}
-              size="md"
               disabled={scoreState === 0}
               onClick={handleEnd}
             >
-              {scoreState === 3 ? 'Confirm' : 'End'}
+              {scoreState === 3 ? 'Confirm' : 'End Attempt'}
             </ActiveButton>
           </div>
 
@@ -400,7 +397,7 @@ function ActiveButton({
   return (
     <div className="relative grow p-px rounded overflow-hidden">
       {active && (
-        <div className="absolute inset-0 p-px animate-rotate-border">
+        <div className="absolute inset-0 rounded animate-rotate-border">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pb-[calc(100%*1.42)] w-[calc(100%*1.42)] rounded-full rotate-border-gradient" />
         </div>
       )}
@@ -409,7 +406,7 @@ function ActiveButton({
         radius={3}
         fullWidth
         className="px-2 grow"
-        size="md"
+        size="xl"
         variant={hint ? 'outline' : 'default'}
         color="orange"
         {...props}

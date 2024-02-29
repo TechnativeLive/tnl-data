@@ -1,3 +1,7 @@
 .root {
   height: unset !important;
 }
+
+.root:active {
+  background: var(--mantine-color-body-dimmed);
+}
