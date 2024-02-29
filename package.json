@@ -33,6 +33,7 @@
     "react-dom": "^18.2.0",
     "react-fitty": "^1.0.1",
     "typia": "^5.4.5",
+    "use-debounce": "^10.0.0",
     "use-fit-text": "^2.4.0",
     "use-sound": "^4.0.1",
     "uuid": "^9.0.1",

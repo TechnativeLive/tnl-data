@@ -5,7 +5,10 @@ import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/sc
 import { QueryLink } from '@/components/query-link';
 import { RealtimeHeartbeat } from '@/components/realtime-heartbeat';
 import { LiveDataPreviewClimbing } from '@/components/scoring-table-json/climbing/preview';
-import { getBlocScores } from '@/components/scoring-table-json/climbing/utils';
+import {
+  getBlocScores,
+  getBoulderingJudgeIndex,
+} from '@/components/scoring-table-json/climbing/utils';
 import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
 import {
   UpdateResultHelper,
@@ -13,7 +16,13 @@ import {
 } from '@/components/scoring-table-json/use-update-json-results';
 import { TimersRealtime } from '@/components/timer/controls/realtime';
 import { createBrowserClient } from '@/lib/db/client';
-import { EventLiveData, EventResult, EventResults, Sport } from '@/lib/event-data';
+import {
+  EventLiveData,
+  EventResult,
+  EventResults,
+  JudgeDataClimbing,
+  Sport,
+} from '@/lib/event-data';
 import {
   generateLiveDataClimbing,
   generateLiveDataResultsClimbing,
@@ -64,6 +73,7 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
     props,
     generateLiveDataClimbing,
   );
+
   const [opened, { close, open }] = useDisclosure(false);
 
   return (
@@ -216,8 +226,8 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
                             {i > 0 && <Divider />}
                             <Entrant
                               index={i}
+                              judgesData={props.judgesData}
                               entrant={row}
-                              judgeActive={results.judgeActive}
                               initialResult={results[round.id]?.[cls.id]?.[row.id]}
                               updateResults={updateResult}
                               roundId={round.id}
@@ -259,7 +269,7 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
 type EntrantProps = {
   index?: number;
   entrant: Partial<Tables<'entrants'>>;
-  judgeActive: EventResults<'climbing'>['judgeActive'];
+  judgesData: JudgeDataClimbing[];
   initialResult: EventResult<'climbing'> | null | undefined;
   updateResults: UpdateResultHelper<'climbing'>;
   roundId: string;
@@ -271,7 +281,7 @@ type EntrantProps = {
 function Entrant({
   index,
   entrant,
-  judgeActive,
+  judgesData,
   initialResult,
   updateResults,
   roundId,
@@ -349,7 +359,7 @@ function Entrant({
         <EntrantScores
           index={index}
           blocCount={blocCount}
-          judgeActive={judgeActive}
+          judgesData={judgesData}
           initialResult={initialResult}
           classId={classId}
           entrantId={entrant.id}
@@ -362,20 +372,22 @@ function Entrant({
 function EntrantScores({
   index,
   blocCount,
-  judgeActive,
+  judgesData,
   initialResult,
   classId,
   entrantId,
-}: Pick<EntrantProps, 'index' | 'initialResult' | 'blocCount' | 'classId' | 'judgeActive'> & {
+}: Pick<EntrantProps, 'index' | 'initialResult' | 'blocCount' | 'classId' | 'judgesData'> & {
   entrantId: EntrantProps['entrant']['id'];
 }) {
   return (
     <div className="flex flex-wrap gap-2 items-center justify-around">
       {Array.from({ length: blocCount }).map((_, i) => {
         const classInitial = classId.charAt(0).toUpperCase();
-        const blocScores = getBlocScores(initialResult?.result[i] ?? null);
+        const blocScores = getBlocScores(initialResult?.result[i]);
         const station = `${classInitial}${i + 1}`;
-        const isActive = judgeActive?.[station]?.entrant === entrantId;
+
+        const judgeIndex = getBoulderingJudgeIndex(station, blocCount);
+        const isActive = judgesData[judgeIndex]?.active?.entrant === entrantId;
 
         return (
           <div key={i} className="flex flex-col">

@@ -1,5 +1,5 @@
 import { getRanks } from '@/lib/sort-and-rank/rank';
-import { sort } from '@/lib/sort-and-rank/sort';
+import { s, sort } from '@/lib/sort-and-rank/sort';
 import { Simplify } from 'type-fest';
 
 export type SortConfig = {
@@ -23,7 +23,7 @@ export function sortAndRank<Datum extends Record<string, unknown>, FieldName ext
   config: SortConfig,
   fieldName = 'rank',
 ): Simplify<Record<FieldName, number> & Datum>[] {
-  const sortedData = sort(data, config.criteria);
+  const sortedData = s(data, config.criteria);
   const ranks = getRanks(sortedData, config.criteria, config.stratagem);
 
   const dataWithRanks = sortedData.map((datum, index) => {
@@ -36,6 +36,6 @@ export function sortAndRank<Datum extends Record<string, unknown>, FieldName ext
     return dataWithRanks;
   }
 
-  const stabilizedData = sort(dataWithRanks, [{ field: 'rank', asc: true }, config.stabilize]);
+  const stabilizedData = s(dataWithRanks, [{ field: 'rank', asc: true }, config.stabilize]);
   return stabilizedData;
 }

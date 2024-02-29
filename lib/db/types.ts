@@ -91,6 +91,7 @@ export type Database = {
           ends_at: string | null
           format: Json | null
           format_options: Json | null
+          judge_data: Json[] | null
           name: string
           results: Json | null
           slug: string
@@ -107,6 +108,7 @@ export type Database = {
           ends_at?: string | null
           format?: Json | null
           format_options?: Json | null
+          judge_data?: Json[] | null
           name: string
           results?: Json | null
           slug: string
@@ -123,6 +125,7 @@ export type Database = {
           ends_at?: string | null
           format?: Json | null
           format_options?: Json | null
+          judge_data?: Json[] | null
           name?: string
           results?: Json | null
           slug?: string
@@ -501,7 +504,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_judge_data: {
+        Args: {
+          index: number
+          value: Json
+          event: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       datastream_kind: "timer" | "data"

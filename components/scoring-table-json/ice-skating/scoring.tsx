@@ -301,7 +301,7 @@ function Entrant({
             pres: Number(formData.get('pres')),
             ddct: Number(formData.get('ddct')),
           },
-          __ts: Date.now(),
+          // __ts: Date.now(),
         };
         const isActiveString = String(formData.get('isActive'));
         const isActiveBool = isActiveString === 'true';

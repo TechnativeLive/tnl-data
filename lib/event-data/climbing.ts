@@ -1,17 +1,23 @@
-import { getBlocScores } from '@/components/scoring-table-json/climbing/utils';
-import { EventFormat, EventLiveData, EventResult, EventResults } from '@/lib/event-data';
+import {
+  getBlocScores,
+  getBoulderingJudgeStation,
+} from '@/components/scoring-table-json/climbing/utils';
+import {
+  EventFormat,
+  EventLiveData,
+  EventResult,
+  EventResults,
+  JudgeDataClimbing,
+} from '@/lib/event-data';
 import { sortAndRank } from '@/lib/sort-and-rank';
 
-export type EventResultClimbing = (
-  | {
-      startedAt: number;
-      zoneAt?: number;
-      topAt?: number;
-      topAtProvisional?: number;
-      endedAt?: number;
-    }[]
-  | null
-)[];
+export type EventResultClimbing = ({
+  startedAt: number;
+  zoneAt?: number;
+  topAt?: number;
+  topAtProvisional?: number;
+  endedAt?: number;
+} | null)[][];
 
 export type EventFormatClimbing = {
   rounds: { id: string; kind?: RoundKind; name: string; classes: RoundClass[] }[];
@@ -63,13 +69,13 @@ export type EventLiveDataClimbing = {
     class?: string;
     classId?: string;
     entrants?: {
-      station: string;
+      station: string | undefined;
       class: string | undefined;
       entrant: LiveDataResult | undefined;
     }[];
   }[];
   judgeActive?: {
-    station: string;
+    station: string | undefined;
     class: string | undefined;
     entrant: LiveDataResult | undefined;
   }[];
@@ -83,9 +89,11 @@ export type EventLiveDataClimbing = {
 export function generateLiveDataClimbing({
   format,
   results,
+  judgesData,
 }: {
   format: EventFormat<'climbing'>;
   results: EventResults<'climbing'>;
+  judgesData: JudgeDataClimbing[];
 }): EventLiveDataClimbing {
   const liveData: EventLiveDataClimbing = { active: [], results: {} };
   const active = results.active;
@@ -117,15 +125,28 @@ export function generateLiveDataClimbing({
     {} as Record<string, LiveDataResult>,
   );
   // console.log('liveDataResultsEntrantMap', liveDataResultsEntrantMap);
-  const judgeActive = Object.entries(results.judgeActive ?? {})
-    .map(([station, { class: cls, entrant }]) => {
-      return {
-        station,
-        class: cls,
-        entrant: entrant ? liveDataResultsEntrantMap[entrant] : undefined,
-      };
-    })
-    .sort((a, b) => a.station.localeCompare(b.station));
+  const judgeActive = judgesData
+    .map((judgeData, index) => ({
+      station: judgeData.active?.class
+        ? getBoulderingJudgeStation(judgeData.active?.class, index)
+        : undefined,
+      class: judgeData.active?.class,
+      entrant: judgeData.active?.entrant
+        ? liveDataResultsEntrantMap[judgeData.active?.entrant]
+        : undefined,
+    }))
+    .filter((ja) => !!ja.station)
+    .sort((a, b) => a.station!.localeCompare(b.station!));
+
+  // const judgeActive = Object.entries(results.judgeActive ?? {})
+  //   .map(([station, { class: cls, entrant }]) => {
+  //     return {
+  //       station,
+  //       class: cls,
+  //       entrant: entrant ? liveDataResultsEntrantMap[entrant] : undefined,
+  //     };
+  //   })
+  //   .sort((a, b) => a.station.localeCompare(b.station));
 
   liveData.judgeActive = judgeActive;
 
@@ -192,8 +213,8 @@ export function generateLiveDataResultsClimbing({
           { field: 'status', undefinedFirst: true },
           { field: 'tops' },
           { field: 'zones' },
-          { field: 'ta' },
-          { field: 'za' },
+          { field: 'ta', asc: true },
+          { field: 'za', asc: true },
         ],
         stabilize: { field: 'entrant.last_name', asc: true },
       });

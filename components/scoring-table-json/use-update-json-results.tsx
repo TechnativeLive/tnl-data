@@ -28,17 +28,11 @@ export type UpdateActiveHelper = (args: {
   feedback?: string | null;
 }) => void;
 
-export type UpdateJudgeActiveHelper = (args: {
-  station: string;
-  cls?: string | undefined;
-  entrant?: number | undefined;
-  message?: string;
-  feedback?: string | null;
-}) => void;
-
 export function useUpdateJsonResults<S extends Sport>(
-  { results: initialResults, format, dsPrivateKey }: ScoringTableProps<S>,
-  liveDataGenerator?: (data: Pick<ScoringTableProps<S>, 'format' | 'results'>) => EventLiveData<S>,
+  { results: initialResults, format, dsPrivateKey, judgesData }: ScoringTableProps<S>,
+  liveDataGenerator?: (
+    data: Pick<ScoringTableProps<S>, 'format' | 'results' | 'judgesData'>,
+  ) => EventLiveData<S>,
 ) {
   const params = useParams();
   const eventSlug = params.event;
@@ -47,6 +41,7 @@ export function useUpdateJsonResults<S extends Sport>(
     liveDataGenerator?.({
       format,
       results,
+      judgesData,
     }),
   );
 
@@ -59,6 +54,7 @@ export function useUpdateJsonResults<S extends Sport>(
       const liveData = liveDataGenerator({
         format,
         results: newResults,
+        judgesData,
       });
       setLiveDataPreview(liveData);
       updateDatastream(dsPrivateKey, liveData);
@@ -79,11 +75,10 @@ export function useUpdateJsonResults<S extends Sport>(
       setResults((current) => {
         const now = Date.now();
         const newResults: EventResults<S> = { ...current };
-        if (!newResults.active) newResults.active = { __ts: now };
+        if (!newResults.active) newResults.active = {};
         newResults.active.round = round;
         newResults.active.class = cls;
         newResults.active.entrant = entrant;
-        newResults.active.__ts = now;
 
         setLoading([round, cls, entrant]);
         // update datastream
@@ -91,6 +86,7 @@ export function useUpdateJsonResults<S extends Sport>(
           const liveData = liveDataGenerator({
             format,
             results: newResults,
+            judgesData,
           });
           setLiveDataPreview(liveData);
           updateDatastream(dsPrivateKey, liveData, message);
@@ -122,59 +118,16 @@ export function useUpdateJsonResults<S extends Sport>(
         return newResults;
       });
     },
-    [setResults, setLoading, supabase, dsPrivateKey, format, liveDataGenerator, eventSlug],
-  );
-
-  const updateJudgeActive = useCallback<UpdateJudgeActiveHelper>(
-    ({ station, cls, entrant, message, feedback }) => {
-      if (!eventSlug || typeof eventSlug !== 'string') {
-        console.warn("Can't update judge active without event slug");
-        return;
-      }
-      setResults((current) => {
-        const now = Date.now();
-        const newResults: EventResults<S> = { ...current };
-        if (!newResults.judgeActive) newResults.judgeActive = {};
-        if (!newResults.judgeActive[station]) newResults.judgeActive[station] = { __ts: now };
-        newResults.judgeActive[station]!.class = cls;
-        newResults.judgeActive[station]!.entrant = entrant;
-        newResults.judgeActive[station]!.__ts = now;
-
-        // update datastream
-        if (liveDataGenerator) {
-          const liveData = liveDataGenerator({
-            format,
-            results: newResults,
-          });
-          setLiveDataPreview(liveData);
-          updateDatastream(dsPrivateKey, liveData, message);
-        }
-
-        supabase
-          .from('events')
-          .update({ results: newResults })
-          .eq('slug', eventSlug)
-          .then(() => {
-            setLoading(false);
-            const message =
-              feedback ?? entrant
-                ? 'Active entrant updated'
-                : cls
-                  ? 'Active class updated'
-                  : 'Active cleared';
-
-            if (feedback !== null)
-              notifications.show({
-                color: 'teal',
-                icon: <IconCircleCheck />,
-                message,
-              });
-          });
-
-        return newResults;
-      });
-    },
-    [setResults, setLoading, supabase, eventSlug, dsPrivateKey, format, liveDataGenerator],
+    [
+      setResults,
+      setLoading,
+      supabase,
+      dsPrivateKey,
+      format,
+      liveDataGenerator,
+      eventSlug,
+      judgesData,
+    ],
   );
 
   const updateResult = useCallback<UpdateResultHelper<S>>(
@@ -190,10 +143,14 @@ export function useUpdateJsonResults<S extends Sport>(
         if (!newResults[round]![cls]![id])
           newResults[round]![cls]![id] = {
             result: {} as EventResult<S>['result'],
-            __ts: Date.now(),
+            // __ts: Date.now(),
             status,
           };
-        newResults[round]![cls]![id] = { result: data, __ts: Date.now(), status };
+        newResults[round]![cls]![id] = {
+          result: data,
+          // __ts: Date.now(),
+          status,
+        };
 
         setLoading([round, cls, id]);
         // update datastream
@@ -201,6 +158,7 @@ export function useUpdateJsonResults<S extends Sport>(
           const liveData = liveDataGenerator({
             format,
             results: newResults,
+            judgesData,
           });
           setLiveDataPreview(liveData);
           updateDatastream(dsPrivateKey, liveData, message);
@@ -224,13 +182,21 @@ export function useUpdateJsonResults<S extends Sport>(
         return newResults;
       });
     },
-    [setResults, setLoading, supabase, eventSlug, dsPrivateKey, format, liveDataGenerator],
+    [
+      setResults,
+      setLoading,
+      supabase,
+      eventSlug,
+      dsPrivateKey,
+      format,
+      liveDataGenerator,
+      judgesData,
+    ],
   );
 
   return {
     results,
     updateActive,
-    updateJudgeActive,
     updateResult,
     liveDataPreview,
     loading,

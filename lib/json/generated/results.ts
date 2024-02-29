@@ -1,134 +1,107 @@
 import { EventFormat, EventResults } from '@/lib/event-data';
 import typia from 'typia';
 export const isResultsClimbing = (input: any): input is EventResults<'climbing'> => {
-    const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && $io1(input.active)) && (undefined === input.judgeActive || "object" === typeof input.judgeActive && null !== input.judgeActive && false === Array.isArray(input.judgeActive) && $io2(input.judgeActive)) && Object.keys(input).every((key: any) => {
-        if (["active", "judgeActive"].some((prop: any) => key === prop))
+    const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && false === Array.isArray(input.active) && $io1(input.active)) && Object.keys(input).every((key: any) => {
+        if (["active"].some((prop: any) => key === prop))
             return true;
         const value = input[key];
         if (undefined === value)
             return true;
         if (true)
-            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io4(value);
+            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io2(value);
         return true;
     });
-    const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
+    const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant);
     const $io2 = (input: any): boolean => Object.keys(input).every((key: any) => {
         const value = input[key];
         if (undefined === value)
             return true;
         if (true)
-            return "object" === typeof value && null !== value && $io3(value);
+            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io3(value);
         return true;
     });
-    const $io3 = (input: any): boolean => (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
-    const $io4 = (input: any): boolean => Object.keys(input).every((key: any) => {
+    const $io3 = (input: any): boolean => Object.keys(input).every((key: any) => {
         const value = input[key];
         if (undefined === value)
             return true;
         if (true)
-            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io5(value);
+            return undefined === value || "object" === typeof value && null !== value && $io4(value);
         return true;
     });
-    const $io5 = (input: any): boolean => Object.keys(input).every((key: any) => {
-        const value = input[key];
-        if (undefined === value)
-            return true;
-        if (true)
-            return undefined === value || "object" === typeof value && null !== value && $io6(value);
-        return true;
-    });
-    const $io6 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => null === elem || Array.isArray(elem) && elem.every((elem: any) => "object" === typeof elem && null !== elem && $io7(elem))) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
-    const $io7 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
+    const $io4 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => Array.isArray(elem) && elem.every((elem: any) => null === elem || "object" === typeof elem && null !== elem && $io5(elem))) && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
+    const $io5 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
     return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
 };
 export const isResultsIceSkating = (input: any): input is EventResults<'ice-skating'> => {
-    const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && $io1(input.active)) && (undefined === input.judgeActive || "object" === typeof input.judgeActive && null !== input.judgeActive && false === Array.isArray(input.judgeActive) && $io2(input.judgeActive)) && Object.keys(input).every((key: any) => {
-        if (["active", "judgeActive"].some((prop: any) => key === prop))
+    const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && false === Array.isArray(input.active) && $io1(input.active)) && Object.keys(input).every((key: any) => {
+        if (["active"].some((prop: any) => key === prop))
             return true;
         const value = input[key];
         if (undefined === value)
             return true;
         if (true)
-            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io4(value);
+            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io2(value);
         return true;
     });
-    const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
+    const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant);
     const $io2 = (input: any): boolean => Object.keys(input).every((key: any) => {
         const value = input[key];
         if (undefined === value)
             return true;
         if (true)
-            return "object" === typeof value && null !== value && $io3(value);
+            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io3(value);
         return true;
     });
-    const $io3 = (input: any): boolean => (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
-    const $io4 = (input: any): boolean => Object.keys(input).every((key: any) => {
+    const $io3 = (input: any): boolean => Object.keys(input).every((key: any) => {
         const value = input[key];
         if (undefined === value)
             return true;
         if (true)
-            return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io5(value);
+            return undefined === value || "object" === typeof value && null !== value && $io4(value);
         return true;
     });
-    const $io5 = (input: any): boolean => Object.keys(input).every((key: any) => {
-        const value = input[key];
-        if (undefined === value)
-            return true;
-        if (true)
-            return undefined === value || "object" === typeof value && null !== value && $io6(value);
-        return true;
-    });
-    const $io6 = (input: any): boolean => "object" === typeof input.result && null !== input.result && ("number" === typeof (input.result as any).tech && "number" === typeof (input.result as any).pres && "number" === typeof (input.result as any).ddct) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
+    const $io4 = (input: any): boolean => "object" === typeof input.result && null !== input.result && ("number" === typeof (input.result as any).tech && "number" === typeof (input.result as any).pres && "number" === typeof (input.result as any).ddct) && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
     return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
 };
 export const validateResultsClimbing = (input: any): typia.IValidation<EventResults<'climbing'>> => {
     const errors = [] as any[];
     const __is = (input: any): input is EventResults<'climbing'> => {
-        const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && $io1(input.active)) && (undefined === input.judgeActive || "object" === typeof input.judgeActive && null !== input.judgeActive && false === Array.isArray(input.judgeActive) && $io2(input.judgeActive)) && Object.keys(input).every((key: any) => {
-            if (["active", "judgeActive"].some((prop: any) => key === prop))
+        const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && false === Array.isArray(input.active) && $io1(input.active)) && Object.keys(input).every((key: any) => {
+            if (["active"].some((prop: any) => key === prop))
                 return true;
             const value = input[key];
             if (undefined === value)
                 return true;
             if (true)
-                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io4(value);
+                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io2(value);
             return true;
         });
-        const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
+        const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant);
         const $io2 = (input: any): boolean => Object.keys(input).every((key: any) => {
             const value = input[key];
             if (undefined === value)
                 return true;
             if (true)
-                return "object" === typeof value && null !== value && $io3(value);
+                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io3(value);
             return true;
         });
-        const $io3 = (input: any): boolean => (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
-        const $io4 = (input: any): boolean => Object.keys(input).every((key: any) => {
+        const $io3 = (input: any): boolean => Object.keys(input).every((key: any) => {
             const value = input[key];
             if (undefined === value)
                 return true;
             if (true)
-                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io5(value);
+                return undefined === value || "object" === typeof value && null !== value && $io4(value);
             return true;
         });
-        const $io5 = (input: any): boolean => Object.keys(input).every((key: any) => {
-            const value = input[key];
-            if (undefined === value)
-                return true;
-            if (true)
-                return undefined === value || "object" === typeof value && null !== value && $io6(value);
-            return true;
-        });
-        const $io6 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => null === elem || Array.isArray(elem) && elem.every((elem: any) => "object" === typeof elem && null !== elem && $io7(elem))) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
-        const $io7 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
+        const $io4 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => Array.isArray(elem) && elem.every((elem: any) => null === elem || "object" === typeof elem && null !== elem && $io5(elem))) && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
+        const $io5 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
         return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
     };
     if (false === __is(input)) {
         const $report = (typia.createValidate as any).report(errors);
         ((input: any, _path: string, _exceptionable: boolean = true): input is EventResults<'climbing'> => {
             const $join = (typia.createValidate as any).join;
-            const $vo0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [undefined === input.active || ("object" === typeof input.active && null !== input.active || $report(_exceptionable, {
+            const $vo0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [undefined === input.active || ("object" === typeof input.active && null !== input.active && false === Array.isArray(input.active) || $report(_exceptionable, {
                     path: _path + ".active",
                     expected: "(__type | undefined)",
                     value: input.active
@@ -136,16 +109,8 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     path: _path + ".active",
                     expected: "(__type | undefined)",
                     value: input.active
-                }), undefined === input.judgeActive || ("object" === typeof input.judgeActive && null !== input.judgeActive && false === Array.isArray(input.judgeActive) || $report(_exceptionable, {
-                    path: _path + ".judgeActive",
-                    expected: "(__type.o1 | undefined)",
-                    value: input.judgeActive
-                })) && $vo2(input.judgeActive, _path + ".judgeActive", true && _exceptionable) || $report(_exceptionable, {
-                    path: _path + ".judgeActive",
-                    expected: "(__type.o1 | undefined)",
-                    value: input.judgeActive
                 }), false === _exceptionable || Object.keys(input).map((key: any) => {
-                    if (["active", "judgeActive"].some((prop: any) => key === prop))
+                    if (["active"].some((prop: any) => key === prop))
                         return true;
                     const value = input[key];
                     if (undefined === value)
@@ -153,11 +118,11 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     if (true)
                         return undefined === value || ("object" === typeof value && null !== value && false === Array.isArray(value) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "(__type.o3 | undefined)",
+                            expected: "(__type.o1 | undefined)",
                             value: value
-                        })) && $vo4(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
+                        })) && $vo2(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "(__type.o3 | undefined)",
+                            expected: "(__type.o1 | undefined)",
                             value: value
                         });
                     return true;
@@ -174,57 +139,24 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     path: _path + ".entrant",
                     expected: "(number | undefined)",
                     value: input.entrant
-                }), "number" === typeof input.__ts || $report(_exceptionable, {
-                    path: _path + ".__ts",
-                    expected: "number",
-                    value: input.__ts
                 })].every((flag: boolean) => flag);
             const $vo2 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
                     const value = input[key];
                     if (undefined === value)
                         return true;
                     if (true)
-                        return ("object" === typeof value && null !== value || $report(_exceptionable, {
+                        return undefined === value || ("object" === typeof value && null !== value && false === Array.isArray(value) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "__type.o2",
+                            expected: "(__type.o2 | undefined)",
                             value: value
                         })) && $vo3(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "__type.o2",
+                            expected: "(__type.o2 | undefined)",
                             value: value
                         });
                     return true;
                 }).every((flag: boolean) => flag)].every((flag: boolean) => flag);
-            const $vo3 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [undefined === input["class"] || "string" === typeof input["class"] || $report(_exceptionable, {
-                    path: _path + "[\"class\"]",
-                    expected: "(string | undefined)",
-                    value: input["class"]
-                }), undefined === input.entrant || "number" === typeof input.entrant || $report(_exceptionable, {
-                    path: _path + ".entrant",
-                    expected: "(number | undefined)",
-                    value: input.entrant
-                }), "number" === typeof input.__ts || $report(_exceptionable, {
-                    path: _path + ".__ts",
-                    expected: "number",
-                    value: input.__ts
-                })].every((flag: boolean) => flag);
-            const $vo4 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
-                    const value = input[key];
-                    if (undefined === value)
-                        return true;
-                    if (true)
-                        return undefined === value || ("object" === typeof value && null !== value && false === Array.isArray(value) || $report(_exceptionable, {
-                            path: _path + $join(key),
-                            expected: "(__type.o4 | undefined)",
-                            value: value
-                        })) && $vo5(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
-                            path: _path + $join(key),
-                            expected: "(__type.o4 | undefined)",
-                            value: value
-                        });
-                    return true;
-                }).every((flag: boolean) => flag)].every((flag: boolean) => flag);
-            const $vo5 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
+            const $vo3 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
                     const value = input[key];
                     if (undefined === value)
                         return true;
@@ -233,47 +165,43 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                             path: _path + $join(key),
                             expected: "(EventResult<\"climbing\"> | undefined)",
                             value: value
-                        })) && $vo6(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
+                        })) && $vo4(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
                             path: _path + $join(key),
                             expected: "(EventResult<\"climbing\"> | undefined)",
                             value: value
                         });
                     return true;
                 }).every((flag: boolean) => flag)].every((flag: boolean) => flag);
-            const $vo6 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [(Array.isArray(input.result) || $report(_exceptionable, {
+            const $vo4 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [(Array.isArray(input.result) || $report(_exceptionable, {
                     path: _path + ".result",
                     expected: "EventResultClimbing",
                     value: input.result
-                })) && input.result.map((elem: any, _index1: number) => null === elem || (Array.isArray(elem) || $report(_exceptionable, {
+                })) && input.result.map((elem: any, _index1: number) => (Array.isArray(elem) || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "]",
-                    expected: "(Array<__type> | null)",
+                    expected: "Array<{ startedAt: number; zoneAt?: number | undefined; topAt?: number | undefined; topAtProvisional?: number | undefined; endedAt?: number | undefined; } | null>",
                     value: elem
-                })) && elem.map((elem: any, _index2: number) => ("object" === typeof elem && null !== elem || $report(_exceptionable, {
+                })) && elem.map((elem: any, _index2: number) => null === elem || ("object" === typeof elem && null !== elem || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "][" + _index2 + "]",
-                    expected: "__type.o5",
+                    expected: "(__type.o3 | null)",
                     value: elem
-                })) && $vo7(elem, _path + ".result[" + _index1 + "][" + _index2 + "]", true && _exceptionable) || $report(_exceptionable, {
+                })) && $vo5(elem, _path + ".result[" + _index1 + "][" + _index2 + "]", true && _exceptionable) || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "][" + _index2 + "]",
-                    expected: "__type.o5",
+                    expected: "(__type.o3 | null)",
                     value: elem
                 })).every((flag: boolean) => flag) || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "]",
-                    expected: "(Array<__type> | null)",
+                    expected: "Array<{ startedAt: number; zoneAt?: number | undefined; topAt?: number | undefined; topAtProvisional?: number | undefined; endedAt?: number | undefined; } | null>",
                     value: elem
                 })).every((flag: boolean) => flag) || $report(_exceptionable, {
                     path: _path + ".result",
                     expected: "EventResultClimbing",
                     value: input.result
-                }), "number" === typeof input.__ts || $report(_exceptionable, {
-                    path: _path + ".__ts",
-                    expected: "number",
-                    value: input.__ts
                 }), undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status || $report(_exceptionable, {
                     path: _path + ".status",
                     expected: "(\"DNF\" | \"DNS\" | \"DQ\" | undefined)",
                     value: input.status
                 })].every((flag: boolean) => flag);
-            const $vo7 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ["number" === typeof input.startedAt || $report(_exceptionable, {
+            const $vo5 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ["number" === typeof input.startedAt || $report(_exceptionable, {
                     path: _path + ".startedAt",
                     expected: "number",
                     value: input.startedAt
@@ -315,50 +243,41 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
 export const validateResultsIceSkating = (input: any): typia.IValidation<EventResults<'ice-skating'>> => {
     const errors = [] as any[];
     const __is = (input: any): input is EventResults<'ice-skating'> => {
-        const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && $io1(input.active)) && (undefined === input.judgeActive || "object" === typeof input.judgeActive && null !== input.judgeActive && false === Array.isArray(input.judgeActive) && $io2(input.judgeActive)) && Object.keys(input).every((key: any) => {
-            if (["active", "judgeActive"].some((prop: any) => key === prop))
+        const $io0 = (input: any): boolean => (undefined === input.active || "object" === typeof input.active && null !== input.active && false === Array.isArray(input.active) && $io1(input.active)) && Object.keys(input).every((key: any) => {
+            if (["active"].some((prop: any) => key === prop))
                 return true;
             const value = input[key];
             if (undefined === value)
                 return true;
             if (true)
-                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io4(value);
+                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io2(value);
             return true;
         });
-        const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
+        const $io1 = (input: any): boolean => (undefined === input.round || "string" === typeof input.round) && (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant);
         const $io2 = (input: any): boolean => Object.keys(input).every((key: any) => {
             const value = input[key];
             if (undefined === value)
                 return true;
             if (true)
-                return "object" === typeof value && null !== value && $io3(value);
+                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io3(value);
             return true;
         });
-        const $io3 = (input: any): boolean => (undefined === input["class"] || "string" === typeof input["class"]) && (undefined === input.entrant || "number" === typeof input.entrant) && "number" === typeof input.__ts;
-        const $io4 = (input: any): boolean => Object.keys(input).every((key: any) => {
+        const $io3 = (input: any): boolean => Object.keys(input).every((key: any) => {
             const value = input[key];
             if (undefined === value)
                 return true;
             if (true)
-                return undefined === value || "object" === typeof value && null !== value && false === Array.isArray(value) && $io5(value);
+                return undefined === value || "object" === typeof value && null !== value && $io4(value);
             return true;
         });
-        const $io5 = (input: any): boolean => Object.keys(input).every((key: any) => {
-            const value = input[key];
-            if (undefined === value)
-                return true;
-            if (true)
-                return undefined === value || "object" === typeof value && null !== value && $io6(value);
-            return true;
-        });
-        const $io6 = (input: any): boolean => "object" === typeof input.result && null !== input.result && ("number" === typeof (input.result as any).tech && "number" === typeof (input.result as any).pres && "number" === typeof (input.result as any).ddct) && "number" === typeof input.__ts && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
+        const $io4 = (input: any): boolean => "object" === typeof input.result && null !== input.result && ("number" === typeof (input.result as any).tech && "number" === typeof (input.result as any).pres && "number" === typeof (input.result as any).ddct) && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
         return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
     };
     if (false === __is(input)) {
         const $report = (typia.createValidate as any).report(errors);
         ((input: any, _path: string, _exceptionable: boolean = true): input is EventResults<'ice-skating'> => {
             const $join = (typia.createValidate as any).join;
-            const $vo0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [undefined === input.active || ("object" === typeof input.active && null !== input.active || $report(_exceptionable, {
+            const $vo0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [undefined === input.active || ("object" === typeof input.active && null !== input.active && false === Array.isArray(input.active) || $report(_exceptionable, {
                     path: _path + ".active",
                     expected: "(__type | undefined)",
                     value: input.active
@@ -366,16 +285,8 @@ export const validateResultsIceSkating = (input: any): typia.IValidation<EventRe
                     path: _path + ".active",
                     expected: "(__type | undefined)",
                     value: input.active
-                }), undefined === input.judgeActive || ("object" === typeof input.judgeActive && null !== input.judgeActive && false === Array.isArray(input.judgeActive) || $report(_exceptionable, {
-                    path: _path + ".judgeActive",
-                    expected: "(__type.o1 | undefined)",
-                    value: input.judgeActive
-                })) && $vo2(input.judgeActive, _path + ".judgeActive", true && _exceptionable) || $report(_exceptionable, {
-                    path: _path + ".judgeActive",
-                    expected: "(__type.o1 | undefined)",
-                    value: input.judgeActive
                 }), false === _exceptionable || Object.keys(input).map((key: any) => {
-                    if (["active", "judgeActive"].some((prop: any) => key === prop))
+                    if (["active"].some((prop: any) => key === prop))
                         return true;
                     const value = input[key];
                     if (undefined === value)
@@ -383,11 +294,11 @@ export const validateResultsIceSkating = (input: any): typia.IValidation<EventRe
                     if (true)
                         return undefined === value || ("object" === typeof value && null !== value && false === Array.isArray(value) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "(__type.o3 | undefined)",
+                            expected: "(__type.o1 | undefined)",
                             value: value
-                        })) && $vo4(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
+                        })) && $vo2(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "(__type.o3 | undefined)",
+                            expected: "(__type.o1 | undefined)",
                             value: value
                         });
                     return true;
@@ -404,57 +315,24 @@ export const validateResultsIceSkating = (input: any): typia.IValidation<EventRe
                     path: _path + ".entrant",
                     expected: "(number | undefined)",
                     value: input.entrant
-                }), "number" === typeof input.__ts || $report(_exceptionable, {
-                    path: _path + ".__ts",
-                    expected: "number",
-                    value: input.__ts
                 })].every((flag: boolean) => flag);
             const $vo2 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
                     const value = input[key];
                     if (undefined === value)
                         return true;
                     if (true)
-                        return ("object" === typeof value && null !== value || $report(_exceptionable, {
+                        return undefined === value || ("object" === typeof value && null !== value && false === Array.isArray(value) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "__type.o2",
+                            expected: "(__type.o2 | undefined)",
                             value: value
                         })) && $vo3(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
                             path: _path + $join(key),
-                            expected: "__type.o2",
+                            expected: "(__type.o2 | undefined)",
                             value: value
                         });
                     return true;
                 }).every((flag: boolean) => flag)].every((flag: boolean) => flag);
-            const $vo3 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [undefined === input["class"] || "string" === typeof input["class"] || $report(_exceptionable, {
-                    path: _path + "[\"class\"]",
-                    expected: "(string | undefined)",
-                    value: input["class"]
-                }), undefined === input.entrant || "number" === typeof input.entrant || $report(_exceptionable, {
-                    path: _path + ".entrant",
-                    expected: "(number | undefined)",
-                    value: input.entrant
-                }), "number" === typeof input.__ts || $report(_exceptionable, {
-                    path: _path + ".__ts",
-                    expected: "number",
-                    value: input.__ts
-                })].every((flag: boolean) => flag);
-            const $vo4 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
-                    const value = input[key];
-                    if (undefined === value)
-                        return true;
-                    if (true)
-                        return undefined === value || ("object" === typeof value && null !== value && false === Array.isArray(value) || $report(_exceptionable, {
-                            path: _path + $join(key),
-                            expected: "(__type.o4 | undefined)",
-                            value: value
-                        })) && $vo5(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
-                            path: _path + $join(key),
-                            expected: "(__type.o4 | undefined)",
-                            value: value
-                        });
-                    return true;
-                }).every((flag: boolean) => flag)].every((flag: boolean) => flag);
-            const $vo5 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
+            const $vo3 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [false === _exceptionable || Object.keys(input).map((key: any) => {
                     const value = input[key];
                     if (undefined === value)
                         return true;
@@ -463,31 +341,27 @@ export const validateResultsIceSkating = (input: any): typia.IValidation<EventRe
                             path: _path + $join(key),
                             expected: "(EventResult<\"ice-skating\"> | undefined)",
                             value: value
-                        })) && $vo6(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
+                        })) && $vo4(value, _path + $join(key), true && _exceptionable) || $report(_exceptionable, {
                             path: _path + $join(key),
                             expected: "(EventResult<\"ice-skating\"> | undefined)",
                             value: value
                         });
                     return true;
                 }).every((flag: boolean) => flag)].every((flag: boolean) => flag);
-            const $vo6 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [("object" === typeof input.result && null !== input.result || $report(_exceptionable, {
+            const $vo4 = (input: any, _path: string, _exceptionable: boolean = true): boolean => [("object" === typeof input.result && null !== input.result || $report(_exceptionable, {
                     path: _path + ".result",
                     expected: "EventResultIceSkating",
                     value: input.result
-                })) && $vo7(input.result, _path + ".result", true && _exceptionable) || $report(_exceptionable, {
+                })) && $vo5(input.result, _path + ".result", true && _exceptionable) || $report(_exceptionable, {
                     path: _path + ".result",
                     expected: "EventResultIceSkating",
                     value: input.result
-                }), "number" === typeof input.__ts || $report(_exceptionable, {
-                    path: _path + ".__ts",
-                    expected: "number",
-                    value: input.__ts
                 }), undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status || $report(_exceptionable, {
                     path: _path + ".status",
                     expected: "(\"DNF\" | \"DNS\" | \"DQ\" | undefined)",
                     value: input.status
                 })].every((flag: boolean) => flag);
-            const $vo7 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ["number" === typeof input.tech || $report(_exceptionable, {
+            const $vo5 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ["number" === typeof input.tech || $report(_exceptionable, {
                     path: _path + ".tech",
                     expected: "number",
                     value: input.tech

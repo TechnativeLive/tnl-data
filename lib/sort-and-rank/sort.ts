@@ -2,6 +2,25 @@ import { SortCriteria, SortCriterion } from '@/lib/sort-and-rank';
 import { compare, partition } from '@/lib/sort-and-rank/helpers';
 import get from 'lodash.get';
 
+export function s<Datum extends Record<string, unknown>>(
+  data: Datum[],
+  criteria: SortCriteria,
+): Datum[] {
+  if (criteria.length === 0) return data;
+
+  return data.sort((aDatum, bDatum) => {
+    for (const criterion of criteria) {
+      const a = get(aDatum, criterion.field);
+      const b = get(bDatum, criterion.field);
+      const result = compare(a, b, criterion);
+      if (result !== 0) {
+        return result;
+      }
+    }
+    return 0;
+  });
+}
+
 export function sort<Datum extends Record<string, unknown>>(
   data: Datum[],
   criteria: SortCriteria,
@@ -16,6 +35,7 @@ function breakTies<Datum extends Record<string, unknown>>(
   criteria: SortCriteria,
   ties: [number, number][] = [],
 ): Datum[] {
+  console.log('ties', ties);
   if (ties.length === 0) {
     return data;
   }
@@ -23,12 +43,13 @@ function breakTies<Datum extends Record<string, unknown>>(
   // We update tiesToBreak in each loop. If any are remaining, we use the next criteria to break them
   let tiesToBreak = ties;
   for (let i = 0; i < criteria.length && tiesToBreak.length > 0; i++) {
-    for (const tieGroup of ties) {
+    for (const tieGroup of tiesToBreak) {
       const [sorted, furtherTies] = splitAndSort(
         data.slice(tieGroup[0], tieGroup[1] + 1),
         criteria[i]!,
       );
       tiesToBreak = furtherTies;
+      console.log({ criterion: criteria[i], sorted, furtherTies });
       if (sorted.length !== tieGroup[1] - tieGroup[0] + 1) {
         console.warn('Sanity check - sorted length does not match tie group length');
       }
@@ -43,6 +64,7 @@ function splitAndSort<Datum extends Record<string, unknown>>(
   data: Datum[],
   criterion: SortCriterion,
 ): [Datum[], [number, number][]] {
+  // console.log('splitAndSort', data, criterion);
   const [undef, def] = partition(data, criterion.field, undefined);
   sortByCriterion(def, criterion);
 

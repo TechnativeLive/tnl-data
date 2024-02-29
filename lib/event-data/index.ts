@@ -39,7 +39,7 @@ export type EventFormatOptions<S extends Sport> = SportJsonTypes[S]['formatOptio
 export type EventLiveData<S extends Sport> = SportJsonTypes[S]['liveData'];
 export type EventResult<S extends Sport> = {
   result: SportJsonTypes[S]['results'];
-  __ts: number;
+  // __ts: number;
   status?: 'DNS' | 'DNF' | 'DQ';
 };
 export type EventResults<S extends Sport> = Results<EventResult<S>>;
@@ -55,8 +55,10 @@ type Results<Result extends unknown = unknown> = {
       }
     | undefined;
 } & {
-  active: { round?: string; class?: string; entrant?: number; __ts: number } | undefined;
-  judgeActive?:
-    | { [station: string]: { class?: string; entrant?: number; __ts: number } }
-    | undefined;
+  active: { round?: string; class?: string; entrant?: number } | undefined;
+  // judgeActive?:
+  //   | { [station: string]: { class?: string; entrant?: number; __ts: number } }
+  //   | undefined;
 };
+
+export type JudgeDataClimbing = Results<EventResultClimbing[number]>;

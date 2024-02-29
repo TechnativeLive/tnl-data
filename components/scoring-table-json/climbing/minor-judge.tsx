@@ -2,9 +2,10 @@ import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
 import { StackedButton } from '@/components/mantine-extensions/stacked-button';
 import { QueryLink } from '@/components/query-link';
 import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
+import { useJudgeJson } from '@/components/scoring-table-json/use-judge-json';
 import { useUpdateJsonResults } from '@/components/scoring-table-json/use-update-json-results';
 import { useEventTimers } from '@/components/timer/event-timers-context';
-import { EventResult } from '@/lib/event-data';
+import { EventResult, JudgeDataClimbing } from '@/lib/event-data';
 import { elapsedTime } from '@/lib/timer/utils';
 import { toNumOr } from '@/lib/utils';
 import {
@@ -22,7 +23,7 @@ import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Attempt = NonNullable<EventResult<'climbing'>['result'][number]>[number];
 
@@ -34,19 +35,33 @@ function getScoreState(attempt?: Attempt): 0 | 1 | 2 | 3 {
   return 0;
 }
 
-export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
+type MinorJudgeProps = Omit<
+  ScoringTableProps<'climbing'>,
+  'judgesData' | 'dsPrivateKey' | 'timers'
+> & { judgeData?: JudgeDataClimbing; station: string };
+
+export function ClimbingMinorJudge({
+  format,
+  results,
+  judgeData: initialJudgeData,
+  station,
+  formatOptions,
+}: MinorJudgeProps) {
   const searchParams = useSearchParams();
-  const { results, updateResult, updateJudgeActive } = useUpdateJsonResults(props);
-  const { format } = props;
+
   const [timer] = useEventTimers();
-  // const [isActive, setIsActive] = useState(false)
-
-  const station = searchParams.get('judge');
-
-  if (!station) return <div>This page should only be used with a `judge` search param</div>;
+  // const [isActive, setIsActive] = useState(false);
 
   const stationClassId = station.charAt(0) === 'M' ? 'mens' : 'womens';
   const activeRound = format.rounds.find((round) => round.id === results.active?.round);
+
+  const { judgeData, updateActive, updateResult } = useJudgeJson({
+    judgeData: initialJudgeData,
+    station,
+    blocCount: formatOptions.blocCount,
+    round: activeRound?.id,
+    class: stationClassId,
+  });
 
   if (!activeRound)
     return (
@@ -64,12 +79,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
       </div>
     );
 
-  const classResults = stationClass ? results[activeRound.id]?.[stationClass.id] : undefined;
-  const position = Number(station.charAt(1));
-
-  // const entrantId = toNumOr(searchParams.get('entrant'), undefined);
   const entrantIndex = toNumOr(searchParams.get('entrant'), 1) - 1;
-  console.log(entrantIndex, searchParams.get('entrant'), toNumOr(searchParams.get('entrant'), 1));
   const entrant = stationClass.entrants[entrantIndex >= 0 ? entrantIndex : 0];
   if (!entrant) {
     return (
@@ -79,37 +89,34 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
       </div>
     );
   }
+
+  const isActive = judgeData.active?.entrant === entrant.id;
+
   const prevEntrant = entrantIndex > 0 ? stationClass.entrants[entrantIndex - 1] : undefined;
   const nextEntrant =
     entrantIndex > -1 && entrantIndex < stationClass.entrants.length - 1
       ? stationClass.entrants[entrantIndex + 1]
       : undefined;
 
-  const entrantResults = classResults?.[entrant.id]?.result;
-  const entrantStatus = classResults?.[entrant.id]?.status;
-  const blocResults = entrantResults?.[position - 1];
+  const entrantStatus = results[activeRound.id]?.[stationClass.id]?.[entrant.id]?.status;
+  const blocResults = judgeData[activeRound.id]?.[stationClass.id]?.[entrant.id] ?? [];
   const latestAttempt = blocResults?.[blocResults.length - 1];
 
   function handleStart() {
     const elapsed = elapsedTime(timer);
     if (!activeRound || !entrant) return;
-    const newResults = [...(entrantResults ?? [])];
-    if (!Array.isArray(newResults[position - 1])) newResults[position - 1] = [];
-    if (!newResults[position - 1]) newResults[position - 1] = [];
-    const bloc = newResults[position - 1]!;
+    const newResults = blocResults.slice();
 
     if (scoreState === 0) {
       const newAttempt = { startedAt: elapsed };
-      bloc.push(newAttempt);
+      newResults.push(newAttempt);
     } else {
       // if mid-attempt, wipe the zone/top/ended times but keep the original start time
-      const attempt = bloc[bloc.length - 1];
-      bloc[bloc.length - 1] = { startedAt: attempt?.startedAt || Date.now() };
+      const attempt = newResults[newResults.length - 1];
+      newResults[newResults.length - 1] = { startedAt: attempt?.startedAt || Date.now() };
     }
 
     updateResult({
-      round: activeRound.id,
-      cls: stationClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -119,10 +126,9 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   function handleZone() {
     if (!activeRound || !entrant || scoreState === 0 || scoreState === 2) return;
     const elapsed = elapsedTime(timer);
-    const newResults = [...(entrantResults ?? [])];
-    if (!newResults[position - 1]) newResults[position - 1] = [];
-    const bloc = newResults[position - 1]!;
-    const attempt = bloc[bloc.length - 1];
+    const newResults = blocResults.slice();
+
+    const attempt = newResults[newResults.length - 1];
 
     if (!attempt) {
       console.warn('No attempt found');
@@ -130,15 +136,13 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     }
 
     if (scoreState === 1) {
-      bloc[bloc.length - 1] = { startedAt: attempt.startedAt, zoneAt: elapsed };
+      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: elapsed };
     } else {
       // scoreState === 3
-      bloc[bloc.length - 1] = { startedAt: attempt.startedAt, zoneAt: attempt.zoneAt };
+      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: attempt.zoneAt };
     }
 
     updateResult({
-      round: activeRound.id,
-      cls: stationClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -148,10 +152,9 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   function handleTop() {
     if (!activeRound || !entrant || scoreState !== 2) return;
     const elapsed = elapsedTime(timer);
-    const newResults = [...(entrantResults ?? [])];
-    if (!newResults[position - 1]) newResults[position - 1] = [];
-    const bloc = newResults[position - 1]!;
-    const attempt = bloc[bloc.length - 1];
+    const newResults = blocResults.slice();
+
+    const attempt = newResults[newResults.length - 1];
 
     if (!attempt) {
       console.warn('No attempt found');
@@ -161,8 +164,6 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     attempt.topAtProvisional = elapsed;
 
     updateResult({
-      round: activeRound.id,
-      cls: stationClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -172,10 +173,9 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   function handleEnd() {
     if (!activeRound || !entrant || scoreState === 0) return;
     const elapsed = elapsedTime(timer);
-    const newResults = [...(entrantResults ?? [])];
-    if (!newResults[position - 1]) newResults[position - 1] = [];
-    const bloc = newResults[position - 1]!;
-    const attempt = bloc[bloc.length - 1];
+    const newResults = blocResults.slice();
+
+    const attempt = newResults[newResults.length - 1];
 
     if (!attempt) {
       console.warn('No attempt found');
@@ -189,8 +189,6 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     }
 
     updateResult({
-      round: activeRound.id,
-      cls: stationClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -199,14 +197,11 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
 
   function handleDelete(attemptNumber: number) {
     if (!activeRound || !entrant) return;
-    const newResults = [...(entrantResults ?? [])];
-    if (!newResults[position - 1]) newResults[position - 1] = [];
-    const bloc = newResults[position - 1]!;
-    bloc.splice(attemptNumber - 1, 1);
+    const newResults = blocResults.slice();
+
+    newResults.splice(attemptNumber - 1, 1);
 
     updateResult({
-      round: activeRound.id,
-      cls: stationClassId,
       id: entrant.id,
       data: newResults,
       feedback: null,
@@ -215,10 +210,9 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
 
   function handleEdit(attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') {
     if (!activeRound || !entrant || !attemptNumber) return;
-    const newResults = [...(entrantResults ?? [])];
-    if (!newResults[position - 1]) newResults[position - 1] = [];
-    const bloc = newResults[position - 1]!;
-    const attempt = bloc[attemptNumber - 1];
+    const newResults = blocResults.slice();
+
+    const attempt = newResults[attemptNumber - 1];
 
     if (!attempt) {
       console.warn('No attempt found');
@@ -226,24 +220,23 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
     }
 
     if (target === 'start') {
-      delete bloc[attemptNumber - 1]!.topAt;
-      delete bloc[attemptNumber - 1]!.topAtProvisional;
-      delete bloc[attemptNumber - 1]!.zoneAt;
+      delete newResults[attemptNumber - 1]!.topAt;
+      delete newResults[attemptNumber - 1]!.topAtProvisional;
+      delete newResults[attemptNumber - 1]!.zoneAt;
     } else if (target === 'zone') {
-      delete bloc[attemptNumber - 1]!.topAt;
-      delete bloc[attemptNumber - 1]!.topAtProvisional;
-      bloc[attemptNumber - 1]!.zoneAt = attempt.zoneAt || attempt.endedAt || elapsedTime(timer);
+      delete newResults[attemptNumber - 1]!.topAt;
+      delete newResults[attemptNumber - 1]!.topAtProvisional;
+      newResults[attemptNumber - 1]!.zoneAt =
+        attempt.zoneAt || attempt.endedAt || elapsedTime(timer);
     } else if (target === 'top') {
       const time =
         attempt.topAt || attempt.topAtProvisional || attempt.endedAt || elapsedTime(timer);
-      bloc[attemptNumber - 1]!.topAtProvisional = time;
-      bloc[attemptNumber - 1]!.topAt = time;
-      bloc[attemptNumber - 1]!.zoneAt = Math.min(attempt.zoneAt ?? time, time);
+      newResults[attemptNumber - 1]!.topAtProvisional = time;
+      newResults[attemptNumber - 1]!.topAt = time;
+      newResults[attemptNumber - 1]!.zoneAt = Math.min(attempt.zoneAt ?? time, time);
     }
 
     updateResult({
-      round: activeRound.id,
-      cls: stationClassId,
       id: entrant.id,
       data: newResults,
       feedback: `Attempt changed to ${target.toLocaleUpperCase()}`,
@@ -251,7 +244,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
   }
 
   const scoreState = getScoreState(latestAttempt);
-  const isActive = results.judgeActive?.[station]?.entrant === entrant.id;
+  // const isActive = judgeData.active?.entrant === entrant.id;
 
   return (
     <div className="flex flex-col h-full rounded-lg border border-body-dimmed-hover overflow-hidden">
@@ -325,9 +318,7 @@ export function ClimbingMinorJudge(props: ScoringTableProps<'climbing'>) {
             color={isActive ? 'teal.5' : 'orange'}
             c={isActive ? 'dark.7' : undefined}
             onClick={() =>
-              updateJudgeActive({
-                station,
-                cls: !isActive ? stationClassId : undefined,
+              updateActive({
                 entrant: !isActive ? entrant.id : undefined,
                 feedback: null,
               })
@@ -432,10 +423,10 @@ function getBadge(attempt: Attempt): {
   label: BadgeLabel;
   color: string;
 } {
-  if (attempt.topAt !== undefined) return { label: 'Top', color: 'teal' };
-  if (attempt.topAtProvisional !== undefined)
+  if (attempt?.topAt !== undefined) return { label: 'Top', color: 'teal' };
+  if (attempt?.topAtProvisional !== undefined)
     return { label: 'Top (Provisional)', color: 'orange' };
-  if (attempt.zoneAt !== undefined) return { label: 'Zone', color: 'blue' };
+  if (attempt?.zoneAt !== undefined) return { label: 'Zone', color: 'blue' };
   return { label: 'Started', color: 'gray' };
 }
 
@@ -458,7 +449,7 @@ function Attempt({
   const badge = getBadge(attempt);
 
   const attemptTime =
-    attempt.endedAt !== undefined
+    attempt?.endedAt !== undefined
       ? dayjs(attempt.endedAt - attempt.startedAt).format('m:ss')
       : undefined;
 
