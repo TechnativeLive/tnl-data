@@ -90,7 +90,7 @@ export function ClimbingMinorJudge({
     );
   }
 
-  const isActive = judgeData.active?.entrant === entrant.id;
+  const isActive = judgeData?.active?.entrant === entrant.id;
 
   const prevEntrant = entrantIndex > 0 ? stationClass.entrants[entrantIndex - 1] : undefined;
   const nextEntrant =
@@ -99,7 +99,7 @@ export function ClimbingMinorJudge({
       : undefined;
 
   const entrantStatus = results[activeRound.id]?.[stationClass.id]?.[entrant.id]?.status;
-  const blocResults = judgeData[activeRound.id]?.[stationClass.id]?.[entrant.id] ?? [];
+  const blocResults = judgeData?.[activeRound.id]?.[stationClass.id]?.[entrant.id] ?? [];
   const latestAttempt = blocResults?.[blocResults.length - 1];
 
   function handleStart() {

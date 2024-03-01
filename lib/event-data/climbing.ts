@@ -126,17 +126,21 @@ export function generateLiveDataClimbing({
   );
   // console.log('liveDataResultsEntrantMap', liveDataResultsEntrantMap);
   const judgeActive = judgesData
-    .map((judgeData, index) => ({
-      station: judgeData.active?.class
-        ? getBoulderingJudgeStation(judgeData.active?.class, index)
+    .map((judgeData, index) =>
+      judgeData
+        ? {
+            station: judgeData.active?.class
+              ? getBoulderingJudgeStation(judgeData.active?.class, index)
+              : undefined,
+            class: judgeData.active?.class,
+            entrant: judgeData.active?.entrant
+              ? liveDataResultsEntrantMap[judgeData.active?.entrant]
+              : undefined,
+          }
         : undefined,
-      class: judgeData.active?.class,
-      entrant: judgeData.active?.entrant
-        ? liveDataResultsEntrantMap[judgeData.active?.entrant]
-        : undefined,
-    }))
-    .filter((ja) => !!ja.station)
-    .sort((a, b) => a.station!.localeCompare(b.station!));
+    )
+    .filter((ja) => !!ja && !!ja.station)
+    .sort((a, b) => a!.station!.localeCompare(b!.station!));
 
   // const judgeActive = Object.entries(results.judgeActive ?? {})
   //   .map(([station, { class: cls, entrant }]) => {
@@ -148,7 +152,7 @@ export function generateLiveDataClimbing({
   //   })
   //   .sort((a, b) => a.station.localeCompare(b.station));
 
-  liveData.judgeActive = judgeActive;
+  liveData.judgeActive = judgeActive as NonNullable<(typeof judgeActive)[number]>[];
 
   if (liveData.results) {
     // for each class, map through the results and find the matching entrant in the judgeActive array
@@ -188,7 +192,9 @@ export function generateLiveDataClimbing({
       round: activeRound.name,
       class: cls.name,
       classId: cls.id,
-      entrants: judgeActive.filter((judge) => judge.class === cls.id),
+      entrants: judgeActive.filter((judge) => judge?.class === cls.id) as NonNullable<
+        (typeof judgeActive)[number]
+      >[],
       // startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
     };
   });

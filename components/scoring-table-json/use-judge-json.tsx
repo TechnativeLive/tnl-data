@@ -48,7 +48,10 @@ export function useJudgeJson<S extends Sport>({
   const judgeIndex = getBoulderingJudgeIndex(station, blocCount);
 
   const [judgeData, setJudgeData] = useState(initialJudgeData ?? ({} as JudgeDataClimbing));
-  useDidUpdate(() => setJudgeData(initialJudgeData ?? ({} as JudgeDataClimbing)), []);
+  useDidUpdate(
+    () => setJudgeData(initialJudgeData ?? ({} as JudgeDataClimbing)),
+    [initialJudgeData],
+  );
 
   const supabase = createBrowserClient();
   const [loading, setLoading] = useState(false);
@@ -66,7 +69,9 @@ export function useJudgeJson<S extends Sport>({
 
       setLoading(true);
       setJudgeData((current) => {
-        const newResults: JudgeDataClimbing = { ...current };
+        const newResults: NonNullable<JudgeDataClimbing> = {
+          ...current,
+        } as NonNullable<JudgeDataClimbing>;
         newResults.active = {
           round,
           class: cls,
@@ -109,14 +114,16 @@ export function useJudgeJson<S extends Sport>({
       }
 
       setJudgeData((current) => {
-        const newResults = { ...current };
+        const newResults: NonNullable<JudgeDataClimbing> = {
+          ...current,
+        } as NonNullable<JudgeDataClimbing>;
         if (!newResults[round]) newResults[round] = {};
         if (!newResults[round]![cls]) newResults[round]![cls] = {};
         newResults[round]![cls]![id] = data;
 
         setLoading(true);
 
-        console.log({ id, data, newResults }); // update db
+        // console.log({ id, data, newResults }); // update db
         supabase
           .rpc('update_judge_data', {
             event: eventSlug,

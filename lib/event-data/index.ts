@@ -61,4 +61,4 @@ type Results<Result extends unknown = unknown> = {
   //   | undefined;
 };
 
-export type JudgeDataClimbing = Results<EventResultClimbing[number]>;
+export type JudgeDataClimbing = Results<EventResultClimbing[number]> | null;
