@@ -82,7 +82,11 @@ export type EventLiveDataClimbing = {
   results: {
     [cls: string]: LiveDataResult[] | undefined;
   };
-  startlist?: { class: string; startlist: { entrant: Tables<'entrants'>; pos: number }[] }[];
+  startlist?: {
+    class: string;
+    classId: string;
+    startlist: { entrant: Tables<'entrants'>; pos: number }[];
+  }[];
   message?: unknown;
 };
 
@@ -105,6 +109,7 @@ export function generateLiveDataClimbing({
 
   liveData.startlist = activeRound.classes.map((cls) => ({
     class: cls.name,
+    classId: cls.id,
     startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
   }));
 
