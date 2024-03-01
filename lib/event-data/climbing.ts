@@ -43,6 +43,7 @@ type RoundClass = {
 };
 
 type LiveDataResult = {
+  startPos: number;
   rank: number;
   tops: number;
   zones: number;
@@ -219,6 +220,7 @@ export function generateLiveDataResultsClimbing({
       const activeResults = results?.[round.id]?.[cls.id];
 
       const liveDataResults = getEntrants(cls.entrants, activeResults);
+
       live[cls.id] = sortAndRank(liveDataResults, {
         criteria: [
           { field: 'status', undefinedFirst: true },
@@ -226,6 +228,7 @@ export function generateLiveDataResultsClimbing({
           { field: 'zones' },
           { field: 'ta', asc: true },
           { field: 'za', asc: true },
+          { field: 'startPos' },
         ],
         stabilize: { field: 'entrant.last_name', asc: true },
       });
@@ -244,7 +247,7 @@ function getEntrants(
       }
     | undefined,
 ): Omit<LiveDataResult, 'rank'>[] {
-  return entrants.map((entrant) => {
+  return entrants.map((entrant, i) => {
     const result = results?.[entrant.id]?.result;
     const runs = result?.map((bloc) => getBlocScores(bloc)) ?? [];
 
@@ -265,6 +268,7 @@ function getEntrants(
       status: results?.[entrant.id]?.status,
       entrant,
       runs,
+      startPos: i + 1,
     };
   });
 }
