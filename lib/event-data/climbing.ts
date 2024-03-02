@@ -75,6 +75,7 @@ export type EventLiveDataClimbing = {
       entrant: LiveDataResult | undefined;
     }[];
   }[];
+  blocData?: LiveDataResult[][][];
   judgeActive?: {
     station: string | undefined;
     class: string | undefined;
@@ -148,17 +149,44 @@ export function generateLiveDataClimbing({
     .filter((ja) => !!ja && !!ja.station)
     .sort((a, b) => a!.station!.localeCompare(b!.station!));
 
-  // const judgeActive = Object.entries(results.judgeActive ?? {})
-  //   .map(([station, { class: cls, entrant }]) => {
-  //     return {
-  //       station,
-  //       class: cls,
-  //       entrant: entrant ? liveDataResultsEntrantMap[entrant] : undefined,
-  //     };
-  //   })
-  //   .sort((a, b) => a.station.localeCompare(b.station));
-
   liveData.judgeActive = judgeActive as NonNullable<(typeof judgeActive)[number]>[];
+
+  liveData.blocData = judgesData.map((judgeData) => {
+    return Object.entries(judgeData?.[activeRound.id] ?? {}).reduce((live, [classId, entrants]) => {
+      const blocResult = Object.entries(entrants ?? {}).map(([entrantId, entrantResult]) => {
+        const run = getBlocScores(entrantResult);
+        const entrantInfo = liveDataResultsEntrantMap[entrantId];
+        const result: Omit<LiveDataResult, 'rank'> = {
+          tops: run.top > 0 ? 1 : 0,
+          zones: run.zone > 0 ? 1 : 0,
+          ta: run.top,
+          za: run.zone,
+          status: results?.[activeRound.id]?.[classId]?.[entrantId]?.status,
+          entrant: entrantInfo?.entrant!,
+          runs: [run],
+          startPos: entrantInfo?.startPos!,
+        };
+
+        return result;
+      });
+      const sorted = sortAndRank(blocResult, {
+        criteria: [
+          { field: 'status', undefinedFirst: true },
+          { field: 'tops' },
+          { field: 'zones' },
+          { field: 'ta', asc: true },
+          { field: 'za', asc: true },
+          { field: 'startPos' },
+        ],
+        stabilize: { field: 'entrant.last_name', asc: true },
+      });
+
+      live.push(sorted);
+
+      return live;
+    }, [] as LiveDataResult[][]);
+  });
+  // liveData.blocData =
 
   if (liveData.results) {
     // for each class, map through the results and find the matching entrant in the judgeActive array
