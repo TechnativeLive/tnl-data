@@ -75,7 +75,7 @@ export type EventLiveDataClimbing = {
       entrant: LiveDataResult | undefined;
     }[];
   }[];
-  blocData?: LiveDataResult[][][];
+  blocData?: LiveDataResult[][];
   judgeActive?: {
     station: string | undefined;
     class: string | undefined;
@@ -151,40 +151,57 @@ export function generateLiveDataClimbing({
 
   liveData.judgeActive = judgeActive as NonNullable<(typeof judgeActive)[number]>[];
 
-  liveData.blocData = judgesData.map((judgeData) => {
-    return Object.entries(judgeData?.[activeRound.id] ?? {}).reduce((live, [classId, entrants]) => {
-      const blocResult = Object.entries(entrants ?? {}).map(([entrantId, entrantResult]) => {
-        const run = getBlocScores(entrantResult);
-        const entrantInfo = liveDataResultsEntrantMap[entrantId];
-        const result: Omit<LiveDataResult, 'rank'> = {
-          tops: run.top > 0 ? 1 : 0,
-          zones: run.zone > 0 ? 1 : 0,
-          ta: run.top,
-          za: run.zone,
-          status: results?.[activeRound.id]?.[classId]?.[entrantId]?.status,
-          entrant: entrantInfo?.entrant!,
-          runs: [run],
-          startPos: entrantInfo?.startPos!,
-        };
-
-        return result;
-      });
-      const sorted = sortAndRank(blocResult, {
-        criteria: [
-          { field: 'status', undefinedFirst: true },
-          { field: 'tops' },
-          { field: 'zones' },
-          { field: 'ta', asc: true },
-          { field: 'za', asc: true },
-          { field: 'startPos' },
-        ],
-        stabilize: { field: 'entrant.last_name', asc: true },
-      });
-
-      live.push(sorted);
-
+  const t = judgesData.map((judgeData) => {
+    Object.entries(judgeData?.[activeRound.id] ?? {}).reduce((live, [classId, entrants]) => {
+      live.push(classId, entrants);
       return live;
-    }, [] as LiveDataResult[][]);
+    }, [] as any[]);
+  });
+  console.log({ t });
+  liveData.blocData = judgesData.map((judgeData) => {
+    // const allBlocEntrants = Object.entries(judgeData?.[activeRound.id] ?? {}).flatMap(([classId, entrants]) => Object.entries(entrants ?? {}))
+
+    const blocResults = Object.entries(judgeData?.[activeRound.id] ?? {})
+      .reduce(
+        (live, [classId, entrants]) => {
+          const blocResult = Object.entries(entrants ?? {}).map(([entrantId, entrantResult]) => {
+            const run = getBlocScores(entrantResult);
+            const entrantInfo = liveDataResultsEntrantMap[entrantId];
+            const result: Omit<LiveDataResult, 'rank'> = {
+              tops: run.top > 0 ? 1 : 0,
+              zones: run.zone > 0 ? 1 : 0,
+              ta: run.top,
+              za: run.zone,
+              status: results?.[activeRound.id]?.[classId]?.[entrantId]?.status,
+              entrant: entrantInfo?.entrant!,
+              runs: [run],
+              startPos: entrantInfo?.startPos!,
+            };
+
+            return result;
+          });
+          live.push(blocResult);
+
+          return live;
+        },
+        [] as Omit<LiveDataResult, 'rank'>[][],
+      )
+      .flat();
+
+    const sorted = sortAndRank(blocResults, {
+      criteria: [
+        { field: 'status', undefinedFirst: true },
+        { field: 'tops' },
+        { field: 'zones' },
+        { field: 'ta', asc: true },
+        { field: 'za', asc: true },
+        { field: 'startPos' },
+      ],
+      stabilize: { field: 'entrant.last_name', asc: true },
+    });
+
+    console.log({ sorted });
+    return sorted;
   });
   // liveData.blocData =
 
