@@ -1,14 +1,14 @@
 import {
-  getBlocScores,
-  getBoulderingJudgeStation,
-} from '@/components/scoring-table-json/climbing/utils';
-import {
   EventFormat,
   EventLiveData,
   EventResult,
   EventResults,
   JudgeDataClimbing,
 } from '@/lib/event-data';
+import {
+  getBlocScores,
+  getBoulderingJudgeStation,
+} from '@/components/scoring-table-json/climbing/utils';
 import { sortAndRank } from '@/lib/sort-and-rank';
 
 export type EventResultClimbing = ({
@@ -151,13 +151,13 @@ export function generateLiveDataClimbing({
 
   liveData.judgeActive = judgeActive as NonNullable<(typeof judgeActive)[number]>[];
 
-  const t = judgesData.map((judgeData) => {
-    Object.entries(judgeData?.[activeRound.id] ?? {}).reduce((live, [classId, entrants]) => {
-      live.push(classId, entrants);
-      return live;
-    }, [] as any[]);
-  });
-  console.log({ t });
+  // const t = judgesData.map((judgeData) => {
+  //   Object.entries(judgeData?.[activeRound.id] ?? {}).reduce((live, [classId, entrants]) => {
+  //     live.push(classId, entrants);
+  //     return live;
+  //   }, [] as any[]);
+  // });
+  // console.log({ t });
   liveData.blocData = judgesData.map((judgeData) => {
     // const allBlocEntrants = Object.entries(judgeData?.[activeRound.id] ?? {}).flatMap(([classId, entrants]) => Object.entries(entrants ?? {}))
 
