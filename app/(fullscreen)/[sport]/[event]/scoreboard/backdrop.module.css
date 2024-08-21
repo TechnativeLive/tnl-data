@@ -1,0 +1,58 @@
+.backdrop {
+  --opacity: 0.05;
+  --bd-duration: 45s;
+  --bd-x: 800px;
+  --bd-y: 1600px;
+  --bd-sway-x: 1 / 4;
+  --bd-sway-y: 1 / 2;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -99;
+}
+
+.backdrop-x {
+  mix-blend-mode: color-burn;
+  animation: backdrop-x calc(var(--bd-duration) / 4) ease-in-out infinite alternate;
+}
+
+.backdrop-y {
+  animation: backdrop-y calc(var(--bd-duration) / 2) ease-in-out infinite alternate;
+}
+
+.backdrop-image {
+  background-image: url(/images/topo/2.svg);
+  opacity: var(--opacity);
+  animation: backdrop var(--bd-duration) linear infinite;
+  width: calc(100vh + calc(var(--bd-x) * (1 + var(--bd-sway-x))));
+  height: calc(100vh + calc(var(--bd-y) * (1 + var(--bd-sway-y))));
+}
+
+@keyframes backdrop {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(calc(var(--bd-x) * -1), calc(var(--bd-y) * -1));
+  }
+}
+
+@keyframes backdrop-x {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(var(--bd-x) * var(--bd-sway-x) * -1));
+  }
+}
+@keyframes backdrop-y {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(var(--bd-y) * var(--bd-sway-y) * -1));
+  }
+}

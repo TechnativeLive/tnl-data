@@ -78,6 +78,22 @@ module.exports = {
           //   marginRight: 'clamp(1rem, 5vw, 10rem)',
           // }
         },
+        '.px-content': {
+          marginLeft: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
+          marginRight: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
+          // '@media (min-width: 1024px)': {
+          //   marginLeft: 'clamp(1rem, 5vw, 10rem)',
+          //   marginRight: 'clamp(1rem, 5vw, 10rem)',
+          // }
+        },
+        '.-px-content': {
+          marginLeft: 'calc(0px - clamp(1rem, 10vw - 3.5rem, 16rem))',
+          marginRight: 'calc(0px - clamp(1rem, 10vw - 3.5rem, 16rem))',
+          // '@media (min-width: 1024px)': {
+          //   marginLeft: 'clamp(1rem, 5vw, 10rem)',
+          //   marginRight: 'clamp(1rem, 5vw, 10rem)',
+          // }
+        },
         '.subgrid': {
           display: 'grid',
           'grid-template-columns': 'subgrid',
