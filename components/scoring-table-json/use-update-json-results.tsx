@@ -73,7 +73,6 @@ export function useUpdateJsonResults<S extends Sport>(
         return;
       }
       setResults((current) => {
-        const now = Date.now();
         const newResults: EventResults<S> = { ...current };
         if (!newResults.active) newResults.active = {};
         newResults.active.round = round;

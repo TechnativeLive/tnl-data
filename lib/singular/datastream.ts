@@ -30,7 +30,7 @@ type DeleteResponse = {
   message: 'success';
 };
 
-export const datastream = {
+export const datastreamKeys = {
   create: async (name: string) => {
     if (!name) {
       return safeError({ code: -1, message: 'Name is required when creating a datastream' });
