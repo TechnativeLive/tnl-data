@@ -20,9 +20,9 @@ export function useRealtimeJsonEvent<S extends string>() {
   const supabase = createBrowserClient();
   const [event, setEvent] = useState<
     | (Data & {
-        results: S extends Sport ? EventResults<S> : Json;
-        format: S extends Sport ? EventFormat<S> : Json;
-      })
+      results: S extends Sport ? EventResults<S> : Json;
+      format: S extends Sport ? EventFormat<S> : Json;
+    })
     | null
   >(null);
   const [loading, setLoading] = useState(true);

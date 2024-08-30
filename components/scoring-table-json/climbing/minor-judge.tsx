@@ -1,13 +1,12 @@
-import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
-import { StackedButton } from '@/components/mantine-extensions/stacked-button';
-import { QueryLink } from '@/components/query-link';
-import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
-import { useJudgeJson } from '@/components/scoring-table-json/use-judge-json';
-import { useUpdateJsonResults } from '@/components/scoring-table-json/use-update-json-results';
-import { useEventTimers } from '@/components/timer/event-timers-context';
-import { EventResult, JudgeDataClimbing } from '@/lib/event-data';
-import { elapsedTime } from '@/lib/timer/utils';
-import { toNumOr } from '@/lib/utils';
+import { ConfirmButton } from '@/components/mantine-extensions/confirm-button'
+import { StackedButton } from '@/components/mantine-extensions/stacked-button'
+import { QueryLink } from '@/components/query-link'
+import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json'
+import { useJudgeJson } from '@/components/scoring-table-json/use-judge-json'
+import { useEventTimers } from '@/components/timer/event-timers-context'
+import { EventResult, JudgeDataClimbing } from '@/lib/event-data'
+import { elapsedTime } from '@/lib/timer/utils'
+import { toNumOr } from '@/lib/utils'
 import {
   Badge,
   Button,
@@ -17,28 +16,28 @@ import {
   Loader,
   Modal,
   Text,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
-import clsx from 'clsx';
-import dayjs from 'dayjs';
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+} from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
+import clsx from 'clsx'
+import dayjs from 'dayjs'
+import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 
-type Attempt = NonNullable<EventResult<'climbing'>['result'][number]>[number];
+type Attempt = NonNullable<EventResult<'climbing'>['result'][number]>[number]
 
 function getScoreState(attempt?: Attempt): 0 | 1 | 2 | 3 {
-  if (attempt?.topAt !== undefined || attempt?.endedAt !== undefined) return 0;
-  if (attempt?.topAtProvisional !== undefined) return 3;
-  if (attempt?.zoneAt !== undefined) return 2;
-  if (attempt?.startedAt !== undefined) return 1;
-  return 0;
+  if (attempt?.topAt !== undefined || attempt?.endedAt !== undefined) return 0
+  if (attempt?.topAtProvisional !== undefined) return 3
+  if (attempt?.zoneAt !== undefined) return 2
+  if (attempt?.startedAt !== undefined) return 1
+  return 0
 }
 
 type MinorJudgeProps = Omit<
   ScoringTableProps<'climbing'>,
   'judgesData' | 'dsPrivateKey' | 'timers'
-> & { judgeData?: JudgeDataClimbing; station: string };
+> & { judgeData?: JudgeDataClimbing; station: string }
 
 export function ClimbingMinorJudge({
   format,
@@ -47,16 +46,16 @@ export function ClimbingMinorJudge({
   station,
   formatOptions,
 }: MinorJudgeProps) {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams()
 
-  const [timer] = useEventTimers();
+  const [timer] = useEventTimers()
   // const [isActive, setIsActive] = useState(false);
 
-  const stationClassId = station.charAt(0) === 'M' ? 'mens' : 'womens';
-  const activeRound = format.rounds.find((round) => round.id === results.active?.round);
-  const stationClass = activeRound?.classes.find((cls) => cls.id === stationClassId);
-  const entrantIndex = toNumOr(searchParams.get('entrant'), 1) - 1;
-  const entrant = stationClass?.entrants[entrantIndex >= 0 ? entrantIndex : 0];
+  const stationClassId = station.charAt(0) === 'M' ? 'mens' : 'womens'
+  const activeRound = format.rounds.find((round) => round.id === results.active?.round)
+  const stationClass = activeRound?.classes.find((cls) => cls.id === stationClassId)
+  const entrantIndex = toNumOr(searchParams.get('entrant'), 1) - 1
+  const entrant = stationClass?.entrants[entrantIndex >= 0 ? entrantIndex : 0]
 
   const { judgeData, updateActive, updateResult } = useJudgeJson({
     judgeData: initialJudgeData,
@@ -64,7 +63,7 @@ export function ClimbingMinorJudge({
     blocCount: formatOptions.blocCount,
     round: activeRound?.id,
     class: stationClassId,
-  });
+  })
 
   if (!activeRound)
     return (
@@ -72,14 +71,14 @@ export function ClimbingMinorJudge({
         Waiting for the head judge to set an active round
         <Loader type="bars" />
       </div>
-    );
+    )
 
   if (!stationClass)
     return (
       <div className="py-8 w-full grid place-content-center justify-items-center gap-4">
         No class found for Judge {station}
       </div>
-    );
+    )
 
   if (!entrant) {
     return (
@@ -87,163 +86,163 @@ export function ClimbingMinorJudge({
         Waiting for the head judge to add entrants
         <Loader type="bars" />
       </div>
-    );
+    )
   }
 
-  const isActive = judgeData?.active?.entrant === entrant.id;
+  const isActive = judgeData?.active?.entrant === entrant.id
 
-  const prevEntrant = entrantIndex > 0 ? stationClass.entrants[entrantIndex - 1] : undefined;
+  const prevEntrant = entrantIndex > 0 ? stationClass.entrants[entrantIndex - 1] : undefined
   const nextEntrant =
     entrantIndex > -1 && entrantIndex < stationClass.entrants.length - 1
       ? stationClass.entrants[entrantIndex + 1]
-      : undefined;
+      : undefined
 
-  const entrantStatus = results[activeRound.id]?.[stationClass.id]?.[entrant.id]?.status;
-  const blocResults = judgeData?.[activeRound.id]?.[stationClass.id]?.[entrant.id] ?? [];
-  const latestAttempt = blocResults?.[blocResults.length - 1];
+  const entrantStatus = results[activeRound.id]?.[stationClass.id]?.[entrant.id]?.status
+  const blocResults = judgeData?.[activeRound.id]?.[stationClass.id]?.[entrant.id] ?? []
+  const latestAttempt = blocResults?.[blocResults.length - 1]
 
   function handleStart() {
-    const elapsed = elapsedTime(timer);
-    if (!activeRound || !entrant) return;
-    const newResults = blocResults.slice();
+    const elapsed = elapsedTime(timer)
+    if (!activeRound || !entrant) return
+    const newResults = blocResults.slice()
 
     if (scoreState === 0) {
-      const newAttempt = { startedAt: elapsed };
-      newResults.push(newAttempt);
+      const newAttempt = { startedAt: elapsed }
+      newResults.push(newAttempt)
     } else {
       // if mid-attempt, wipe the zone/top/ended times but keep the original start time
-      const attempt = newResults[newResults.length - 1];
-      newResults[newResults.length - 1] = { startedAt: attempt?.startedAt || Date.now() };
+      const attempt = newResults[newResults.length - 1]
+      newResults[newResults.length - 1] = { startedAt: attempt?.startedAt || Date.now() }
     }
 
     updateResult({
       id: entrant.id,
       data: newResults,
       feedback: null,
-    });
+    })
   }
 
   function handleZone() {
-    if (!activeRound || !entrant || scoreState === 0 || scoreState === 2) return;
-    const elapsed = elapsedTime(timer);
-    const newResults = blocResults.slice();
+    if (!activeRound || !entrant || scoreState === 0 || scoreState === 2) return
+    const elapsed = elapsedTime(timer)
+    const newResults = blocResults.slice()
 
-    const attempt = newResults[newResults.length - 1];
+    const attempt = newResults[newResults.length - 1]
 
     if (!attempt) {
-      console.warn('No attempt found');
-      return;
+      console.warn('No attempt found')
+      return
     }
 
     if (scoreState === 1) {
-      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: elapsed };
+      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: elapsed }
     } else {
       // scoreState === 3
-      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: attempt.zoneAt };
+      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: attempt.zoneAt }
     }
 
     updateResult({
       id: entrant.id,
       data: newResults,
       feedback: null,
-    });
+    })
   }
 
   function handleTop() {
-    if (!activeRound || !entrant || scoreState !== 2) return;
-    const elapsed = elapsedTime(timer);
-    const newResults = blocResults.slice();
+    if (!activeRound || !entrant || scoreState !== 2) return
+    const elapsed = elapsedTime(timer)
+    const newResults = blocResults.slice()
 
-    const attempt = newResults[newResults.length - 1];
+    const attempt = newResults[newResults.length - 1]
 
     if (!attempt) {
-      console.warn('No attempt found');
-      return;
+      console.warn('No attempt found')
+      return
     }
 
-    attempt.topAtProvisional = elapsed;
+    attempt.topAtProvisional = elapsed
 
     updateResult({
       id: entrant.id,
       data: newResults,
       feedback: null,
-    });
+    })
   }
 
   function handleEnd() {
-    if (!activeRound || !entrant || scoreState === 0) return;
-    const elapsed = elapsedTime(timer);
-    const newResults = blocResults.slice();
+    if (!activeRound || !entrant || scoreState === 0) return
+    const elapsed = elapsedTime(timer)
+    const newResults = blocResults.slice()
 
-    const attempt = newResults[newResults.length - 1];
+    const attempt = newResults[newResults.length - 1]
 
     if (!attempt) {
-      console.warn('No attempt found');
-      return;
+      console.warn('No attempt found')
+      return
     }
     if (scoreState === 3) {
-      attempt.topAt = attempt.topAtProvisional || elapsed;
-      attempt.endedAt = attempt.topAt;
+      attempt.topAt = attempt.topAtProvisional || elapsed
+      attempt.endedAt = attempt.topAt
     } else {
-      attempt.endedAt = elapsed;
+      attempt.endedAt = elapsed
     }
 
     updateResult({
       id: entrant.id,
       data: newResults,
       feedback: null,
-    });
+    })
   }
 
   function handleDelete(attemptNumber: number) {
-    if (!activeRound || !entrant) return;
-    const newResults = blocResults.slice();
+    if (!activeRound || !entrant) return
+    const newResults = blocResults.slice()
 
-    newResults.splice(attemptNumber - 1, 1);
+    newResults.splice(attemptNumber - 1, 1)
 
     updateResult({
       id: entrant.id,
       data: newResults,
       feedback: null,
-    });
+    })
   }
 
   function handleEdit(attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') {
-    if (!activeRound || !entrant || !attemptNumber) return;
-    const newResults = blocResults.slice();
+    if (!activeRound || !entrant || !attemptNumber) return
+    const newResults = blocResults.slice()
 
-    const attempt = newResults[attemptNumber - 1];
+    const attempt = newResults[attemptNumber - 1]
 
     if (!attempt) {
-      console.warn('No attempt found');
-      return;
+      console.warn('No attempt found')
+      return
     }
 
     if (target === 'start') {
-      delete newResults[attemptNumber - 1]!.topAt;
-      delete newResults[attemptNumber - 1]!.topAtProvisional;
-      delete newResults[attemptNumber - 1]!.zoneAt;
+      delete newResults[attemptNumber - 1]!.topAt
+      delete newResults[attemptNumber - 1]!.topAtProvisional
+      delete newResults[attemptNumber - 1]!.zoneAt
     } else if (target === 'zone') {
-      delete newResults[attemptNumber - 1]!.topAt;
-      delete newResults[attemptNumber - 1]!.topAtProvisional;
+      delete newResults[attemptNumber - 1]!.topAt
+      delete newResults[attemptNumber - 1]!.topAtProvisional
       newResults[attemptNumber - 1]!.zoneAt =
-        attempt.zoneAt || attempt.endedAt || elapsedTime(timer);
+        attempt.zoneAt || attempt.endedAt || elapsedTime(timer)
     } else if (target === 'top') {
       const time =
-        attempt.topAt || attempt.topAtProvisional || attempt.endedAt || elapsedTime(timer);
-      newResults[attemptNumber - 1]!.topAtProvisional = time;
-      newResults[attemptNumber - 1]!.topAt = time;
-      newResults[attemptNumber - 1]!.zoneAt = Math.min(attempt.zoneAt ?? time, time);
+        attempt.topAt || attempt.topAtProvisional || attempt.endedAt || elapsedTime(timer)
+      newResults[attemptNumber - 1]!.topAtProvisional = time
+      newResults[attemptNumber - 1]!.topAt = time
+      newResults[attemptNumber - 1]!.zoneAt = Math.min(attempt.zoneAt ?? time, time)
     }
 
     updateResult({
       id: entrant.id,
       data: newResults,
       feedback: `Attempt changed to ${target.toLocaleUpperCase()}`,
-    });
+    })
   }
 
-  const scoreState = getScoreState(latestAttempt);
+  const scoreState = getScoreState(latestAttempt)
   // const isActive = judgeData.active?.entrant === entrant.id;
 
   return (
@@ -382,7 +381,7 @@ export function ClimbingMinorJudge({
         </>
       )}
     </div>
-  );
+  )
 }
 
 function ActiveButton({
@@ -412,19 +411,19 @@ function ActiveButton({
         {...props}
       />
     </div>
-  );
+  )
 }
 
-type BadgeLabel = 'Started' | 'Zone' | 'Top' | 'Top (Provisional)';
+type BadgeLabel = 'Started' | 'Zone' | 'Top' | 'Top (Provisional)'
 function getBadge(attempt: Attempt): {
-  label: BadgeLabel;
-  color: string;
+  label: BadgeLabel
+  color: string
 } {
-  if (attempt?.topAt !== undefined) return { label: 'Top', color: 'teal' };
+  if (attempt?.topAt !== undefined) return { label: 'Top', color: 'teal' }
   if (attempt?.topAtProvisional !== undefined)
-    return { label: 'Top (Provisional)', color: 'orange' };
-  if (attempt?.zoneAt !== undefined) return { label: 'Zone', color: 'blue' };
-  return { label: 'Started', color: 'gray' };
+    return { label: 'Top (Provisional)', color: 'orange' }
+  if (attempt?.zoneAt !== undefined) return { label: 'Zone', color: 'blue' }
+  return { label: 'Started', color: 'gray' }
 }
 
 function Attempt({
@@ -434,21 +433,21 @@ function Attempt({
   handleEdit,
   handleDelete,
 }: {
-  attempt: Attempt;
-  number: number;
-  active: boolean;
-  handleEdit: (attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') => void;
-  handleDelete: (attemptNumber: number) => void;
+  attempt: Attempt
+  number: number
+  active: boolean
+  handleEdit: (attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') => void
+  handleDelete: (attemptNumber: number) => void
 }) {
-  const [opened, { open, close }] = useDisclosure(false);
-  const [editing, setEditing] = useState<number>();
+  const [opened, { open, close }] = useDisclosure(false)
+  const [editing, setEditing] = useState<number>()
 
-  const badge = getBadge(attempt);
+  const badge = getBadge(attempt)
 
   const attemptTime =
     attempt?.endedAt !== undefined
       ? dayjs(attempt.endedAt - attempt.startedAt).format('m:ss')
-      : undefined;
+      : undefined
 
   return (
     <>
@@ -519,8 +518,8 @@ function Attempt({
               size="sm"
               color="gray"
               onClick={() => {
-                open();
-                setEditing(number);
+                open()
+                setEditing(number)
               }}
               disabled={active}
             >
@@ -539,5 +538,5 @@ function Attempt({
         </div>
       </div>
     </>
-  );
+  )
 }

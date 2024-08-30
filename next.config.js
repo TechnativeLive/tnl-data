@@ -7,6 +7,6 @@ const nextConfig = {
     optimizePackageImports: ['@mantine/core', '@tabler/icons-react'],
     typedRoutes: true,
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
