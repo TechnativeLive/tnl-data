@@ -1,19 +1,19 @@
-import { EventDataEditForm } from '@/app/(app-shell)/[sport]/[event]/edit/edit';
+import { EventDataEditForm } from '@/app/(app-shell)/[sport]/[event]/edit/edit'
 import {
   PreviousSnapshotModal,
   RestoreFromSnapshotButton,
   TakeSnapshotButton,
-} from '@/app/(app-shell)/[sport]/[event]/edit/snapshot';
-import { Info } from '@/components/info';
-import { tsReadable } from '@/lib/dates';
-import { day } from '@/lib/dayjs';
-import { createServerClient } from '@/lib/db/server';
-import { Sport } from '@/lib/event-data';
-import { Flex, Loader, Paper, Stack, Text } from '@mantine/core';
-import { Suspense } from 'react';
+} from '@/app/(app-shell)/[sport]/[event]/edit/snapshot'
+import { Info } from '@/components/info'
+import { tsReadable } from '@/lib/dates'
+import { day } from '@/lib/dayjs'
+import { createServerClient } from '@/lib/db/server'
+import { Sport } from '@/lib/event-data'
+import { Flex, Loader, Paper, Stack, Text } from '@mantine/core'
+import { Suspense } from 'react'
 
 export default async function EventPage({ params }: { params: { sport: string; event: string } }) {
-  const supabase = createServerClient();
+  const supabase = createServerClient()
 
   const { data } = await supabase
     .from('events')
@@ -21,17 +21,17 @@ export default async function EventPage({ params }: { params: { sport: string; e
       'name, format, results, starts_at, ends_at, created_at, updated_at, snapshot, timers, ds_keys(name, description, public, private)',
     )
     .eq('slug', params.event)
-    .single();
+    .single()
 
   const { data: allDsKeys } = await supabase
     .from('ds_keys')
     .select('name, description, public, private')
-    .filter('kind', 'eq', 'data');
+    .filter('kind', 'eq', 'data')
 
-  const { data: timers } = await supabase.from('timers').select('value:id, label:name');
+  const { data: timers } = await supabase.from('timers').select('value:id, label:name')
 
-  const createdAtDate = data?.created_at ? new Date(data.created_at) : undefined;
-  const updatedAtDate = data?.updated_at ? new Date(data.updated_at) : undefined;
+  const createdAtDate = data?.created_at ? new Date(data.created_at) : undefined
+  const updatedAtDate = data?.updated_at ? new Date(data.updated_at) : undefined
 
   return (
     <Flex justify="center" className="flex-1 py-4 mb-4 mx-content">
@@ -106,5 +106,5 @@ export default async function EventPage({ params }: { params: { sport: string; e
         )}
       </Stack>
     </Flex>
-  );
+  )
 }

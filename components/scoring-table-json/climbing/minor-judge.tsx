@@ -27,10 +27,10 @@ import { useState } from 'react'
 type Attempt = NonNullable<EventResult<'climbing'>['result'][number]>[number]
 
 function getScoreState(attempt?: Attempt): 0 | 1 | 2 | 3 {
-  if (attempt?.topAt !== undefined || attempt?.endedAt !== undefined) return 0
-  if (attempt?.topAtProvisional !== undefined) return 3
-  if (attempt?.zoneAt !== undefined) return 2
-  if (attempt?.startedAt !== undefined) return 1
+  if (attempt?.t !== undefined || attempt?.e !== undefined) return 0
+  if (attempt?.tp !== undefined) return 3
+  if (attempt?.z !== undefined) return 2
+  if (attempt?.s !== undefined) return 1
   return 0
 }
 
@@ -107,12 +107,12 @@ export function ClimbingMinorJudge({
     const newResults = blocResults.slice()
 
     if (scoreState === 0) {
-      const newAttempt = { startedAt: elapsed }
+      const newAttempt = { s: elapsed }
       newResults.push(newAttempt)
     } else {
       // if mid-attempt, wipe the zone/top/ended times but keep the original start time
       const attempt = newResults[newResults.length - 1]
-      newResults[newResults.length - 1] = { startedAt: attempt?.startedAt || Date.now() }
+      newResults[newResults.length - 1] = { s: attempt?.s || Date.now() }
     }
 
     updateResult({
@@ -135,10 +135,10 @@ export function ClimbingMinorJudge({
     }
 
     if (scoreState === 1) {
-      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: elapsed }
+      newResults[newResults.length - 1] = { s: attempt.s, z: elapsed }
     } else {
       // scoreState === 3
-      newResults[newResults.length - 1] = { startedAt: attempt.startedAt, zoneAt: attempt.zoneAt }
+      newResults[newResults.length - 1] = { s: attempt.s, z: attempt.z }
     }
 
     updateResult({
@@ -160,7 +160,7 @@ export function ClimbingMinorJudge({
       return
     }
 
-    attempt.topAtProvisional = elapsed
+    attempt.tp = elapsed
 
     updateResult({
       id: entrant.id,
@@ -181,10 +181,10 @@ export function ClimbingMinorJudge({
       return
     }
     if (scoreState === 3) {
-      attempt.topAt = attempt.topAtProvisional || elapsed
-      attempt.endedAt = attempt.topAt
+      attempt.t = attempt.tp || elapsed
+      attempt.e = attempt.t
     } else {
-      attempt.endedAt = elapsed
+      attempt.e = elapsed
     }
 
     updateResult({
@@ -219,20 +219,18 @@ export function ClimbingMinorJudge({
     }
 
     if (target === 'start') {
-      delete newResults[attemptNumber - 1]!.topAt
-      delete newResults[attemptNumber - 1]!.topAtProvisional
-      delete newResults[attemptNumber - 1]!.zoneAt
+      delete newResults[attemptNumber - 1]!.t
+      delete newResults[attemptNumber - 1]!.tp
+      delete newResults[attemptNumber - 1]!.z
     } else if (target === 'zone') {
-      delete newResults[attemptNumber - 1]!.topAt
-      delete newResults[attemptNumber - 1]!.topAtProvisional
-      newResults[attemptNumber - 1]!.zoneAt =
-        attempt.zoneAt || attempt.endedAt || elapsedTime(timer)
+      delete newResults[attemptNumber - 1]!.t
+      delete newResults[attemptNumber - 1]!.tp
+      newResults[attemptNumber - 1]!.z = attempt.z || attempt.e || elapsedTime(timer)
     } else if (target === 'top') {
-      const time =
-        attempt.topAt || attempt.topAtProvisional || attempt.endedAt || elapsedTime(timer)
-      newResults[attemptNumber - 1]!.topAtProvisional = time
-      newResults[attemptNumber - 1]!.topAt = time
-      newResults[attemptNumber - 1]!.zoneAt = Math.min(attempt.zoneAt ?? time, time)
+      const time = attempt.t || attempt.tp || attempt.e || elapsedTime(timer)
+      newResults[attemptNumber - 1]!.tp = time
+      newResults[attemptNumber - 1]!.t = time
+      newResults[attemptNumber - 1]!.z = Math.min(attempt.z ?? time, time)
     }
 
     updateResult({
@@ -296,7 +294,7 @@ export function ClimbingMinorJudge({
               className="min-w-[6rem] py-2 items-center"
               component={QueryLink}
               query={{ entrant: entrantIndex + 2 }}
-              variant={latestAttempt?.topAt ? 'outline' : 'default'}
+              variant={latestAttempt?.t ? 'outline' : 'default'}
               color="orange"
               leftSection={<IconChevronLeft className="opacity-0" />}
               rightSection={<IconChevronRight />}
@@ -329,8 +327,8 @@ export function ClimbingMinorJudge({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mx-4 my-12">
             <ActiveButton
               active={scoreState === 1}
-              hint={scoreState === 0 && !latestAttempt?.topAt && isActive}
-              disabled={scoreState === 1 || latestAttempt?.topAt !== undefined}
+              hint={scoreState === 0 && !latestAttempt?.t && isActive}
+              disabled={scoreState === 1 || latestAttempt?.t !== undefined}
               onClick={handleStart}
             >
               Start Attempt
@@ -419,10 +417,9 @@ function getBadge(attempt: Attempt): {
   label: BadgeLabel
   color: string
 } {
-  if (attempt?.topAt !== undefined) return { label: 'Top', color: 'teal' }
-  if (attempt?.topAtProvisional !== undefined)
-    return { label: 'Top (Provisional)', color: 'orange' }
-  if (attempt?.zoneAt !== undefined) return { label: 'Zone', color: 'blue' }
+  if (attempt?.t !== undefined) return { label: 'Top', color: 'teal' }
+  if (attempt?.tp !== undefined) return { label: 'Top (Provisional)', color: 'orange' }
+  if (attempt?.z !== undefined) return { label: 'Zone', color: 'blue' }
   return { label: 'Started', color: 'gray' }
 }
 
@@ -445,9 +442,7 @@ function Attempt({
   const badge = getBadge(attempt)
 
   const attemptTime =
-    attempt?.endedAt !== undefined
-      ? dayjs(attempt.endedAt - attempt.startedAt).format('m:ss')
-      : undefined
+    attempt?.e !== undefined ? dayjs(attempt.e - attempt.s).format('m:ss') : undefined
 
   return (
     <>

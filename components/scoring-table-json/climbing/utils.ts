@@ -5,22 +5,22 @@ export function getBlocScores(
   result: EventResult<'climbing'>['result'][number] | undefined,
 ): BlocScores {
   const scores: BlocScores = {
-    attempts: result?.length ?? 0,
     data: result ?? [],
     climbing: false,
-    top: 0,
-    topProvisional: 0,
-    zone: 0,
+    t: 0,
+    z: 0,
+    tp: 0,
+    a: result?.length ?? 0,
   };
   if (!result) return scores;
 
   for (let i = 0; i < result.length; i++) {
     const bloc = result[i];
     if (!bloc) continue;
-    scores.climbing ||= bloc.startedAt !== undefined && bloc.endedAt === undefined;
-    scores.topProvisional ||= bloc.topAtProvisional !== undefined ? i + 1 : 0;
-    scores.top ||= bloc.topAt !== undefined ? i + 1 : 0;
-    scores.zone ||= bloc.zoneAt !== undefined ? i + 1 : 0;
+    scores.climbing ||= bloc.s !== undefined && bloc.e === undefined;
+    scores.tp ||= bloc.tp !== undefined ? i + 1 : 0;
+    scores.t ||= bloc.t !== undefined ? i + 1 : 0;
+    scores.z ||= bloc.z !== undefined ? i + 1 : 0;
   }
 
   return scores;

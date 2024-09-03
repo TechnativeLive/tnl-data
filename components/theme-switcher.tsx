@@ -1,22 +1,14 @@
-'use client';
-import { useMantineColorScheme, ActionIcon } from '@mantine/core';
-import { IconSun, IconMoon } from '@tabler/icons-react';
-import { useEffect, useRef } from 'react';
+'use client'
+
+import { useMantineColorScheme, ActionIcon } from '@mantine/core'
+import { IconSun, IconMoon } from '@tabler/icons-react'
 
 export function ThemeSwitcher() {
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const isMounted = useRef(false);
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  return !isMounted.current ? null : (
-    <ActionIcon onClick={toggleColorScheme} className="animate-fade animate-duration-300">
+  return (
+    <ActionIcon onClick={toggleColorScheme}>
       {colorScheme === 'dark' ? <IconSun size={14} /> : <IconMoon size={14} />}
     </ActionIcon>
-  );
+  )
 }

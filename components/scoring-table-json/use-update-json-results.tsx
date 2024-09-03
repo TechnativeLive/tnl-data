@@ -3,7 +3,8 @@
 import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json'
 import { createBrowserClient } from '@/lib/db/client'
 import { EventLiveData, Sport, EventResult, EventResults } from '@/lib/event-data'
-import { updateDatastream } from '@/lib/singular/datastream'
+import { updateDatastream, updateDatastreams } from '@/lib/singular/datastream'
+import { getByteSize } from '@/lib/utils'
 import { useDidUpdate } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { IconCircleCheck } from '@tabler/icons-react'
@@ -29,7 +30,13 @@ export type UpdateActiveHelper = (args: {
 }) => void
 
 export function useUpdateJsonResults<S extends Sport>(
-  { results: initialResults, format, dsPrivateKey, judgesData }: ScoringTableProps<S>,
+  {
+    results: initialResults,
+    format,
+    dsPrivateKey,
+    judgesData,
+    formatOptions,
+  }: ScoringTableProps<S>,
   liveDataGenerator?: (
     data: Pick<ScoringTableProps<S>, 'format' | 'results' | 'judgesData'>,
   ) => EventLiveData<S>,
@@ -57,9 +64,24 @@ export function useUpdateJsonResults<S extends Sport>(
         judgesData,
       })
       setLiveDataPreview(liveData)
-      updateDatastream(dsPrivateKey, liveData)
+
+      // // Searchwords: Bloc data, blocdata, _format, formatOptions
+      // @ts-expect-error Hacky workaround for multiple datastreams - should come up with something permanent
+      const { blocData, ...coreLiveData } = liveData
+      updateDatastreams([
+        { privateKey: dsPrivateKey, body: coreLiveData },
+        { privateKey: formatOptions?.blocDataDsKey, body: blocData },
+      ])
     }
-  }, [setResults, initialResults, format, liveDataGenerator, setLiveDataPreview])
+  }, [
+    setResults,
+    initialResults,
+    format,
+    liveDataGenerator,
+    setLiveDataPreview,
+    dsPrivateKey,
+    formatOptions?.blocDataDsKey,
+  ])
 
   const supabase = createBrowserClient()
   const [loading, setLoading] = useState<
@@ -88,7 +110,14 @@ export function useUpdateJsonResults<S extends Sport>(
             judgesData,
           })
           setLiveDataPreview(liveData)
-          updateDatastream(dsPrivateKey, liveData, message)
+
+          // // Searchwords: Bloc data, blocdata, _format, formatOptions
+          // @ts-expect-error Hacky workaround for multiple datastreams - should come up with something permanent
+          const { blocData, ...coreLiveData } = liveData
+          updateDatastreams([
+            { privateKey: dsPrivateKey, body: coreLiveData, customMessage: message },
+            { privateKey: formatOptions?.blocDataDsKey, body: blocData },
+          ])
         }
 
         supabase
@@ -121,11 +150,12 @@ export function useUpdateJsonResults<S extends Sport>(
       setResults,
       setLoading,
       supabase,
-      dsPrivateKey,
       format,
       liveDataGenerator,
       eventSlug,
       judgesData,
+      dsPrivateKey,
+      formatOptions?.blocDataDsKey,
     ],
   )
 
@@ -160,7 +190,14 @@ export function useUpdateJsonResults<S extends Sport>(
             judgesData,
           })
           setLiveDataPreview(liveData)
-          updateDatastream(dsPrivateKey, liveData, message)
+
+          // // Searchwords: Bloc data, blocdata, _format, formatOptions
+          // @ts-expect-error Hacky workaround for multiple datastreams - should come up with something permanent
+          const { blocData, ...coreLiveData } = liveData
+          updateDatastreams([
+            { privateKey: dsPrivateKey, body: coreLiveData, customMessage: message },
+            { privateKey: formatOptions?.blocDataDsKey, body: blocData },
+          ])
         }
 
         // update db
@@ -186,10 +223,11 @@ export function useUpdateJsonResults<S extends Sport>(
       setLoading,
       supabase,
       eventSlug,
-      dsPrivateKey,
       format,
       liveDataGenerator,
       judgesData,
+      dsPrivateKey,
+      formatOptions?.blocDataDsKey,
     ],
   )
 

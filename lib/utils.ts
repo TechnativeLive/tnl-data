@@ -1,5 +1,9 @@
 import clsx from 'clsx';
 
+export function getByteSize(o: unknown): number {
+  return Buffer.byteLength(JSON.stringify(o));
+}
+
 export function split<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, (i + 1) * size));
 }

@@ -280,19 +280,19 @@ function ResultsRow({ result, last }: { result: ResultRow; last?: boolean }) {
   const [showZone, setZone] = useTransient(false, 4000)
   const [showTop, setTop] = useTransient(false, 4000)
 
-  const zone = useRef(latestRun?.zone ?? 0)
-  const top = useRef(latestRun?.top ?? 0)
+  const zone = useRef(latestRun?.z ?? 0)
+  const top = useRef(latestRun?.t ?? 0)
 
   useDidUpdate(() => {
-    if (latestRun?.top && latestRun.top > top.current) {
+    if (latestRun?.t && latestRun.t > top.current) {
       setTop(true)
-    } else if (latestRun?.zone && latestRun.zone > zone.current) {
+    } else if (latestRun?.z && latestRun.z > zone.current) {
       setZone(true)
     }
 
-    zone.current = latestRun?.zone ?? 0
-    top.current = latestRun?.top ?? 0
-  }, [latestRun?.zone, latestRun?.top, setTop, setZone])
+    zone.current = latestRun?.z ?? 0
+    top.current = latestRun?.t ?? 0
+  }, [latestRun?.z, latestRun?.t, setTop, setZone])
 
   return (
     <Row key={result.entrant.id} last={last} active={!!result.station}>
@@ -305,7 +305,7 @@ function ResultsRow({ result, last }: { result: ResultRow; last?: boolean }) {
       />
       <BarReveal
         show={showTop}
-        text={latestRun?.attempts === 1 ? 'FLASH' : 'TOP'}
+        text={latestRun?.a === 1 ? 'FLASH' : 'TOP'}
         bars={5}
         background="bg-gradient-to-r from-green-4 to-green-6"
         color="text-gray-9"
@@ -325,21 +325,21 @@ function ResultsRow({ result, last }: { result: ResultRow; last?: boolean }) {
             className="flex flex-col items-center flex-wrap"
           >
             <div className="flex items-center leading-none">
-              <div>{run.top > 0 ? 1 : 0}</div>
+              <div>{run.t > 0 ? 1 : 0}</div>
               <Text component="div" fz="xl" fw="bold" c="gray.6" className="relative top-px">
                 <Text display="inline" fz="lg" fw="bold">
                   {'\u00A0/ '}
                 </Text>
-                <span className="relative top-px">{run.top}</span>
+                <span className="relative top-px">{run.t}</span>
               </Text>
             </div>
             <div className="flex items-center leading-none">
-              <div>{run.zone > 0 ? 1 : 0}</div>
+              <div>{run.z > 0 ? 1 : 0}</div>
               <Text component="div" fz="xl" fw="bold" c="gray.6" className="relative top-px">
                 <Text display="inline" fz="lg" fw="bold">
                   {'\u00A0/ '}
                 </Text>
-                <span className="relative top-px">{run.zone}</span>
+                <span className="relative top-px">{run.z}</span>
               </Text>
             </div>
           </Text>

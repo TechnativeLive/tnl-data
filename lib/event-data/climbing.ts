@@ -12,11 +12,11 @@ import {
 import { sortAndRank } from '@/lib/sort-and-rank';
 
 export type EventResultClimbing = ({
-  startedAt: number;
-  zoneAt?: number;
-  topAt?: number;
-  topAtProvisional?: number;
-  endedAt?: number;
+  s: number;
+  z?: number;
+  t?: number;
+  tp?: number;
+  e?: number;
 } | null)[][];
 
 export type EventFormatClimbing = {
@@ -25,6 +25,7 @@ export type EventFormatClimbing = {
 
 export type EventFormatOptionsClimbing = {
   blocCount: number;
+  blocDataDsKey?: string;
 };
 
 export const roundKindClimbingSelection: { value: RoundKind; label: string }[] = [
@@ -51,18 +52,22 @@ type LiveDataResult = {
   za: number;
   status: EventResult<'climbing'>['status'];
   station?: string;
-  entrant: Tables<'entrants'>;
+  entrant: Tables<'entrants'>['id'];
   runs: BlocScores[];
 };
 
 export type BlocScores = {
   climbing: boolean;
-  top: number;
-  topProvisional: number;
-  zone: number;
-  attempts: number;
+  t: number;
+  tp: number;
+  z: number;
+  a: number;
   data: EventResult<'climbing'>['result'][number];
 };
+
+type BlocDataRow = Omit<LiveDataResult, 'rank'>
+
+type EntrantMap = Record<string | number, Tables<'entrants'> & { startPos: number }>
 
 export type EventLiveDataClimbing = {
   active: {
@@ -72,14 +77,14 @@ export type EventLiveDataClimbing = {
     entrants?: {
       station: string | undefined;
       class: string | undefined;
-      entrant: LiveDataResult | undefined;
+      entrant: Tables<'entrants'>['id'] | undefined;
     }[];
   }[];
-  blocData?: LiveDataResult[][];
+  blocData?: BlocDataRow[][];
   judgeActive?: {
     station: string | undefined;
     class: string | undefined;
-    entrant: LiveDataResult | undefined;
+    entrant: Tables<'entrants'>['id'] | undefined;
   }[];
   results: {
     [cls: string]: LiveDataResult[] | undefined;
@@ -87,8 +92,9 @@ export type EventLiveDataClimbing = {
   startlist?: {
     class: string;
     classId: string;
-    startlist: { entrant: Tables<'entrants'>; pos: number }[];
+    startlist: { entrant: Tables<'entrants'>['id']; pos: number }[];
   }[];
+  entrantMap?: EntrantMap
   message?: unknown;
 };
 
@@ -111,28 +117,53 @@ export function generateLiveDataClimbing({
   const activeRound = format.rounds.find((round) => round.id === active.round);
   if (!activeRound) return liveData;
 
-  liveData.startlist = activeRound.classes.map((cls) => ({
-    class: cls.name,
-    classId: cls.id,
-    startlist: cls.entrants.map((entrant, i) => ({ entrant, pos: i + 1 })),
+
+  const startlist: EventLiveDataClimbing['startlist'] = []
+  const entrantMap: EntrantMap = Object.fromEntries(activeRound.classes.flatMap((cls, clsIndex) => {
+    startlist.push({
+      class: cls.name,
+      classId: cls.id,
+      startlist: []
+    })
+
+    return cls.entrants.map((entrant, i) => {
+      startlist[clsIndex]!.startlist.push({
+        entrant: entrant.id,
+        pos: i + 1
+      })
+
+      return [entrant.id, {
+        ...entrant,
+        startPos: i + 1,
+      }]
+    })
   }));
+  liveData.entrantMap = entrantMap;
+
+  liveData.startlist = startlist;
+  // liveData.startlist = activeRound.classes.map((cls) => ({
+  //   class: cls.name,
+  //   classId: cls.id,
+  //   startlist: cls.entrants.map((entrant, i) => ({ entrant: entrant.id, pos: i + 1 })),
+  // }));
+
 
   liveData.results = generateLiveDataResultsClimbing({
     round: activeRound,
     results,
   });
   // console.log('liveData.results', liveData.results);
-  const liveDataResultsEntrantMap = Object.entries(liveData.results).reduce(
-    (map, [_cls, results]) => {
-      // console.log({ map, _cls, results });
-      if (!results) return map;
-      results.forEach((result) => {
-        map[result.entrant.id] = result;
-      });
-      return map;
-    },
-    {} as Record<string, LiveDataResult>,
-  );
+  // const liveDataResultsEntrantMap = Object.entries(liveData.results).reduce(
+  //   (map, [_cls, results]) => {
+  //     // console.log({ map, _cls, results });
+  //     if (!results) return map;
+  //     results.forEach((result) => {
+  //       map[result.entrant] = result;
+  //     });
+  //     return map;
+  //   },
+  //   {} as Record<string, LiveDataResult>,
+  // );
   // console.log('liveDataResultsEntrantMap', liveDataResultsEntrantMap);
   const judgeActive = judgesData
     .map((judgeData, index) =>
@@ -143,8 +174,6 @@ export function generateLiveDataClimbing({
             : undefined,
           class: judgeData.active?.class,
           entrant: judgeData.active?.entrant
-            ? liveDataResultsEntrantMap[judgeData.active?.entrant]
-            : undefined,
         }
         : undefined,
     )
@@ -153,23 +182,20 @@ export function generateLiveDataClimbing({
 
   liveData.judgeActive = judgeActive as NonNullable<(typeof judgeActive)[number]>[];
 
-  // liveData.blocData =
   const blocData = judgesData.map((judgeData) => {
-    // const allBlocEntrants = Object.entries(judgeData?.[activeRound.id] ?? {}).flatMap(([classId, entrants]) => Object.entries(entrants ?? {}))
-
     const blocResults = Object.entries(judgeData?.[activeRound.id] ?? {})
       .reduce(
         (live, [classId, entrants]) => {
           const blocResult = Object.entries(entrants ?? {}).map(([entrantId, entrantResult]) => {
             const run = getBlocScores(entrantResult);
-            const entrantInfo = liveDataResultsEntrantMap[entrantId];
-            const result: Omit<LiveDataResult, 'rank'> = {
-              tops: run.top > 0 ? 1 : 0,
-              zones: run.zone > 0 ? 1 : 0,
-              ta: run.top,
-              za: run.zone,
+            const entrantInfo = entrantMap[entrantId];
+            const result: BlocDataRow = {
+              tops: run.t > 0 ? 1 : 0,
+              zones: run.z > 0 ? 1 : 0,
+              ta: run.t,
+              za: run.z,
               status: results?.[activeRound.id]?.[classId]?.[entrantId]?.status,
-              entrant: entrantInfo?.entrant!,
+              entrant: Number(entrantId),
               runs: [run],
               startPos: entrantInfo?.startPos!,
             };
@@ -180,7 +206,7 @@ export function generateLiveDataClimbing({
 
           return live;
         },
-        [] as Omit<LiveDataResult, 'rank'>[][],
+        [] as BlocDataRow[][],
       )
       .flat();
 
@@ -206,7 +232,7 @@ export function generateLiveDataClimbing({
       if (!judge.class || !judge.entrant) continue;
 
       liveData.results[judge.class]?.forEach((result) => {
-        if (result.entrant.id === judge.entrant?.entrant.id) {
+        if (result.entrant === judge.entrant) {
           result.station = judge.station;
         }
       });
@@ -225,13 +251,10 @@ export function generateLiveDataClimbing({
     };
   });
 
+  liveData.blocData = blocData;
   // console.log({ blocDataSize: getSize(blocData), liveDataSize: getSize(liveData) });
 
   return liveData;
-}
-
-function getSize(o: unknown) {
-  return `${Buffer.byteLength(JSON.stringify(o)).toFixed(0)}b`;
 }
 
 export function generateLiveDataResultsClimbing({
@@ -256,10 +279,10 @@ export function generateLiveDataResultsClimbing({
           { field: 'za', asc: true },
           { field: 'startPos' },
         ],
-        stabilize: { field: 'entrant.last_name', asc: true },
+        stabilize: { field: 'entrant', asc: true },
       });
 
-      return live;
+      return live
     },
     {} as EventLiveData<'climbing'>['results'],
   );
@@ -279,11 +302,11 @@ function getEntrants(
 
     const scores = runs.reduce(
       (scores, run) => {
-        scores.tops += run?.top ? 1 : 0;
-        scores.zones += run?.zone ? 1 : 0;
+        scores.tops += run?.t ? 1 : 0;
+        scores.zones += run?.z ? 1 : 0;
 
-        scores.ta += run?.top ?? 0;
-        scores.za += run?.zone ?? 0;
+        scores.ta += run?.t ?? 0;
+        scores.za += run?.z ?? 0;
         return scores;
       },
       { tops: 0, zones: 0, ta: 0, za: 0 },
@@ -292,7 +315,7 @@ function getEntrants(
     return {
       ...scores,
       status: results?.[entrant.id]?.status,
-      entrant,
+      entrant: entrant.id,
       runs,
       startPos: i + 1,
     };

@@ -404,17 +404,14 @@ function EntrantScores({
               color={blocScores?.climbing ? 'orange' : 'teal'}
             >
               <div className="flex space-x-2">
-                <Text
-                  miw={20}
-                  c={blocScores?.top || blocScores?.topProvisional ? undefined : 'dimmed'}
-                >
-                  T{blocScores?.top || blocScores?.topProvisional || '\u00A0'}
+                <Text miw={20} c={blocScores?.t || blocScores?.tp ? undefined : 'dimmed'}>
+                  T{blocScores?.t || blocScores?.tp || '\u00A0'}
                 </Text>
-                <Text miw={20} c={blocScores?.zone ? undefined : 'dimmed'}>
-                  Z{blocScores?.zone || '\u00A0'}
+                <Text miw={20} c={blocScores?.z ? undefined : 'dimmed'}>
+                  Z{blocScores?.z || '\u00A0'}
                 </Text>
-                <Text miw={27} c={blocScores?.attempts ? undefined : 'dimmed'}>
-                  A{blocScores?.attempts || '\u00A0'}
+                <Text miw={27} c={blocScores?.a ? undefined : 'dimmed'}>
+                  A{blocScores?.a || '\u00A0'}
                 </Text>
               </div>
             </Button>
