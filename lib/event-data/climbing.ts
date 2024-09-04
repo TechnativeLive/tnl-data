@@ -119,6 +119,8 @@ export function generateLiveDataClimbing({
   const activeRound = format.rounds.find((round) => round.id === active.round);
   if (!activeRound) return liveData;
 
+  liveData.entrantMap = entrantMap
+
   liveData.startlist = activeRound.classes.map((cls) => ({
     class: cls.name,
     classId: cls.id,
