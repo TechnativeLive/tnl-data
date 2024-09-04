@@ -1,0 +1,40 @@
+.container {
+  animation: fade-in 1000ms forwards;
+  transform: skewX(calc(var(--skew, -12) * 1deg));
+}
+
+.bar-reveal-in > div {
+  animation: bar-reveal-in 500ms cubic-bezier(0.85, 0, 0.15, 1) both;
+  /* animation-delay: 200ms; */
+}
+
+.bar-reveal-out > div {
+  animation: bar-reveal-out 500ms cubic-bezier(0.85, 0, 0.15, 1) both;
+  /* animation-delay: 0ms; */
+}
+
+@keyframes fade-in {
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes bar-reveal-in {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes bar-reveal-out {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}

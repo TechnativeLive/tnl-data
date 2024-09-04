@@ -2,7 +2,7 @@
 
 import { FormState } from '@/components/forms/simple-form';
 import { createServerActionClient } from '@/lib/db/server-action';
-import { datastream } from '@/lib/singular/datastream';
+import { datastreamKeys } from '@/lib/singular/datastream';
 import { toNumOr } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 
@@ -12,10 +12,10 @@ export async function createDatastream(
 ): Promise<FormState<Tables<'ds_keys'>>> {
   const supabase = createServerActionClient();
 
-  const name: Parameters<typeof datastream.create>[0] = String(formData.get('name'));
+  const name: Parameters<typeof datastreamKeys.create>[0] = String(formData.get('name'));
 
   try {
-    const { data: singularData, error: singularError } = await datastream.create(name);
+    const { data: singularData, error: singularError } = await datastreamKeys.create(name);
     if (singularError) {
       return { success: false, message: singularError.message };
     }
@@ -34,7 +34,7 @@ export async function createDatastream(
     const { data, error } = await supabase.from('ds_keys').insert(record).select().single();
 
     if (error) {
-      const { error: deleteError } = await datastream.delete(singularData.id);
+      const { error: deleteError } = await datastreamKeys.delete(singularData.id);
       if (deleteError) {
         return {
           success: false,
@@ -66,7 +66,7 @@ export async function deleteDatastream(
   }
 
   try {
-    const { error: singularError } = await datastream.delete(id);
+    const { error: singularError } = await datastreamKeys.delete(id);
     if (singularError) {
       return { success: false, message: singularError.message };
     }

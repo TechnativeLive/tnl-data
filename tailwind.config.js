@@ -1,4 +1,4 @@
-const plugin = require('tailwindcss/plugin');
+const plugin = require('tailwindcss/plugin')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -78,6 +78,22 @@ module.exports = {
           //   marginRight: 'clamp(1rem, 5vw, 10rem)',
           // }
         },
+        '.px-content': {
+          paddingLeft: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
+          paddingRight: 'clamp(1rem, 10vw - 3.5rem, 16rem)',
+          // '@media (min-width: 1024px)': {
+          //   paddingLeft: 'clamp(1rem, 5vw, 10rem)',
+          //   paddingRight: 'clamp(1rem, 5vw, 10rem)',
+          // }
+        },
+        '.-px-content': {
+          paddingLeft: 'calc(0px - clamp(1rem, 10vw - 3.5rem, 16rem))',
+          paddingRight: 'calc(0px - clamp(1rem, 10vw - 3.5rem, 16rem))',
+          // '@media (min-width: 1024px)': {
+          //   paddingLeft: 'clamp(1rem, 5vw, 10rem)',
+          //   paddingRight: 'clamp(1rem, 5vw, 10rem)',
+          // }
+        },
         '.subgrid': {
           display: 'grid',
           'grid-template-columns': 'subgrid',
@@ -91,7 +107,7 @@ module.exports = {
           display: 'grid',
           'grid-template-rows': 'subgrid',
         },
-      });
+      })
     }),
 
     plugin(({ addUtilities, matchUtilities, theme }) => {
@@ -123,51 +139,51 @@ module.exports = {
         '.layout-full': {
           'grid-column': 'full',
         },
-      });
+      })
 
       matchUtilities(
         {
           'layout-gap-min': (modifier) => {
-            const value = theme('spacing')[modifier] || modifier;
+            const value = theme('spacing')[modifier] || modifier
             return {
               '--layout-gap-min': value,
-            };
+            }
           },
           'layout-gap-max': (modifier) => {
-            const value = theme('spacing')[modifier] || modifier;
+            const value = theme('spacing')[modifier] || modifier
             return {
               '--layout-gap-max': value,
-            };
+            }
           },
           'layout-content-min': (modifier) => {
-            const value = theme('spacing')[modifier] || modifier;
+            const value = theme('spacing')[modifier] || modifier
             return {
               '--layout-content': `min(${value}, 100% - var(--layout-gap) * 2)`,
-            };
+            }
           },
           'layout-popout-size': (modifier) => {
-            const value = theme('spacing')[modifier] || modifier;
+            const value = theme('spacing')[modifier] || modifier
             return {
               '--layout-popout': `minmax(0, ${value})`,
-            };
+            }
           },
           'layout-feature-size': (modifier) => {
-            const value = theme('spacing')[modifier] || modifier;
+            const value = theme('spacing')[modifier] || modifier
             return {
               '--layout-feature': `minmax(0, ${value})`,
-            };
+            }
           },
         },
         { values: theme('spacing') },
-      );
+      )
 
       matchUtilities(
         {
           'layout-gap-scale': (modifier) => {
-            const value = theme('spacing')[modifier] || modifier;
+            const value = theme('spacing')[modifier] || modifier
             return {
               '--layout-gap-scale': value,
-            };
+            }
           },
         },
         {
@@ -183,7 +199,16 @@ module.exports = {
             8: '8vw',
           },
         },
-      );
+      )
     }),
   ],
-};
+}
+
+function withOpacity(variable) {
+  return ({ opacityValue }) => {
+    if (opacityValue === undefined) {
+      return `rgb(var(${variable}))`
+    }
+    return `rgb(var(${variable}) / ${opacityValue})`
+  }
+}

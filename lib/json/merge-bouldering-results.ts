@@ -2,19 +2,19 @@ import { EventResults, JudgeDataClimbing } from '@/lib/event-data';
 
 type RequiredData = {
   results: EventResults<'climbing'> | undefined;
-  judgesData: JudgeDataClimbing[] | undefined;
+  judgesData: JudgeDataClimbing[] | null | undefined;
   blocCount: number;
 };
 
 export function mergeBoulderingResults({
   results = {} as EventResults<'climbing'>,
-  judgesData = [],
+  judgesData,
   blocCount,
 }: RequiredData) {
   // results contains data directly from the head judge, specifically entrant status data.
   // judgesData contains scoring data from each judge.
 
-  judgesData.forEach((judgeData, judgeIndex) => {
+  (judgesData || []).forEach((judgeData, judgeIndex) => {
     if (!judgeData) return;
 
     for (const round in judgeData) {

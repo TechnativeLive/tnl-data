@@ -1,5 +1,6 @@
 import { singular } from '@/lib/singular/client';
-import { safeError } from '@/lib/utils';
+import { getByteSize, safeError } from '@/lib/utils';
+import { notifications } from '@mantine/notifications';
 
 type SingularDatastream = {
   id: number;
@@ -12,17 +13,42 @@ type SingularDatastream = {
   account_id: number;
 };
 
-export function updateDatastream(
-  privateKey: string,
+const API_SIZE_LIMIT = 60_000
+
+export function updateDatastreams(updates: Parameters<typeof updateDatastream>[0][]) {
+  return Promise.all(updates.map(updateDatastream))
+}
+
+const notified: Record<string, boolean> = {}
+
+export function updateDatastream({ privateKey, body, customMessage }: {
+  privateKey?: string,
   body: Record<string, unknown>,
   customMessage?: unknown,
-) {
-  console.log('updateDatastream');
-  return fetch(`https://datastream.singular.live/datastreams/${privateKey}`, {
-    body: JSON.stringify(customMessage ? { ...body, message: customMessage } : body),
-    headers: { 'Content-Type': 'application/json' },
-    method: 'PUT',
-  });
+}) {
+  if (!privateKey) return Promise.resolve()
+  const size = getByteSize(body)
+  console.log({ size, privateKey })
+  if (size > API_SIZE_LIMIT && !notified[privateKey]) {
+    notified[privateKey] = true
+    notifications.show({
+      title: 'Datastream size exceeds API limit',
+      message: 'Please notify the TNL team of this error'
+    })
+    console.warn(
+      `Datastream size exceeds API limit (${size} bytes - ${(100 * size / API_SIZE_LIMIT).toFixed(2)}%)`,
+      {
+        privateKey,
+        body,
+        customMessage
+      })
+  } else {
+    return fetch(`https://datastream.singular.live/datastreams/${privateKey}`, {
+      body: JSON.stringify(customMessage ? { ...body, message: customMessage } : body),
+      headers: { 'Content-Type': 'application/json' },
+      method: 'PUT',
+    });
+  }
 }
 
 type DeleteResponse = {
@@ -30,7 +56,7 @@ type DeleteResponse = {
   message: 'success';
 };
 
-export const datastream = {
+export const datastreamKeys = {
   create: async (name: string) => {
     if (!name) {
       return safeError({ code: -1, message: 'Name is required when creating a datastream' });

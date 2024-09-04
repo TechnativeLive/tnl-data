@@ -210,7 +210,8 @@ export const parseFormatIceSkating = (input: any): typia.Primitive<EventFormat<'
 }; input = JSON.parse(input); return is(input) ? input as any : null; };
 // format options
 export const isFormatOptionsClimbing = (input: any): input is EventFormatOptions<'climbing'> => {
-    return "object" === typeof input && null !== input && "number" === typeof (input as any).blocCount;
+    const $io0 = (input: any): boolean => "number" === typeof input.blocCount && (undefined === input.blocDataDsKey || "string" === typeof input.blocDataDsKey);
+    return "object" === typeof input && null !== input && $io0(input);
 };
 export const isFormatOptionsIceSkating = (input: any): input is EventFormatOptions<'ice-skating'> => {
     return null === input || undefined === input;
@@ -218,7 +219,8 @@ export const isFormatOptionsIceSkating = (input: any): input is EventFormatOptio
 export const validateFormatOptionsClimbing = (input: any): typia.IValidation<EventFormatOptions<'climbing'>> => {
     const errors = [] as any[];
     const __is = (input: any): input is EventFormatOptions<'climbing'> => {
-        return "object" === typeof input && null !== input && "number" === typeof (input as any).blocCount;
+        const $io0 = (input: any): boolean => "number" === typeof input.blocCount && (undefined === input.blocDataDsKey || "string" === typeof input.blocDataDsKey);
+        return "object" === typeof input && null !== input && $io0(input);
     };
     if (false === __is(input)) {
         const $report = (typia.createValidate as any).report(errors);
@@ -227,6 +229,10 @@ export const validateFormatOptionsClimbing = (input: any): typia.IValidation<Eve
                     path: _path + ".blocCount",
                     expected: "number",
                     value: input.blocCount
+                }), undefined === input.blocDataDsKey || "string" === typeof input.blocDataDsKey || $report(_exceptionable, {
+                    path: _path + ".blocDataDsKey",
+                    expected: "(string | undefined)",
+                    value: input.blocDataDsKey
                 })].every((flag: boolean) => flag);
             return ("object" === typeof input && null !== input || $report(true, {
                 path: _path + "",

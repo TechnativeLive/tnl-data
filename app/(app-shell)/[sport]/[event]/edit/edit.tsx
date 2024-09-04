@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import { updateEvent } from '@/app/(app-shell)/[sport]/[event]/edit/actions';
-import { FormatUtilsButton } from '@/app/(app-shell)/[sport]/[event]/edit/format';
-import { EventFormatRoundsInput } from '@/app/(app-shell)/[sport]/[event]/edit/format-rounds-input';
-import { Select } from '@/components/select';
-import { EventFormat, Sport } from '@/lib/event-data';
-import { useFormFeedback } from '@/lib/hooks/use-form-feedback';
+import { updateEvent } from '@/app/(app-shell)/[sport]/[event]/edit/actions'
+import { FormatUtilsButton } from '@/app/(app-shell)/[sport]/[event]/edit/format'
+import { EventFormatRoundsInput } from '@/app/(app-shell)/[sport]/[event]/edit/format-rounds-input'
+import { Select } from '@/components/select'
+import { EventFormat, Sport } from '@/lib/event-data'
+import { useFormFeedback } from '@/lib/hooks/use-form-feedback'
 import {
   Button,
   Collapse,
@@ -15,16 +15,16 @@ import {
   Text,
   TextInput,
   Tooltip,
-} from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates';
-import { useDisclosure } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
-import { notifications } from '@mantine/notifications';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
-import { type Simplify } from 'type-fest';
+} from '@mantine/core'
+import { DateTimePicker } from '@mantine/dates'
+import { useDisclosure } from '@mantine/hooks'
+import { modals } from '@mantine/modals'
+import { notifications } from '@mantine/notifications'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useFormState, useFormStatus } from 'react-dom'
+import { type Simplify } from 'type-fest'
 
-type DSKeys = Pick<Tables<'ds_keys'>, 'name' | 'description' | 'private' | 'public'>;
+type DSKeys = Pick<Tables<'ds_keys'>, 'name' | 'description' | 'private' | 'public'>
 type EventData = Pick<
   Tables<'events'>,
   | 'name'
@@ -38,8 +38,8 @@ type EventData = Pick<
   | 'timers'
 > &
   (null | {
-    ds_keys: DSKeys | null;
-  });
+    ds_keys: DSKeys | null
+  })
 
 export function EventDataEditForm<S extends Sport>({
   sport,
@@ -48,42 +48,42 @@ export function EventDataEditForm<S extends Sport>({
   dsKeys,
   timers,
 }: {
-  sport: S;
-  event: string;
-  eventData: Simplify<EventData>;
-  dsKeys: DSKeys[] | null;
-  timers: { label: string; value: string }[];
+  sport: S
+  event: string
+  eventData: Simplify<EventData>
+  dsKeys: DSKeys[] | null
+  timers: { label: string; value: string }[]
 }) {
-  const [formatInput, setFormatInput] = useState(JSON.stringify(eventData.format, null, 2));
-  const [state, formAction] = useFormState(updateEvent, { message: null, success: false });
-  const { pending } = useFormStatus();
-  const formRef = useRef<HTMLFormElement>(null);
+  const [formatInput, setFormatInput] = useState(JSON.stringify(eventData.format, null, 2))
+  const [state, formAction] = useFormState(updateEvent, { message: null, success: false })
+  const { pending } = useFormStatus()
+  const formRef = useRef<HTMLFormElement>(null)
 
-  const startsAt = eventData.starts_at ? new Date(eventData.starts_at) : undefined;
-  const endsAt = eventData.ends_at ? new Date(eventData.ends_at) : undefined;
+  const startsAt = eventData.starts_at ? new Date(eventData.starts_at) : undefined
+  const endsAt = eventData.ends_at ? new Date(eventData.ends_at) : undefined
 
-  const [dsKeyName, setDsKeyName] = useState(eventData.ds_keys?.name ?? null);
-  const selectedDsKey = dsKeys?.find((dsKey) => dsKey.name === dsKeyName);
+  const [dsKeyName, setDsKeyName] = useState(eventData.ds_keys?.name ?? null)
+  const selectedDsKey = dsKeys?.find((dsKey) => dsKey.name === dsKeyName)
 
-  const [showFormatJson, { toggle: toggleShowFormatJson }] = useDisclosure();
+  const [showFormatJson, { toggle: toggleShowFormatJson }] = useDisclosure()
 
-  useFormFeedback(state);
+  useFormFeedback(state)
 
   useEffect(() => {
-    setFormatInput(JSON.stringify(eventData.format, null, 2));
-  }, [eventData.format, setFormatInput]);
+    setFormatInput(JSON.stringify(eventData.format, null, 2))
+  }, [eventData.format, setFormatInput])
 
-  const [rounds, setRounds] = useState((eventData.format as EventFormat<S>).rounds);
+  const [rounds, setRounds] = useState((eventData.format as EventFormat<S>).rounds)
   useEffect(() => {
-    setRounds((eventData.format as EventFormat<S>).rounds);
-  }, [setRounds, eventData.format]);
+    setRounds((eventData.format as EventFormat<S>).rounds)
+  }, [setRounds, eventData.format])
 
   const updateFormatRounds = useCallback(
     (updateRounds: EventFormat<Sport>['rounds']) => setRounds(updateRounds),
     [setRounds],
-  );
+  )
 
-  const isDirty = JSON.stringify(eventData.format, null, 2) !== formatInput;
+  const isDirty = JSON.stringify(eventData.format, null, 2) !== formatInput
 
   // Show confirmation modal when updating event
   const openDeleteModal = () =>
@@ -106,17 +106,17 @@ export function EventDataEditForm<S extends Sport>({
         }),
       onConfirm: () => {
         try {
-          formRef.current?.requestSubmit();
+          formRef.current?.requestSubmit()
         } catch (e) {
-          const message = e instanceof Error ? e.message : 'Unknown error';
+          const message = e instanceof Error ? e.message : 'Unknown error'
           notifications.show({
             color: 'red',
             title: 'Error',
             message: `Failed to update event: ${message}`,
-          });
+          })
         }
       },
-    });
+    })
 
   return (
     <>
@@ -282,5 +282,5 @@ export function EventDataEditForm<S extends Sport>({
         {/* TODO: Add prune results - remove any rounds/classes that no longer exist in the format */}
       </div>
     </>
-  );
+  )
 }

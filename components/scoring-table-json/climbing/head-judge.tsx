@@ -1,34 +1,35 @@
-'use client';
+'use client'
 
-import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
-import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/scroll-area-with-shadow';
-import { QueryLink } from '@/components/query-link';
-import { RealtimeHeartbeat } from '@/components/realtime-heartbeat';
-import { LiveDataPreviewClimbing } from '@/components/scoring-table-json/climbing/preview';
+import { ConfirmButton } from '@/components/mantine-extensions/confirm-button'
+import { ScrollAreaAutosizeWithShadow } from '@/components/mantine-extensions/scroll-area-with-shadow'
+import { QueryLink } from '@/components/query-link'
+import { RealtimeHeartbeat } from '@/components/realtime-heartbeat'
+import { LiveDataPreviewClimbing } from '@/components/scoring-table-json/climbing/preview'
 import {
   getBlocScores,
   getBoulderingJudgeIndex,
-} from '@/components/scoring-table-json/climbing/utils';
-import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
+} from '@/components/scoring-table-json/climbing/utils'
+import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json'
 import {
   UpdateResultHelper,
   useUpdateJsonResults,
-} from '@/components/scoring-table-json/use-update-json-results';
-import { TimersRealtime } from '@/components/timer/controls/realtime';
-import { createBrowserClient } from '@/lib/db/client';
+} from '@/components/scoring-table-json/use-update-json-results'
+import { TimersRealtime } from '@/components/timer/controls/realtime'
+import { createBrowserClient } from '@/lib/db/client'
 import {
   EventLiveData,
   EventResult,
   EventResults,
   JudgeDataClimbing,
   Sport,
-} from '@/lib/event-data';
+} from '@/lib/event-data'
 import {
   generateLiveDataClimbing,
   generateLiveDataResultsClimbing,
-} from '@/lib/event-data/climbing';
-import { isFormatClimbing } from '@/lib/json/generated/format';
-import { toNumOr } from '@/lib/utils';
+} from '@/lib/event-data/climbing'
+import { entrantMapAtom } from '@/lib/hooks/use-realtime-json-event'
+import { isFormatClimbing } from '@/lib/json/generated/format'
+import { toNumOr } from '@/lib/utils'
 import {
   ActionIcon,
   Alert,
@@ -50,9 +51,9 @@ import {
   Text,
   Title,
   Tooltip,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+} from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { notifications } from '@mantine/notifications'
 import {
   IconArrowDown,
   IconArrowRight,
@@ -62,19 +63,20 @@ import {
   IconInfoCircle,
   IconMinus,
   IconX,
-} from '@tabler/icons-react';
-import clsx from 'clsx';
-import { useParams } from 'next/navigation';
-import { Fragment, useEffect, useState } from 'react';
+} from '@tabler/icons-react'
+import clsx from 'clsx'
+import { useAtomValue } from 'jotai'
+import { useParams } from 'next/navigation'
+import { Fragment, useEffect, useState } from 'react'
 
 export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
-  const [previewOpened, { toggle: togglePreview }] = useDisclosure(false);
+  const [previewOpened, { toggle: togglePreview }] = useDisclosure(false)
   const { results, updateActive, updateResult, loading, liveDataPreview } = useUpdateJsonResults(
     props,
     generateLiveDataClimbing,
-  );
+  )
 
-  const [opened, { close, open }] = useDisclosure(false);
+  const [opened, { close, open }] = useDisclosure(false)
 
   return (
     <Stack mb={52}>
@@ -140,7 +142,7 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
         )}
       </div>
       {props.format.rounds.map((round, i) => {
-        const isRoundActive = round.id === results.active?.round;
+        const isRoundActive = round.id === results.active?.round
         return (
           <Fragment key={round.id}>
             <Paper
@@ -184,9 +186,9 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
               </div>
               <div className="flex flex-col gap-md">
                 {round.classes.map((cls) => {
-                  const classId = `${round.id}.${cls.id}`;
+                  const classId = `${round.id}.${cls.id}`
                   const isClassActive =
-                    round.id === results.active?.round && cls.id === results.active?.class;
+                    round.id === results.active?.round && cls.id === results.active?.class
 
                   return (
                     <Paper
@@ -220,7 +222,7 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
                       </div>
                       <Divider />
                       {cls.entrants.map((entrant, i) => {
-                        const row = typeof entrant === 'number' ? { id: entrant } : entrant;
+                        const row = typeof entrant === 'number' ? { id: entrant } : entrant
                         return (
                           <Fragment key={row.id}>
                             {i > 0 && <Divider />}
@@ -241,10 +243,10 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
                               }
                             />
                           </Fragment>
-                        );
+                        )
                       })}
                     </Paper>
-                  );
+                  )
                 })}
               </div>
             </Paper>
@@ -260,23 +262,23 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
               </Button>
             )}
           </Fragment>
-        );
+        )
       })}
     </Stack>
-  );
+  )
 }
 
 type EntrantProps = {
-  index?: number;
-  entrant: Partial<Tables<'entrants'>>;
-  judgesData: JudgeDataClimbing[];
-  initialResult: EventResult<'climbing'> | null | undefined;
-  updateResults: UpdateResultHelper<'climbing'>;
-  roundId: string;
-  classId: string;
-  loading: boolean;
-  blocCount: number;
-};
+  index?: number
+  entrant: Partial<Tables<'entrants'>>
+  judgesData: JudgeDataClimbing[]
+  initialResult: EventResult<'climbing'> | null | undefined
+  updateResults: UpdateResultHelper<'climbing'>
+  roundId: string
+  classId: string
+  loading: boolean
+  blocCount: number
+}
 
 function Entrant({
   index,
@@ -288,9 +290,9 @@ function Entrant({
   classId,
   blocCount,
 }: EntrantProps) {
-  const [opened, { close, open }] = useDisclosure(false);
+  const [opened, { close, open }] = useDisclosure(false)
   function updateStatus(status: EventResult<'climbing'>['status']) {
-    if (entrant.id === undefined || !initialResult) return;
+    if (entrant.id === undefined || !initialResult) return
     updateResults({
       round: roundId,
       cls: classId,
@@ -298,11 +300,11 @@ function Entrant({
       data: initialResult.result,
       status,
       feedback: status ? `Entrant status set to ${status}` : 'Entrant status cleared',
-    });
+    })
   }
 
   return (
-    <div className="grid max-sm:grid-cols-1 max-sm:my-2 grid-cols-[1fr,4fr] justify-between items-center px-2 gap-2">
+    <div className="grid max-sm:grid-cols-1 max-sm:my-2 grid-cols-[auto,auto] justify-between items-center px-2 gap-2">
       <Modal centered opened={opened} onClose={close} title="Edit entrant status">
         <ButtonGroup mb="md">
           <Button
@@ -366,7 +368,7 @@ function Entrant({
         />
       </div>
     </div>
-  );
+  )
 }
 
 function EntrantScores({
@@ -377,17 +379,17 @@ function EntrantScores({
   classId,
   entrantId,
 }: Pick<EntrantProps, 'index' | 'initialResult' | 'blocCount' | 'classId' | 'judgesData'> & {
-  entrantId: EntrantProps['entrant']['id'];
+  entrantId: EntrantProps['entrant']['id']
 }) {
   return (
     <div className="flex flex-wrap gap-2 items-center justify-around">
       {Array.from({ length: blocCount }).map((_, i) => {
-        const classInitial = classId.charAt(0).toUpperCase();
-        const blocScores = getBlocScores(initialResult?.result[i]);
-        const station = `${classInitial}${i + 1}`;
+        const classInitial = classId.charAt(0).toUpperCase()
+        const blocScores = getBlocScores(initialResult?.result[i])
+        const station = `${classInitial}${i + 1}`
 
-        const judgeIndex = getBoulderingJudgeIndex(station, blocCount);
-        const isActive = judgesData[judgeIndex]?.active?.entrant === entrantId;
+        const judgeIndex = getBoulderingJudgeIndex(station, blocCount)
+        const isActive = judgesData[judgeIndex]?.active?.entrant === entrantId
 
         return (
           <div key={i} className="flex flex-col">
@@ -404,25 +406,22 @@ function EntrantScores({
               color={blocScores?.climbing ? 'orange' : 'teal'}
             >
               <div className="flex space-x-2">
-                <Text
-                  miw={20}
-                  c={blocScores?.top || blocScores?.topProvisional ? undefined : 'dimmed'}
-                >
-                  T{blocScores?.top || blocScores?.topProvisional || '\u00A0'}
+                <Text miw={20} c={blocScores?.t || blocScores?.tp ? undefined : 'dimmed'}>
+                  T{blocScores?.t || blocScores?.tp || '\u00A0'}
                 </Text>
-                <Text miw={20} c={blocScores?.zone ? undefined : 'dimmed'}>
-                  Z{blocScores?.zone || '\u00A0'}
+                <Text miw={20} c={blocScores?.z ? undefined : 'dimmed'}>
+                  Z{blocScores?.z || '\u00A0'}
                 </Text>
-                <Text miw={20} c={blocScores?.attempts ? undefined : 'dimmed'}>
-                  A{blocScores?.attempts || '\u00A0'}
+                <Text miw={27} c={blocScores?.a ? undefined : 'dimmed'}>
+                  A{blocScores?.a || '\u00A0'}
                 </Text>
               </div>
             </Button>
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
 function EventProgressionModal({
@@ -447,38 +446,43 @@ function EventProgressionModal({
         />
       )}
     </Modal>
-  );
+  )
 }
 
 const CheckboxIcon: CheckboxProps['icon'] = ({ indeterminate, ...others }) =>
-  indeterminate ? <IconMinus {...others} /> : <IconX {...others} />;
+  indeterminate ? <IconMinus {...others} /> : <IconX {...others} />
 
 function EventProgressionModalInternals({
   results,
   format,
   onClose,
 }: Pick<ScoringTableProps<'climbing'>, 'results' | 'format'> & Pick<ModalProps, 'onClose'>) {
-  const supabase = createBrowserClient();
-  const params = useParams() as { sport: Sport; event: string };
-  const [from, setFrom] = useState<string | null>(format.rounds[0]?.id ?? null);
-  const [to, setTo] = useState<string | null>(null);
-  const [countInput, setCountInput] = useState<string | number>(6);
-  const [reverseOrder, setReverseOrder] = useState(true);
-  const progressEntrantCount = toNumOr(countInput, 0);
+  const supabase = createBrowserClient()
+  const params = useParams() as { sport: Sport; event: string }
+  const [from, setFrom] = useState<string | null>(format.rounds[0]?.id ?? null)
+  const [to, setTo] = useState<string | null>(null)
+  const [countInput, setCountInput] = useState<string | number>(6)
+  const [reverseOrder, setReverseOrder] = useState(true)
+  const progressEntrantCount = toNumOr(countInput, 0)
 
   // entrant ids stored for use in checkbox to manually DQ entrants
-  const [manualDQ, setManualDQ] = useState<number[]>([]);
+  const [manualDQ, setManualDQ] = useState<number[]>([])
 
-  const [preview, setPreview] = useState<EventLiveData<'climbing'>['results']>();
+  const entrantMap = useAtomValue(entrantMapAtom)
 
-  const fromRound = format.rounds.find((round) => round.id === from);
+  const [preview, setPreview] = useState<EventLiveData<'climbing'>['results']>()
+
+  const fromRound = format.rounds.find((round) => round.id === from)
+
+  // This modal skips the liveDataPreview dn generates the results directly. Problem then is it is missing the entrantMap. Maybe the entrantMap should be in an atom and available to all children - but where to update the atom? In the eventJSON fetch/update pattern i guss
+
   useEffect(() => {
     // const round = format.rounds.find((round) => round.id === from);
-    if (fromRound) setPreview(generateLiveDataResultsClimbing({ round: fromRound, results }));
-  }, [fromRound, results, format.rounds]);
+    if (fromRound) setPreview(generateLiveDataResultsClimbing({ round: fromRound, results }))
+  }, [fromRound, results, format.rounds])
 
-  let cutoff = progressEntrantCount;
-  const previewEntries = Object.entries(preview ?? {});
+  let cutoff = progressEntrantCount
+  const previewEntries = Object.entries(preview ?? {})
 
   return (
     <div className="flex flex-col items-stretch gap-4 p-4">
@@ -531,12 +535,12 @@ function EventProgressionModalInternals({
       </div>
 
       {previewEntries.map(([classId, results], i) => {
-        const className = fromRound?.classes.find((cls) => cls.id === classId)?.name;
+        const className = fromRound?.classes.find((cls) => cls.id === classId)?.name
         const cantProgress = !to
           ? 'Select a target round'
           : from === to
             ? 'Cannot progress to the same round'
-            : undefined;
+            : undefined
         return !results?.length ? null : (
           <div className="flex flex-col gap-8" key={classId}>
             <div
@@ -565,18 +569,19 @@ function EventProgressionModalInternals({
                   checked={!!manualDQ.length}
                   onChange={() =>
                     setManualDQ((dqs) =>
-                      dqs.length === results.length ? [] : results.map((r) => r.entrant.id),
+                      dqs.length === results.length ? [] : results.map((r) => r.entrant),
                     )
                   }
                 />
               </div>
               {results.map((result, i) => {
-                const isManualDQ = manualDQ.includes(result.entrant.id);
-                if (isManualDQ) cutoff += 1;
+                const entrant = entrantMap[result.entrant]!
+                const isManualDQ = manualDQ.includes(result.entrant)
+                if (isManualDQ) cutoff += 1
 
                 return (
                   <div
-                    key={result.entrant.id}
+                    key={result.entrant}
                     className={clsx(
                       (i >= cutoff || isManualDQ) &&
                         'border-red-5 text-gray-6 border-dashed bg-red-5/10',
@@ -585,11 +590,11 @@ function EventProgressionModalInternals({
                     )}
                   >
                     <Text size="xs" c="dimmed">
-                      {result.entrant.id}
+                      {result.entrant}
                     </Text>
                     <Text>{result.rank}</Text>
                     <Text>
-                      {result.entrant.first_name} {result.entrant.last_name}
+                      {entrant.first_name} {entrant.last_name}
                     </Text>
                     <Text>{result.tops}</Text>
                     <Text>{result.zones}</Text>
@@ -605,13 +610,13 @@ function EventProgressionModalInternals({
                       onChange={() =>
                         setManualDQ((dqs) =>
                           isManualDQ
-                            ? dqs.filter((id) => id !== result.entrant.id)
-                            : [...dqs, result.entrant.id],
+                            ? dqs.filter((id) => id !== result.entrant)
+                            : [...dqs, result.entrant],
                         )
                       }
                     />
                   </div>
-                );
+                )
               })}
             </div>
             <ConfirmButton
@@ -620,38 +625,38 @@ function EventProgressionModalInternals({
               disabled={!to || from === to}
               onClick={async () => {
                 const entrants = results
-                  .filter((result) => !manualDQ.includes(result.entrant.id))
-                  .slice(0, progressEntrantCount);
-                if (reverseOrder) entrants.reverse();
+                  .filter((result) => !manualDQ.includes(result.entrant))
+                  .slice(0, progressEntrantCount)
+                if (reverseOrder) entrants.reverse()
 
                 const newFormat = {
                   rounds: format.rounds.map((round) => {
                     if (round.id !== to) {
-                      return round;
+                      return round
                     }
 
                     return {
                       ...round,
                       classes: round.classes.map((cls) => {
                         if (cls.id !== classId) {
-                          return cls;
+                          return cls
                         }
 
                         return {
                           ...cls,
                           entrants: entrants.map((entrant) => entrant.entrant),
-                        };
+                        }
                       }),
-                    };
+                    }
                   }),
-                };
+                }
 
-                const isValidFormat = isFormatClimbing(newFormat);
+                const isValidFormat = isFormatClimbing(newFormat)
                 if (isValidFormat) {
                   const { error } = await supabase
                     .from('events')
                     .update({ format: newFormat })
-                    .eq('slug', params.event);
+                    .eq('slug', params.event)
 
                   notifications.show({
                     title: error ? 'Error Progressing Entrants' : 'Progressing Entrants',
@@ -659,23 +664,23 @@ function EventProgressionModalInternals({
                       ? error.message
                       : `Progressing ${entrants.length} entrants from ${from} to ${to}`,
                     color: error ? 'red' : 'teal',
-                  });
+                  })
                 } else {
                   notifications.show({
                     title: 'Error Progressing Entrants',
                     message: 'Resulting format is invalid. Please edit the event manually',
                     color: 'red',
-                  });
+                  })
                 }
 
-                onClose();
+                onClose()
               }}
             >
               Progress {className} Entrants{cantProgress && ` - ${cantProgress}`}
             </ConfirmButton>
             {i < previewEntries.length - 1 && <Divider />}
           </div>
-        );
+        )
       })}
 
       {/* {Object.entries(preview ?? {}).map(([classId, results]) => {
@@ -722,5 +727,5 @@ function EventProgressionModalInternals({
         );
       })} */}
     </div>
-  );
+  )
 }

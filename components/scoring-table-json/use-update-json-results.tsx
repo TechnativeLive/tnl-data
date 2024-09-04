@@ -1,95 +1,122 @@
-'use client';
+'use client'
 
-import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
-import { createBrowserClient } from '@/lib/db/client';
-import { EventLiveData, Sport, EventResult, EventResults } from '@/lib/event-data';
-import { updateDatastream } from '@/lib/singular/datastream';
-import { useDidUpdate } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import { IconCircleCheck } from '@tabler/icons-react';
-import { useParams } from 'next/navigation';
-import { useState, useCallback } from 'react';
+import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json'
+import { createBrowserClient } from '@/lib/db/client'
+import { EventLiveData, Sport, EventResult, EventResults } from '@/lib/event-data'
+import { updateDatastreams } from '@/lib/singular/datastream'
+import { useDidUpdate } from '@mantine/hooks'
+import { notifications } from '@mantine/notifications'
+import { IconCircleCheck } from '@tabler/icons-react'
+import { useParams } from 'next/navigation'
+import { useState, useCallback } from 'react'
 
 export type UpdateResultHelper<S extends Sport> = (args: {
-  round: string;
-  cls: string;
-  id: number;
-  data: EventResult<S>['result'];
-  status?: 'DNS' | 'DNF' | 'DQ';
-  message?: string;
-  feedback?: string | null;
-}) => void;
+  round: string
+  cls: string
+  id: number
+  data: EventResult<S>['result']
+  status?: 'DNS' | 'DNF' | 'DQ'
+  message?: string
+  feedback?: string | null
+}) => void
 
 export type UpdateActiveHelper = (args: {
-  round?: string | undefined;
-  cls?: string | undefined;
-  entrant?: number | undefined;
-  message?: string;
-  feedback?: string | null;
-}) => void;
+  round?: string | undefined
+  cls?: string | undefined
+  entrant?: number | undefined
+  message?: string
+  feedback?: string | null
+}) => void
 
 export function useUpdateJsonResults<S extends Sport>(
-  { results: initialResults, format, dsPrivateKey, judgesData }: ScoringTableProps<S>,
+  {
+    results: initialResults,
+    format,
+    dsPrivateKey,
+    judgesData,
+    formatOptions,
+  }: ScoringTableProps<S>,
   liveDataGenerator?: (
     data: Pick<ScoringTableProps<S>, 'format' | 'results' | 'judgesData'>,
   ) => EventLiveData<S>,
 ) {
-  const params = useParams();
-  const eventSlug = params.event;
-  const [results, setResults] = useState(initialResults);
+  const params = useParams()
+  const eventSlug = params.event
+  const [results, setResults] = useState(initialResults)
   const [liveDataPreview, setLiveDataPreview] = useState<EventLiveData<S> | undefined>(
     liveDataGenerator?.({
       format,
       results,
       judgesData,
     }),
-  );
+  )
 
   // Keep results up to date with database changes
   // Note: this causes unnecessary re-renders. Consider using an atom linked to the realtime event
   useDidUpdate(() => {
-    const newResults = initialResults;
-    setResults(newResults);
+    const newResults = initialResults
+    setResults(newResults)
     if (liveDataGenerator) {
       const liveData = liveDataGenerator({
         format,
         results: newResults,
         judgesData,
-      });
-      setLiveDataPreview(liveData);
-      updateDatastream(dsPrivateKey, liveData);
-    }
-  }, [setResults, initialResults, format, liveDataGenerator, setLiveDataPreview]);
+      })
+      setLiveDataPreview(liveData)
 
-  const supabase = createBrowserClient();
+      // // Searchwords: Bloc data, blocdata, _format, formatOptions
+      // @ts-expect-error Hacky workaround for multiple datastreams - should come up with something permanent
+      const { blocData, ...coreLiveData } = liveData
+      updateDatastreams([
+        { privateKey: dsPrivateKey, body: coreLiveData },
+        { privateKey: formatOptions?.blocDataDsKey, body: blocData },
+      ])
+    }
+  }, [
+    setResults,
+    initialResults,
+    format,
+    liveDataGenerator,
+    setLiveDataPreview,
+    dsPrivateKey,
+    formatOptions?.blocDataDsKey,
+  ])
+
+  const supabase = createBrowserClient()
   const [loading, setLoading] = useState<
     false | [string | undefined, string | undefined, number | undefined]
-  >(false);
+  >(false)
 
   const updateActive = useCallback<UpdateActiveHelper>(
     ({ round, cls, entrant, message, feedback }) => {
       if (!eventSlug || typeof eventSlug !== 'string') {
-        console.warn("Can't update active without event slug");
-        return;
+        console.warn("Can't update active without event slug")
+        return
       }
       setResults((current) => {
-        const now = Date.now();
-        const newResults: EventResults<S> = { ...current };
-        if (!newResults.active) newResults.active = {};
-        newResults.active.round = round;
-        newResults.active.class = cls;
-        newResults.active.entrant = entrant;
+        const newResults: EventResults<S> = { ...current }
+        if (!newResults.active) newResults.active = {}
+        newResults.active.round = round
+        newResults.active.class = cls
+        newResults.active.entrant = entrant
 
-        setLoading([round, cls, entrant]);
+        setLoading([round, cls, entrant])
         // update datastream
         if (liveDataGenerator) {
           const liveData = liveDataGenerator({
             format,
             results: newResults,
             judgesData,
-          });
-          setLiveDataPreview(liveData);
-          updateDatastream(dsPrivateKey, liveData, message);
+          })
+          setLiveDataPreview(liveData)
+
+          // // Searchwords: Bloc data, blocdata, _format, formatOptions
+          // @ts-expect-error Hacky workaround for multiple datastreams - should come up with something permanent
+          const { blocData, ...coreLiveData } = liveData
+          updateDatastreams([
+            { privateKey: dsPrivateKey, body: coreLiveData, customMessage: message },
+            { privateKey: formatOptions?.blocDataDsKey, body: blocData },
+          ])
         }
 
         supabase
@@ -97,7 +124,7 @@ export function useUpdateJsonResults<S extends Sport>(
           .update({ results: newResults })
           .eq('slug', eventSlug)
           .then(() => {
-            setLoading(false);
+            setLoading(false)
             const message =
               feedback ?? entrant
                 ? 'Active entrant updated'
@@ -105,63 +132,71 @@ export function useUpdateJsonResults<S extends Sport>(
                   ? 'Active class updated'
                   : round
                     ? 'Active round updated'
-                    : 'Active cleared';
+                    : 'Active cleared'
 
             if (feedback !== null)
               notifications.show({
                 color: 'teal',
                 icon: <IconCircleCheck />,
                 message,
-              });
-          });
+              })
+          })
 
-        return newResults;
-      });
+        return newResults
+      })
     },
     [
       setResults,
       setLoading,
       supabase,
-      dsPrivateKey,
       format,
       liveDataGenerator,
       eventSlug,
       judgesData,
+      dsPrivateKey,
+      formatOptions?.blocDataDsKey,
     ],
-  );
+  )
 
   const updateResult = useCallback<UpdateResultHelper<S>>(
     ({ round, cls, id, data, status, message, feedback }) => {
       if (!eventSlug || typeof eventSlug !== 'string') {
-        console.warn("Can't update result without event slug");
-        return;
+        console.warn("Can't update result without event slug")
+        return
       }
       setResults((current) => {
-        const newResults = { ...current };
-        if (!newResults[round]) newResults[round] = {};
-        if (!newResults[round]![cls]) newResults[round]![cls] = {};
+        const newResults = { ...current }
+        if (!newResults[round]) newResults[round] = {}
+        if (!newResults[round]![cls]) newResults[round]![cls] = {}
         if (!newResults[round]![cls]![id])
           newResults[round]![cls]![id] = {
             result: {} as EventResult<S>['result'],
             // __ts: Date.now(),
             status,
-          };
+          }
         newResults[round]![cls]![id] = {
           result: data,
           // __ts: Date.now(),
           status,
-        };
+        }
 
-        setLoading([round, cls, id]);
+        setLoading([round, cls, id])
         // update datastream
         if (liveDataGenerator) {
           const liveData = liveDataGenerator({
             format,
             results: newResults,
             judgesData,
-          });
-          setLiveDataPreview(liveData);
-          updateDatastream(dsPrivateKey, liveData, message);
+          })
+          setLiveDataPreview(liveData)
+
+          // // Searchwords: Bloc data, blocdata, _format, formatOptions
+          // @ts-expect-error Hacky workaround for multiple datastreams - should come up with something permanent
+          const { blocData, ...coreLiveData } = liveData
+          updateDatastreams([
+            { privateKey: dsPrivateKey, body: coreLiveData, customMessage: message },
+            { privateKey: formatOptions?.blocDataDsKey, body: blocData },
+          ])
         }
 
         // update db
@@ -170,29 +205,30 @@ export function useUpdateJsonResults<S extends Sport>(
           .update({ results: newResults })
           .eq('slug', eventSlug)
           .then(() => {
-            setLoading(false);
+            setLoading(false)
             if (feedback !== null)
               notifications.show({
                 color: 'teal',
                 icon: <IconCircleCheck />,
                 message: feedback ?? 'Score submitted',
-              });
-          });
+              })
+          })
 
-        return newResults;
-      });
+        return newResults
+      })
     },
     [
       setResults,
       setLoading,
       supabase,
       eventSlug,
-      dsPrivateKey,
       format,
       liveDataGenerator,
       judgesData,
+      dsPrivateKey,
+      formatOptions?.blocDataDsKey,
     ],
-  );
+  )
 
   return {
     results,
@@ -200,5 +236,5 @@ export function useUpdateJsonResults<S extends Sport>(
     updateResult,
     liveDataPreview,
     loading,
-  };
+  }
 }

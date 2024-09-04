@@ -1,9 +1,13 @@
 import { QueryLink } from '@/components/query-link';
 import { Button, Divider, SimpleGrid } from '@mantine/core';
 import clsx from 'clsx';
+import { Route } from 'next';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 export function ClimbingJudgeSelection({ blocCount }: { blocCount: number }) {
   const judges = Array.from({ length: blocCount }, (_, i) => i + 1);
+  const params = useParams();
 
   return (
     <SimpleGrid cols={{ base: Math.ceil(blocCount / 2), sm: blocCount }} verticalSpacing="xl">
@@ -16,6 +20,10 @@ export function ClimbingJudgeSelection({ blocCount }: { blocCount: number }) {
       {judges.map((position) => (
         <JudgeSelectButton class="womens" position={position} key={position} />
       ))}
+      <Divider className="col-span-full" />
+      <Button component={Link} href={`/${params.sport}/${params.event}/scoreboard` as Route}>
+        Scoreboard
+      </Button>
     </SimpleGrid>
   );
 }

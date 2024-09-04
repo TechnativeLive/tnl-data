@@ -29,7 +29,7 @@ export const isResultsClimbing = (input: any): input is EventResults<'climbing'>
         return true;
     });
     const $io4 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => Array.isArray(elem) && elem.every((elem: any) => null === elem || "object" === typeof elem && null !== elem && $io5(elem))) && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
-    const $io5 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
+    const $io5 = (input: any): boolean => "number" === typeof input.s && (undefined === input.z || "number" === typeof input.z) && (undefined === input.t || "number" === typeof input.t) && (undefined === input.tp || "number" === typeof input.tp) && (undefined === input.e || "number" === typeof input.e);
     return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
 };
 export const isResultsIceSkating = (input: any): input is EventResults<'ice-skating'> => {
@@ -94,7 +94,7 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
             return true;
         });
         const $io4 = (input: any): boolean => Array.isArray(input.result) && input.result.every((elem: any) => Array.isArray(elem) && elem.every((elem: any) => null === elem || "object" === typeof elem && null !== elem && $io5(elem))) && (undefined === input.status || "DNS" === input.status || "DNF" === input.status || "DQ" === input.status);
-        const $io5 = (input: any): boolean => "number" === typeof input.startedAt && (undefined === input.zoneAt || "number" === typeof input.zoneAt) && (undefined === input.topAt || "number" === typeof input.topAt) && (undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional) && (undefined === input.endedAt || "number" === typeof input.endedAt);
+        const $io5 = (input: any): boolean => "number" === typeof input.s && (undefined === input.z || "number" === typeof input.z) && (undefined === input.t || "number" === typeof input.t) && (undefined === input.tp || "number" === typeof input.tp) && (undefined === input.e || "number" === typeof input.e);
         return "object" === typeof input && null !== input && false === Array.isArray(input) && $io0(input);
     };
     if (false === __is(input)) {
@@ -178,7 +178,7 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     value: input.result
                 })) && input.result.map((elem: any, _index1: number) => (Array.isArray(elem) || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "]",
-                    expected: "Array<{ startedAt: number; zoneAt?: number | undefined; topAt?: number | undefined; topAtProvisional?: number | undefined; endedAt?: number | undefined; } | null>",
+                    expected: "Array<{ s: number; z?: number | undefined; t?: number | undefined; tp?: number | undefined; e?: number | undefined; } | null>",
                     value: elem
                 })) && elem.map((elem: any, _index2: number) => null === elem || ("object" === typeof elem && null !== elem || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "][" + _index2 + "]",
@@ -190,7 +190,7 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     value: elem
                 })).every((flag: boolean) => flag) || $report(_exceptionable, {
                     path: _path + ".result[" + _index1 + "]",
-                    expected: "Array<{ startedAt: number; zoneAt?: number | undefined; topAt?: number | undefined; topAtProvisional?: number | undefined; endedAt?: number | undefined; } | null>",
+                    expected: "Array<{ s: number; z?: number | undefined; t?: number | undefined; tp?: number | undefined; e?: number | undefined; } | null>",
                     value: elem
                 })).every((flag: boolean) => flag) || $report(_exceptionable, {
                     path: _path + ".result",
@@ -201,26 +201,26 @@ export const validateResultsClimbing = (input: any): typia.IValidation<EventResu
                     expected: "(\"DNF\" | \"DNS\" | \"DQ\" | undefined)",
                     value: input.status
                 })].every((flag: boolean) => flag);
-            const $vo5 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ["number" === typeof input.startedAt || $report(_exceptionable, {
-                    path: _path + ".startedAt",
+            const $vo5 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ["number" === typeof input.s || $report(_exceptionable, {
+                    path: _path + ".s",
                     expected: "number",
-                    value: input.startedAt
-                }), undefined === input.zoneAt || "number" === typeof input.zoneAt || $report(_exceptionable, {
-                    path: _path + ".zoneAt",
+                    value: input.s
+                }), undefined === input.z || "number" === typeof input.z || $report(_exceptionable, {
+                    path: _path + ".z",
                     expected: "(number | undefined)",
-                    value: input.zoneAt
-                }), undefined === input.topAt || "number" === typeof input.topAt || $report(_exceptionable, {
-                    path: _path + ".topAt",
+                    value: input.z
+                }), undefined === input.t || "number" === typeof input.t || $report(_exceptionable, {
+                    path: _path + ".t",
                     expected: "(number | undefined)",
-                    value: input.topAt
-                }), undefined === input.topAtProvisional || "number" === typeof input.topAtProvisional || $report(_exceptionable, {
-                    path: _path + ".topAtProvisional",
+                    value: input.t
+                }), undefined === input.tp || "number" === typeof input.tp || $report(_exceptionable, {
+                    path: _path + ".tp",
                     expected: "(number | undefined)",
-                    value: input.topAtProvisional
-                }), undefined === input.endedAt || "number" === typeof input.endedAt || $report(_exceptionable, {
-                    path: _path + ".endedAt",
+                    value: input.tp
+                }), undefined === input.e || "number" === typeof input.e || $report(_exceptionable, {
+                    path: _path + ".e",
                     expected: "(number | undefined)",
-                    value: input.endedAt
+                    value: input.e
                 })].every((flag: boolean) => flag);
             return ("object" === typeof input && null !== input && false === Array.isArray(input) || $report(true, {
                 path: _path + "",

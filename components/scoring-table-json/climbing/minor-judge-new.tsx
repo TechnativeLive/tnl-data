@@ -1,17 +1,13 @@
-'use client';
+'use client'
 
-import { ConfirmButton } from '@/components/mantine-extensions/confirm-button';
-import { StackedButton } from '@/components/mantine-extensions/stacked-button';
-import { QueryLink } from '@/components/query-link';
-import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json';
-import { useUpdateJsonResults } from '@/components/scoring-table-json/use-update-json-results';
-import { createBrowserClient } from '@/lib/db/client';
-import { EventResult } from '@/lib/event-data';
-import { generateLiveDataClimbing } from '@/lib/event-data/climbing';
-import { toNumOr } from '@/lib/utils';
+import { ConfirmButton } from '@/components/mantine-extensions/confirm-button'
+import { StackedButton } from '@/components/mantine-extensions/stacked-button'
+import { QueryLink } from '@/components/query-link'
+import { ScoringTableProps } from '@/components/scoring-table-json/scoring-table-json'
+import { createBrowserClient } from '@/lib/db/client'
+import { toNumOr } from '@/lib/utils'
 import {
   Badge,
-  BadgeProps,
   Button,
   ButtonGroup,
   ButtonProps,
@@ -19,134 +15,133 @@ import {
   Loader,
   Modal,
   Text,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
-import clsx from 'clsx';
-import dayjs from 'dayjs';
-import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { SetOptional, SetRequired } from 'type-fest';
+} from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { notifications } from '@mantine/notifications'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
+import clsx from 'clsx'
+import dayjs from 'dayjs'
+import { useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 
 function getScoreState(attempt?: Tables<'runs_bouldering'>): 0 | 1 | 2 | 3 {
-  if (attempt?.top_at || attempt?.ended_at) return 0;
-  if (attempt?.top_at_provisional) return 3;
-  if (attempt?.zone_at) return 2;
-  if (attempt?.started_at) return 1;
-  return 0;
+  if (attempt?.top_at || attempt?.ended_at) return 0
+  if (attempt?.top_at_provisional) return 3
+  if (attempt?.zone_at) return 2
+  if (attempt?.started_at) return 1
+  return 0
 }
 
 type RunUpsert<T extends 'update' | 'insert'> = (
   action: T,
   run: T extends 'update' ? DbUpdate<'runs_bouldering'> : DbInsert<'runs_bouldering'>,
   overwrite?: boolean,
-) => void;
+) => void
 
 type MinorJudgeProps = {
-  category: Tables<'runs_bouldering'>['category'];
-  activeRoundId: string;
-} & Pick<ScoringTableProps<'climbing'>, 'format'>;
+  category: Tables<'runs_bouldering'>['category']
+  activeRoundId: string
+} & Pick<ScoringTableProps<'climbing'>, 'format'>
 
 export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJudgeProps) {
-  const supabase = createBrowserClient();
-  const [runs, setRuns] = useState<DbInsert<'runs_bouldering'>[]>([]);
+  const supabase = createBrowserClient()
+  const [runs, setRuns] = useState<DbInsert<'runs_bouldering'>[]>([])
 
   const createRun = useCallback<(run: DbInsert<'runs_bouldering'>) => void>(
     async (run) => {
-      setRuns((prevRuns) => [run, ...prevRuns]);
+      setRuns((prevRuns) => [run, ...prevRuns])
 
-      const { error } = await supabase.from('runs_bouldering').insert(run);
+      const { error } = await supabase.from('runs_bouldering').insert(run)
       if (error) {
         notifications.show({
           title: 'Error creating run',
           message: error.message,
           color: 'red',
-        });
+        })
       }
     },
     [supabase, setRuns],
-  );
+  )
 
   const updateRun = useCallback<(run: DbUpdate<'runs_bouldering'>, overwrite?: boolean) => void>(
     async (run, overwrite = false) => {
       if (!run.id) {
-        console.warn('Run id is required', run);
-        return;
+        console.warn('Run id is required', run)
+        return
       }
       setRuns((prevRuns) => {
-        const newRuns = [...prevRuns];
-        const index = newRuns.findIndex((r) => r.id === run.id);
+        const newRuns = [...prevRuns]
+        const index = newRuns.findIndex((r) => r.id === run.id)
         if (index === -1) {
-          console.warn('Run not found', run);
-          return prevRuns;
+          console.warn('Run not found', run)
+          return prevRuns
         }
         newRuns[index] = overwrite
           ? (run as DbInsert<'runs_bouldering'>)
-          : { ...newRuns[index]!, ...run };
-        return newRuns;
-      });
-      const { error } = await supabase.from('runs_bouldering').update(run).eq('id', run.id);
+          : { ...newRuns[index]!, ...run }
+        return newRuns
+      })
+      const { error } = await supabase.from('runs_bouldering').update(run).eq('id', run.id)
       if (error) {
         notifications.show({
           title: 'Error updating run',
           message: error.message,
           color: 'red',
-        });
+        })
       }
-      return;
+      return
     },
     [supabase, setRuns],
-  );
+  )
 
   const deleteRun = useCallback<(id: Tables<'runs_bouldering'>['id']) => void>(
     async (id) => {
-      setRuns((prevRuns) => prevRuns.filter((r) => r.id !== id));
+      setRuns((prevRuns) => prevRuns.filter((r) => r.id !== id))
 
-      const { error } = await supabase.from('runs_bouldering').delete().eq('id', id);
+      const { error } = await supabase.from('runs_bouldering').delete().eq('id', id)
       if (error) {
         notifications.show({
           title: 'Error creating run',
           message: error.message,
           color: 'red',
-        });
+        })
       }
     },
     [supabase, setRuns],
-  );
+  )
 
-  const searchParams = useSearchParams();
-  const judge = searchParams.get('judge');
-  const bloc = toNumOr(judge?.charAt(1), undefined);
+  const searchParams = useSearchParams()
+  const judge = searchParams.get('judge')
+  const bloc = toNumOr(judge?.charAt(1), undefined)
 
   useEffect(() => {
     const getRuns = async () => {
-      if (!bloc || !category) return;
+      if (!bloc || !category) return
       const { data, error } = await supabase
         .from('runs_bouldering')
         .select('*')
         .filter('category', 'eq', category)
         .filter('bloc', 'eq', bloc)
-        .order('started_at', { ascending: false });
+        .order('started_at', { ascending: false })
       if (error) {
         notifications.show({
           title: 'Error fetching data',
           message: error.message,
           color: 'red',
-        });
-        return;
+        })
+        return
       }
-      setRuns(data);
-    };
-    getRuns();
-  }, [setRuns, category, bloc, supabase]);
+      setRuns(data)
+    }
+    getRuns()
+  }, [setRuns, category, bloc, supabase])
 
-  if (!judge) return <div>This page should only be used with a `judge` search param</div>;
+  if (!judge) return <div>This page should only be used with a `judge` search param</div>
 
   // const { results, updateResult } = useUpdateJsonResults(props, generateLiveDataClimbing);
 
-  const judgeClassId = judge.charAt(0) === 'M' ? 'mens' : 'womens';
-  const activeRound = format.rounds.find((round) => round.id === activeRoundId);
+  const judgeClassId = judge.charAt(0) === 'M' ? 'mens' : 'womens'
+  const activeRound = format.rounds.find((round) => round.id === activeRoundId)
 
   if (!activeRound)
     return (
@@ -154,28 +149,28 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
         Waiting for the head judge to set an active round
         <Loader type="bars" />
       </div>
-    );
+    )
 
-  const judgeClass = activeRound.classes.find((cls) => cls.id === judgeClassId);
+  const judgeClass = activeRound.classes.find((cls) => cls.id === judgeClassId)
   if (!judgeClass)
     return (
       <div className="py-8 w-full grid place-content-center justify-items-center gap-4">
         No class found for Judge {judge}
       </div>
-    );
+    )
 
   // const classResults = judgeClass ? results[activeRound.id]?.[judgeClass.id] : undefined;
 
-  const entrantId = Number(searchParams.get('entrant'));
+  const entrantId = Number(searchParams.get('entrant'))
   const entrantIndex = judgeClass.entrants.findIndex((ent) =>
     typeof ent === 'number' ? ent === entrantId : ent.id === entrantId,
-  );
-  const entrant = judgeClass.entrants[entrantIndex > -1 ? entrantIndex : 0];
-  const prevEntrant = entrantIndex > 0 ? judgeClass.entrants[entrantIndex - 1] : undefined;
+  )
+  const entrant = judgeClass.entrants[entrantIndex > -1 ? entrantIndex : 0]
+  const prevEntrant = entrantIndex > 0 ? judgeClass.entrants[entrantIndex - 1] : undefined
   const nextEntrant =
     entrantIndex > -1 && entrantIndex < judgeClass.entrants.length - 1
       ? judgeClass.entrants[entrantIndex + 1]
-      : undefined;
+      : undefined
 
   // function handleStart() {
   //   if (!activeRound || !entrant) return;
@@ -275,7 +270,7 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
   //   });
   // }
 
-  const latestAttempt = runs[0];
+  const latestAttempt = runs[0]
   // const scoreState = getScoreState(latestAttempt);
 
   return (
@@ -393,7 +388,7 @@ export function ClimbingMinorJudge({ category, format, activeRoundId }: MinorJud
         </>
       )}
     </div>
-  );
+  )
 }
 
 function ActiveButton({
@@ -423,14 +418,14 @@ function ActiveButton({
         {...props}
       />
     </div>
-  );
+  )
 }
 
 function getBadge(attempt: Tables<'runs_bouldering'>) {
-  if (attempt.top_at) return { label: 'Top', color: 'teal' };
-  if (attempt.top_at_provisional) return { label: 'Top (Provisional)', color: 'orange' };
-  if (attempt.zone_at) return { label: 'Zone', color: 'blue' };
-  return { label: 'Started', color: 'gray' };
+  if (attempt.top_at) return { label: 'Top', color: 'teal' }
+  if (attempt.top_at_provisional) return { label: 'Top (Provisional)', color: 'orange' }
+  if (attempt.zone_at) return { label: 'Zone', color: 'blue' }
+  return { label: 'Started', color: 'gray' }
 }
 
 function Attempt({
@@ -439,20 +434,20 @@ function Attempt({
   active,
   handleDelete,
 }: {
-  attempt: Tables<'runs_bouldering'>;
-  number: number;
-  active: boolean;
-  handleDelete: (attemptNumber: number) => void;
+  attempt: Tables<'runs_bouldering'>
+  number: number
+  active: boolean
+  handleDelete: (attemptNumber: number) => void
 }) {
-  const [opened, { open, close }] = useDisclosure(false);
-  const [editing, setEditing] = useState<number>();
+  const [opened, { open, close }] = useDisclosure(false)
+  const [editing, setEditing] = useState<number>()
 
-  const score = attempt.top_at ? 'Top' : attempt.zone_at ? 'Zone' : 'No Score';
-  const badge = getBadge(attempt);
+  const score = attempt.top_at ? 'Top' : attempt.zone_at ? 'Zone' : 'No Score'
+  const badge = getBadge(attempt)
 
   const attemptTime = attempt.ended_at
     ? dayjs(attempt.ended_at - attempt.started_at).format('m:ss')
-    : undefined;
+    : undefined
 
   return (
     <>
@@ -523,8 +518,8 @@ function Attempt({
               size="sm"
               color="gray"
               onClick={() => {
-                open();
-                setEditing(number);
+                open()
+                setEditing(number)
               }}
             >
               Edit
@@ -542,5 +537,5 @@ function Attempt({
         </div>
       </div>
     </>
-  );
+  )
 }

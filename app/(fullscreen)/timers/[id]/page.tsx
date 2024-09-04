@@ -1,4 +1,4 @@
-import { FullscreenTimer } from '@/app/(fullscreen-timer)/timers/[id]/fullscreen-timer';
+import { FullscreenTimer } from '@/app/(fullscreen)/timers/[id]/fullscreen-timer';
 import { PageProps } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import { Chivo } from 'next/font/google';
