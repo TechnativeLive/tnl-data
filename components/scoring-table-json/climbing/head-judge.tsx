@@ -27,6 +27,7 @@ import {
   generateLiveDataClimbing,
   generateLiveDataResultsClimbing,
 } from '@/lib/event-data/climbing'
+import { entrantMapAtom } from '@/lib/hooks/use-realtime-json-event'
 import { isFormatClimbing } from '@/lib/json/generated/format'
 import { toNumOr } from '@/lib/utils'
 import {
@@ -64,6 +65,7 @@ import {
   IconX,
 } from '@tabler/icons-react'
 import clsx from 'clsx'
+import { useAtomValue } from 'jotai'
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useState } from 'react'
 
@@ -466,9 +468,14 @@ function EventProgressionModalInternals({
   // entrant ids stored for use in checkbox to manually DQ entrants
   const [manualDQ, setManualDQ] = useState<number[]>([])
 
+  const entrantMap = useAtomValue(entrantMapAtom)
+
   const [preview, setPreview] = useState<EventLiveData<'climbing'>['results']>()
 
   const fromRound = format.rounds.find((round) => round.id === from)
+
+  // This modal skips the liveDataPreview dn generates the results directly. Problem then is it is missing the entrantMap. Maybe the entrantMap should be in an atom and available to all children - but where to update the atom? In the eventJSON fetch/update pattern i guss
+
   useEffect(() => {
     // const round = format.rounds.find((round) => round.id === from);
     if (fromRound) setPreview(generateLiveDataResultsClimbing({ round: fromRound, results }))
@@ -562,18 +569,19 @@ function EventProgressionModalInternals({
                   checked={!!manualDQ.length}
                   onChange={() =>
                     setManualDQ((dqs) =>
-                      dqs.length === results.length ? [] : results.map((r) => r.entrant.id),
+                      dqs.length === results.length ? [] : results.map((r) => r.entrant),
                     )
                   }
                 />
               </div>
               {results.map((result, i) => {
-                const isManualDQ = manualDQ.includes(result.entrant.id)
+                const entrant = entrantMap[result.entrant]!
+                const isManualDQ = manualDQ.includes(result.entrant)
                 if (isManualDQ) cutoff += 1
 
                 return (
                   <div
-                    key={result.entrant.id}
+                    key={result.entrant}
                     className={clsx(
                       (i >= cutoff || isManualDQ) &&
                         'border-red-5 text-gray-6 border-dashed bg-red-5/10',
@@ -582,11 +590,11 @@ function EventProgressionModalInternals({
                     )}
                   >
                     <Text size="xs" c="dimmed">
-                      {result.entrant.id}
+                      {result.entrant}
                     </Text>
                     <Text>{result.rank}</Text>
                     <Text>
-                      {result.entrant.first_name} {result.entrant.last_name}
+                      {entrant.first_name} {entrant.last_name}
                     </Text>
                     <Text>{result.tops}</Text>
                     <Text>{result.zones}</Text>
@@ -602,8 +610,8 @@ function EventProgressionModalInternals({
                       onChange={() =>
                         setManualDQ((dqs) =>
                           isManualDQ
-                            ? dqs.filter((id) => id !== result.entrant.id)
-                            : [...dqs, result.entrant.id],
+                            ? dqs.filter((id) => id !== result.entrant)
+                            : [...dqs, result.entrant],
                         )
                       }
                     />
@@ -617,7 +625,7 @@ function EventProgressionModalInternals({
               disabled={!to || from === to}
               onClick={async () => {
                 const entrants = results
-                  .filter((result) => !manualDQ.includes(result.entrant.id))
+                  .filter((result) => !manualDQ.includes(result.entrant))
                   .slice(0, progressEntrantCount)
                 if (reverseOrder) entrants.reverse()
 

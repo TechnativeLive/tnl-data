@@ -17,6 +17,7 @@ export const roundKindSelection = {
   'ice-skating': roundKindIceSkatingSelection,
 };
 
+
 export type Sport = keyof SportJsonTypes;
 
 type SportJsonTypes = {
@@ -46,14 +47,14 @@ export type EventResults<S extends Sport> = Results<EventResult<S>>;
 
 type Results<Result extends unknown = unknown> = {
   [round: string]:
+  | {
+    [cls: string]:
     | {
-        [cls: string]:
-          | {
-              [entrant: string]: Result | undefined;
-            }
-          | undefined;
-      }
+      [entrant: string]: Result | undefined;
+    }
     | undefined;
+  }
+  | undefined;
 } & {
   active: { round?: string; class?: string; entrant?: number } | undefined;
   // judgeActive?:

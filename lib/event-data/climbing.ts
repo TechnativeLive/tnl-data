@@ -5,11 +5,14 @@ import {
   EventResults,
   JudgeDataClimbing,
 } from '@/lib/event-data';
+import { EntrantMap, entrantMapAtom } from '../hooks/use-realtime-json-event';
 import {
   getBlocScores,
   getBoulderingJudgeStation,
 } from '@/components/scoring-table-json/climbing/utils';
 import { sortAndRank } from '@/lib/sort-and-rank';
+import { useAtomValue } from 'jotai';
+import { atomStore } from '@/components/providers';
 
 export type EventResultClimbing = ({
   s: number;
@@ -67,8 +70,6 @@ export type BlocScores = {
 
 type BlocDataRow = Omit<LiveDataResult, 'rank'>
 
-type EntrantMap = Record<string | number, Tables<'entrants'> & { startPos: number }>
-
 export type EventLiveDataClimbing = {
   active: {
     round?: string;
@@ -107,6 +108,7 @@ export function generateLiveDataClimbing({
   results?: EventResults<'climbing'>;
   judgesData: JudgeDataClimbing[];
 }): EventLiveDataClimbing {
+  const entrantMap = atomStore.get(entrantMapAtom)
   const liveData: EventLiveDataClimbing = { active: [], results: {} };
   if (!results || !format) return liveData;
 
@@ -117,35 +119,11 @@ export function generateLiveDataClimbing({
   const activeRound = format.rounds.find((round) => round.id === active.round);
   if (!activeRound) return liveData;
 
-
-  const startlist: EventLiveDataClimbing['startlist'] = []
-  const entrantMap: EntrantMap = Object.fromEntries(activeRound.classes.flatMap((cls, clsIndex) => {
-    startlist.push({
-      class: cls.name,
-      classId: cls.id,
-      startlist: []
-    })
-
-    return cls.entrants.map((entrant, i) => {
-      startlist[clsIndex]!.startlist.push({
-        entrant: entrant.id,
-        pos: i + 1
-      })
-
-      return [entrant.id, {
-        ...entrant,
-        startPos: i + 1,
-      }]
-    })
+  liveData.startlist = activeRound.classes.map((cls) => ({
+    class: cls.name,
+    classId: cls.id,
+    startlist: cls.entrants.map((entrant, i) => ({ entrant: entrant.id, pos: i + 1 })),
   }));
-  liveData.entrantMap = entrantMap;
-
-  liveData.startlist = startlist;
-  // liveData.startlist = activeRound.classes.map((cls) => ({
-  //   class: cls.name,
-  //   classId: cls.id,
-  //   startlist: cls.entrants.map((entrant, i) => ({ entrant: entrant.id, pos: i + 1 })),
-  // }));
 
 
   liveData.results = generateLiveDataResultsClimbing({

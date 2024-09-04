@@ -4,9 +4,10 @@ import { updateOutlineAtom } from '@/components/shell/event-outline';
 import { createBrowserClient } from '@/lib/db/client';
 import { Json } from '@/lib/db/types';
 import { Sport, EventResults, JudgeDataClimbing, EventFormat } from '@/lib/event-data';
+import { EventFormatClimbing } from '@/lib/event-data/climbing';
 import { mergeBoulderingResults } from '@/lib/json/merge-bouldering-results';
 import { notifications } from '@mantine/notifications';
-import { useSetAtom } from 'jotai';
+import { atom, useSetAtom } from 'jotai';
 import { useParams } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
 import { useThrottledCallback } from 'use-debounce';
@@ -14,6 +15,9 @@ import { useThrottledCallback } from 'use-debounce';
 type Data = Omit<Tables<'events'>, 'slug' | 'snapshot' | 'sport' | 'ds_keys' | '_format'> & {
   ds_keys: Tables<'ds_keys'> | null;
 };
+
+export type EntrantMap = Record<string | number, Tables<'entrants'> & { startPos: number; }>;
+export const entrantMapAtom = atom({} as EntrantMap)
 
 export function useRealtimeJsonEvent<S extends string>() {
   const params = useParams<{ sport?: string; event?: string }>();
@@ -27,6 +31,7 @@ export function useRealtimeJsonEvent<S extends string>() {
   >(null);
   const [loading, setLoading] = useState(true);
   const updateOutline = useSetAtom(updateOutlineAtom);
+  const updateEntrantMap = useSetAtom(entrantMapAtom);
 
   const fetchData = useThrottledCallback(
     useCallback(async () => {
@@ -37,6 +42,25 @@ export function useRealtimeJsonEvent<S extends string>() {
         )
         .eq('slug', params.event || '')
         .single();
+
+      if (params.sport === 'climbing') {
+        const activeRound = (data?.format as EventFormatClimbing)?.rounds.find((round) => round.id === (data?.results as EventResults<'climbing'>)?.active?.round);
+
+        if (activeRound && activeRound.classes) {
+          const entrantMap: EntrantMap = Object.fromEntries(
+            activeRound?.classes.flatMap(
+              ({ entrants }) => entrants.map(
+                (entrant, i) => ([entrant.id, {
+                  ...entrant,
+                  startPos: i + 1,
+                }])
+              )
+            )
+          )
+
+          updateEntrantMap(entrantMap)
+        }
+      }
 
       // @ts-ignore
       setEvent((prev) => {
@@ -60,7 +84,7 @@ export function useRealtimeJsonEvent<S extends string>() {
       });
       setLoading(false);
       updateOutline();
-    }, [params.event, params.sport, supabase, updateOutline]),
+    }, [params.event, params.sport, supabase, updateOutline, updateEntrantMap]),
     500,
     { leading: true, trailing: true },
   );
@@ -103,3 +127,4 @@ export function useRealtimeJsonEvent<S extends string>() {
     loading,
   };
 }
+

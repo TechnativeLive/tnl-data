@@ -1,6 +1,6 @@
 'use client'
 
-import { useRealtimeJsonEvent } from '@/lib/hooks/use-realtime-json-event'
+import { entrantMapAtom, useRealtimeJsonEvent } from '@/lib/hooks/use-realtime-json-event'
 import {
   ActionIcon,
   ActionIconGroup,
@@ -28,6 +28,7 @@ import {
 } from '@/components/auto-animate/animate-highlights'
 import { BarReveal } from '@/components/bar-reveal/bar-reveal'
 import { split } from '@/lib/utils'
+import { useAtomValue } from 'jotai'
 
 const DEFAULT_PAGE_INTERVAL = 10_000
 const DEFAULT_MAX_ROWS = 12
@@ -253,8 +254,15 @@ type ResultRow = NonNullable<EventLiveDataClimbing['results'][string]>[number]
 type StartlistRow = NonNullable<EventLiveDataClimbing['startlist']>[number]['startlist'][number]
 
 function Results({ results }: { results: ResultRow[] }) {
+  const entrantMap = useAtomValue(entrantMapAtom)
+
   return results.map((result, i) => (
-    <ResultsRow key={result.entrant.id} result={result} last={i === results.length - 1} />
+    <ResultsRow
+      key={result.entrant}
+      result={result}
+      entrant={entrantMap[result.entrant]!}
+      last={i === results.length - 1}
+    />
   ))
 }
 
@@ -274,7 +282,15 @@ function useTransient<T>(value: T, defaultDelay: number = 0): [T, Dispatch<SetSt
   return [state, set]
 }
 
-function ResultsRow({ result, last }: { result: ResultRow; last?: boolean }) {
+function ResultsRow({
+  result,
+  entrant,
+  last,
+}: {
+  result: ResultRow
+  entrant: Tables<'entrants'>
+  last?: boolean
+}) {
   const latestRun = result.runs[result.runs.length - 1]
 
   const [showZone, setZone] = useTransient(false, 4000)
@@ -295,7 +311,7 @@ function ResultsRow({ result, last }: { result: ResultRow; last?: boolean }) {
   }, [latestRun?.z, latestRun?.t, setTop, setZone])
 
   return (
-    <Row key={result.entrant.id} last={last} active={!!result.station}>
+    <Row key={result.entrant} last={last} active={!!result.station}>
       <BarReveal
         show={showZone}
         text="ZONE"
@@ -313,7 +329,7 @@ function ResultsRow({ result, last }: { result: ResultRow; last?: boolean }) {
 
       <div>{result.rank}</div>
       <div className="text-left">
-        {result.entrant.first_name} {result.entrant.last_name}
+        {entrant.first_name} {entrant.last_name}
       </div>
       <div className="grid grid-cols-[1fr,1fr,1fr,1fr]">
         {result.runs.map((run, i) => (
@@ -357,14 +373,19 @@ function ResultsRow({ result, last }: { result: ResultRow; last?: boolean }) {
 }
 
 function Startlist({ startlist = [] }: { startlist?: StartlistRow[] }) {
-  return startlist.map((row) => (
-    <Row key={row.entrant.id}>
-      <div>{row.pos}</div>
-      <div className="text-left">
-        {row.entrant.first_name} {row.entrant.last_name}
-      </div>
-    </Row>
-  ))
+  const entrantMap = useAtomValue(entrantMapAtom)
+  return startlist.map((row) => {
+    const entrant = entrantMap[row.entrant]!
+
+    return (
+      <Row key={row.entrant}>
+        <div>{row.pos}</div>
+        <div className="text-left">
+          {entrant.first_name} {entrant.last_name}
+        </div>
+      </Row>
+    )
+  })
 }
 
 function Row({

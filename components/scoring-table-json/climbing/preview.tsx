@@ -1,4 +1,5 @@
-import { EventLiveData } from '@/lib/event-data';
+import { EventLiveData } from '@/lib/event-data'
+import { EntrantMap, entrantMapAtom } from '@/lib/hooks/use-realtime-json-event'
 import {
   AccordionItem,
   AccordionControl,
@@ -6,9 +7,10 @@ import {
   AccordionPanel,
   Text,
   Accordion,
-} from '@mantine/core';
-import { Fragment } from 'react';
-import styles from './preview.module.css';
+} from '@mantine/core'
+import { Fragment } from 'react'
+import styles from './preview.module.css'
+import { useAtomValue } from 'jotai'
 
 export function LiveDataPreviewClimbing(liveData: EventLiveData<'climbing'>) {
   return (
@@ -24,35 +26,35 @@ export function LiveDataPreviewClimbing(liveData: EventLiveData<'climbing'>) {
         ) : null,
       )}
     </Accordion>
-  );
+  )
 }
 
-type PreviewCols<T> = {
-  field: string;
-  label: string;
-  get: (row: T) => string | number | undefined | null;
-};
+type PreviewCols<T, E> = {
+  field: string
+  label: string
+  get: (row: T, entrant: E) => string | number | undefined | null
+}
 
-type ResultRow = NonNullable<EventLiveData<'climbing'>['results'][number]>[number];
+type ResultRow = NonNullable<EventLiveData<'climbing'>['results'][number]>[number]
 
-const overallRows: PreviewCols<ResultRow>[] = [
-  { field: 'id', label: 'e.id', get: (row) => row.entrant?.id },
+const overallRows: PreviewCols<ResultRow, Tables<'entrants'>>[] = [
+  { field: 'id', label: 'e.id', get: (row) => row.entrant },
   { field: 'rank', label: 'rank', get: (row) => row.rank },
   { field: 'tops', label: 'tops', get: (row) => row.tops },
   { field: 'zones', label: 'zones', get: (row) => row.zones },
   { field: 'ta', label: 'TA', get: (row) => row.ta },
   { field: 'za', label: 'ZA', get: (row) => row.za },
-  { field: 'first_name', label: 'e.first_name', get: (row) => row.entrant?.first_name },
-  { field: 'last_name', label: 'e.last_name', get: (row) => row.entrant?.last_name },
+  { field: 'first_name', label: 'e.first_name', get: (_row, entrant) => entrant?.first_name },
+  { field: 'last_name', label: 'e.last_name', get: (_row, entrant) => entrant?.last_name },
   { field: 'status', label: 'status', get: (row) => row.status },
-];
+]
 
 function ResultsPreview({
   overall,
   class: cls,
 }: {
-  overall: EventLiveData<'climbing'>['results'][number];
-  class?: string;
+  overall: EventLiveData<'climbing'>['results'][number]
+  class?: string
 }) {
   return (
     <AccordionItem value={cls || 'results'}>
@@ -63,18 +65,20 @@ function ResultsPreview({
         <PreviewGrid cols={overallRows} data={overall} />
       </AccordionPanel>
     </AccordionItem>
-  );
+  )
 }
 
-function PreviewGrid<T>({
+function PreviewGrid<T, E>({
   title,
   cols,
   data,
 }: {
-  title?: string;
-  cols: PreviewCols<T>[];
-  data?: T[];
+  title?: string
+  cols: PreviewCols<T, E>[]
+  data?: T[]
 }) {
+  const entrantMap = useAtomValue(entrantMapAtom)
+
   return (
     <div className="flex flex-col bg-body rounded-md border overflow-hidden">
       {title && (
@@ -87,54 +91,55 @@ function PreviewGrid<T>({
         style={{ gridTemplateColumns: `max-content repeat(${cols.length - 1}, auto)` }}
       >
         {cols.map(({ field, label }) => {
-          const isId = field === 'id';
+          const isId = field === 'id'
           return (
             <Text key={field} c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
               {label}
             </Text>
-          );
+          )
         })}
         {data?.map((row) =>
           cols.map(({ field, get }) => {
-            const isId = field === 'id';
+            const isId = field === 'id'
             return (
               <Fragment key={field}>
                 <Text c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
-                  {get(row)}
+                  {/* @ts-expect-error - entrantMap[row.entrant] is not null */}
+                  {get(row, entrantMap[row.entrant])}
                 </Text>
               </Fragment>
-            );
+            )
           }),
         )}
       </div>
     </div>
-  );
+  )
 }
 
 type StartlistCols = NonNullable<
   EventLiveData<'climbing'>['startlist']
->[number]['startlist'][number];
+>[number]['startlist'][number]
 
-const startlistCols: PreviewCols<StartlistCols>[] = [
-  { field: 'id', label: 'e.id', get: (row) => row.entrant.id },
+const startlistCols: PreviewCols<StartlistCols, Tables<'entrants'>>[] = [
+  { field: 'id', label: 'e.id', get: (row) => row.entrant },
   { field: 'pos', label: '#', get: (row) => row.pos },
-  { field: 'first_name', label: 'e.first_name', get: (row) => row.entrant.first_name },
-  { field: 'last_name', label: 'e.last_name', get: (row) => row.entrant.last_name },
-  { field: 'country', label: 'e.country', get: (row) => row.entrant.country },
+  { field: 'first_name', label: 'e.first_name', get: (_row, entrant) => entrant.first_name },
+  { field: 'last_name', label: 'e.last_name', get: (_row, entrant) => entrant.last_name },
+  { field: 'country', label: 'e.country', get: (_row, entrant) => entrant.country },
   // {
   //   field: 'dob',
   //   label: 'dob',
   //   get: (row) => (row.entrant.dob ? dsShort.format(new Date(row.entrant.dob)) : ''),
   // },
-];
+]
 function ActiveAndStartlistPreview({
   active,
   startlists,
 }: {
-  active: EventLiveData<'climbing'>['active'];
-  startlists: EventLiveData<'climbing'>['startlist'];
+  active: EventLiveData<'climbing'>['active']
+  startlists: EventLiveData<'climbing'>['startlist']
 }) {
-  const activeRoundName = active[0]?.round;
+  const activeRoundName = active[0]?.round
   return (
     <AccordionItem value="active">
       <AccordionControl classNames={{ control: styles.control }}>
@@ -161,5 +166,5 @@ function ActiveAndStartlistPreview({
         </div>
       </AccordionPanel>
     </AccordionItem>
-  );
+  )
 }
