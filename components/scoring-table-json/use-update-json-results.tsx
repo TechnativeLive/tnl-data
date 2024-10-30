@@ -37,7 +37,7 @@ export function useUpdateJsonResults<S extends Sport>(
     formatOptions,
   }: ScoringTableProps<S>,
   liveDataGenerator?: (
-    data: Pick<ScoringTableProps<S>, 'format' | 'results' | 'judgesData'>,
+    data: Pick<ScoringTableProps<S>, 'format' | 'results' | 'judgesData' | 'formatOptions'>,
   ) => EventLiveData<S>,
 ) {
   const params = useParams()
@@ -48,6 +48,7 @@ export function useUpdateJsonResults<S extends Sport>(
       format,
       results,
       judgesData,
+      formatOptions,
     }),
   )
 
@@ -61,6 +62,7 @@ export function useUpdateJsonResults<S extends Sport>(
         format,
         results: newResults,
         judgesData,
+        formatOptions,
       })
       setLiveDataPreview(liveData)
 
@@ -107,6 +109,7 @@ export function useUpdateJsonResults<S extends Sport>(
             format,
             results: newResults,
             judgesData,
+            formatOptions,
           })
           setLiveDataPreview(liveData)
 
@@ -153,8 +156,8 @@ export function useUpdateJsonResults<S extends Sport>(
       liveDataGenerator,
       eventSlug,
       judgesData,
+      formatOptions,
       dsPrivateKey,
-      formatOptions?.blocDataDsKey,
     ],
   )
 
@@ -187,6 +190,7 @@ export function useUpdateJsonResults<S extends Sport>(
             format,
             results: newResults,
             judgesData,
+            formatOptions,
           })
           setLiveDataPreview(liveData)
 
@@ -226,7 +230,7 @@ export function useUpdateJsonResults<S extends Sport>(
       liveDataGenerator,
       judgesData,
       dsPrivateKey,
-      formatOptions?.blocDataDsKey,
+      formatOptions,
     ],
   )
 
