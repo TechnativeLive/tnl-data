@@ -1,18 +1,19 @@
-'use client';
+'use client'
 
-import { TimerControls } from '@/app/(app-shell)/timers/controls';
-import { NewIndicator } from '@/app/(app-shell)/timers/create-timer';
-import { TimerControlsButtons } from '@/components/timer/buttons';
-import { TimerControlsDisplay } from '@/components/timer/display';
-import { TimerControlsMuteButton } from '@/components/timer/mute';
-import { TimerControlsSettingsDrawer } from '@/components/timer/settings-drawer';
-import { TimerControlsStatus } from '@/components/timer/status';
-import { TimerControlsTitle } from '@/components/timer/title';
-import { DbTimer } from '@/lib/db/custom';
-import { Button, ActionIcon } from '@mantine/core';
-import { IconWindowMaximize } from '@tabler/icons-react';
-import { Route } from 'next';
-import Link from 'next/link';
+import { TimerControls } from '@/app/(app-shell)/timers/controls'
+import { NewIndicator } from '@/app/(app-shell)/timers/create-timer'
+import { TimerControlsButtons } from '@/components/timer/buttons'
+import { TimerControlsDisplay } from '@/components/timer/display'
+import { TimerControlsMuteButton } from '@/components/timer/mute'
+import { TimerControlsRepeatButton } from '@/components/timer/repeat'
+import { TimerControlsSettingsDrawer } from '@/components/timer/settings-drawer'
+import { TimerControlsStatus } from '@/components/timer/status'
+import { TimerControlsTitle } from '@/components/timer/title'
+import { DbTimer } from '@/lib/db/custom'
+import { Button, ActionIcon } from '@mantine/core'
+import { IconWindowMaximize } from '@tabler/icons-react'
+import { Route } from 'next'
+import Link from 'next/link'
 
 export function TimerControlCardSmall({ timer }: { timer: DbTimer }) {
   return (
@@ -34,6 +35,7 @@ export function TimerControlCardSmall({ timer }: { timer: DbTimer }) {
         <TimerControlsDisplay className="text-2xl font-bold grow" />
         <TimerControlsStatus />
         <TimerControlsMuteButton />
+        <TimerControlsRepeatButton />
         <TimerControlsSettingsDrawer />
 
         <Link target="_blank" href={`/timers/${timer.id}`}>
@@ -45,5 +47,5 @@ export function TimerControlCardSmall({ timer }: { timer: DbTimer }) {
 
       <TimerControlsButtons />
     </TimerControls>
-  );
+  )
 }
