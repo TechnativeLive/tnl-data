@@ -46,6 +46,7 @@ export type Database = {
           id: number
           last_name: string
           nick_name: string | null
+          photo: string | null
           primary_sport: number | null
           updated_at: string | null
         }
@@ -58,6 +59,7 @@ export type Database = {
           id?: number
           last_name: string
           nick_name?: string | null
+          photo?: string | null
           primary_sport?: number | null
           updated_at?: string | null
         }
@@ -70,6 +72,7 @@ export type Database = {
           id?: number
           last_name?: string
           nick_name?: string | null
+          photo?: string | null
           primary_sport?: number | null
           updated_at?: string | null
         }

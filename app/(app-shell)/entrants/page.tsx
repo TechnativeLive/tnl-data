@@ -1,10 +1,12 @@
-import { createEntrant } from '@/app/(app-shell)/entrants/actions';
-import { SimpleForm } from '@/components/forms/simple-form';
-import { SubmitButton } from '@/components/forms/submit-button';
-import { PROJECT_ICONS } from '@/components/project-icons';
-import { Select } from '@/components/select';
-import { countrySelectionCode2 } from '@/lib/countries/countries';
-import { createServerClient } from '@/lib/db/server';
+import { createEntrant } from '@/app/(app-shell)/entrants/actions'
+import { EditEntrantForm } from '@/app/(app-shell)/entrants/edit-entrant-form'
+import { PhotoDropzoneSSR } from '@/app/(app-shell)/entrants/photo-dropzone-ssr'
+import { SimpleForm } from '@/components/forms/simple-form'
+import { SubmitButton } from '@/components/forms/submit-button'
+import { PROJECT_ICONS } from '@/components/project-icons'
+import { Select } from '@/components/select'
+import { countrySelectionCode2 } from '@/lib/countries/countries'
+import { createServerClient } from '@/lib/db/server'
 import {
   Accordion,
   AccordionControl,
@@ -17,14 +19,18 @@ import {
   Loader,
   SimpleGrid,
   Stack,
+  Tabs,
+  TabsList,
+  TabsPanel,
+  TabsTab,
   Text,
   TextInput,
   Title,
-} from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
-import { IconCalendarDue, IconExclamationCircle, IconQuestionMark } from '@tabler/icons-react';
-import groupBy from 'object.groupby';
-import { Suspense } from 'react';
+} from '@mantine/core'
+import { DatePickerInput } from '@mantine/dates'
+import { IconCalendarDue, IconExclamationCircle, IconQuestionMark } from '@tabler/icons-react'
+import groupBy from 'object.groupby'
+import { Suspense } from 'react'
 
 // export const dynamic = 'force-dynamic';
 
@@ -36,11 +42,6 @@ export default async function EntrantsPage() {
           <Title>Entrants</Title>
         </div>
 
-        {/* <SimpleGrid cols={{ xs: 1, sm: 2 }}>
-          <Suspense fallback={<Loader />}>
-            <EntrantSummary />
-          </Suspense>
-        </SimpleGrid> */}
         <Suspense fallback={<Loader />}>
           <CreateEntrant />
         </Suspense>
@@ -49,83 +50,87 @@ export default async function EntrantsPage() {
         </Suspense>
       </Stack>
     </Flex>
-  );
+  )
 }
 
 async function CreateEntrant() {
-  const supabase = createServerClient();
-  const { data: entrants } = await supabase.from('entrants').select('id, first_name, last_name');
-  const entrantsAsOptions =
-    entrants?.map((entrant) => ({
-      label: `${entrant.first_name} ${entrant.last_name}`,
-      value: entrant.id.toString(),
-    })) ?? [];
+  const supabase = createServerClient()
+  const { data: entrants } = await supabase
+    .from('entrants')
+    .select('*')
+    .order('id', { ascending: false })
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <SimpleForm action={createEntrant} reset>
-        <Select
-          className="grow max-w-md mb-lg"
-          defaultValue="null"
-          fw={700}
-          searchable
-          name="id"
-          data={[
-            { group: '', items: [{ label: 'Create a new entrant', value: 'null' }] },
-            {
-              group: 'Existing Entrants',
-              items: entrantsAsOptions,
-            },
-          ]}
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-sm">
-          <TextInput required label="First Name" name="first_name" />
-          <TextInput required label="Last Name" name="last_name" />
-          <TextInput label="Nickname" name="nick_name" />
-          <DatePickerInput
-            label="Date of Birth"
-            name="dob"
-            rightSection={<IconCalendarDue />}
-            rightSectionPointerEvents="none"
-          />
-          <Select
-            className="sm:col-span-2"
-            label="Country"
-            name="country"
-            data={countrySelectionCode2}
-            defaultValue="GB"
-            autoComplete="off"
-            searchable
-          />
-          <JsonInput
-            label="Custom Data"
-            name="data"
-            minRows={1}
-            autosize
-            formatOnBlur
-            variant="default"
-            validationError="Invalid JSON (use double-quotes, remove trailing commas)"
-          />
-          <Suspense fallback={<Select />}>
-            <PrimarySportSelection />
+      <Tabs defaultValue="create">
+        <TabsList className="mb-4">
+          <TabsTab value="create">Create New Entrant</TabsTab>
+          <TabsTab value="edit">Edit Entrant</TabsTab>
+          <TabsTab value="summary">Sumary (stats)</TabsTab>
+        </TabsList>
+
+        <TabsPanel value="create">
+          <SimpleForm action={createEntrant} reset={false}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-sm">
+              <TextInput required label="First Name" name="first_name" />
+              <TextInput required label="Last Name" name="last_name" />
+              <TextInput label="Nickname" name="nick_name" />
+              <DatePickerInput
+                label="Date of Birth"
+                name="dob"
+                rightSection={<IconCalendarDue />}
+                rightSectionPointerEvents="none"
+              />
+              <Select
+                label="Country"
+                name="country"
+                data={countrySelectionCode2}
+                defaultValue="GB"
+                autoComplete="off"
+                searchable
+              />
+              <PhotoDropzoneSSR />
+              <Suspense fallback={<Select />}>
+                <PrimarySportSelection />
+              </Suspense>
+              <JsonInput
+                label="Custom Data"
+                name="data"
+                minRows={1}
+                autosize
+                formatOnBlur
+                variant="default"
+                validationError="Invalid JSON (use double-quotes, remove trailing commas)"
+              />
+              <SubmitButton
+                className="self-end max-lg:mt-8 col-span-full"
+                type="submit"
+                variant="filled"
+              >
+                Create
+              </SubmitButton>
+            </div>
+          </SimpleForm>
+        </TabsPanel>
+
+        <TabsPanel value="edit">
+          <EditEntrantForm action={createEntrant} entrants={entrants || []} />
+        </TabsPanel>
+
+        <TabsPanel value="summary">
+          <Suspense fallback={<Loader />}>
+            <EntrantSummary />
           </Suspense>
-          <SubmitButton
-            className="self-end max-lg:mt-8 sm:col-span-2 lg:col-span-1"
-            type="submit"
-            variant="filled"
-          >
-            Create
-          </SubmitButton>
-        </div>
-      </SimpleForm>
+        </TabsPanel>
+      </Tabs>
     </Card>
-  );
+  )
 }
 
 async function PrimarySportSelection() {
-  const supabase = createServerClient();
-  const { data } = await supabase.from('sports').select('id, name');
-  const options = (data ?? []).map((sport) => ({ value: sport.id.toString(), label: sport.name }));
+  const supabase = createServerClient()
+  const { data } = await supabase.from('sports').select('id, name')
+  const options = (data ?? []).map((sport) => ({ value: sport.id.toString(), label: sport.name }))
 
   return (
     <Select
@@ -135,15 +140,15 @@ async function PrimarySportSelection() {
       data={options}
       defaultValue="3"
     />
-  );
+  )
 }
 
 async function EntrantSummary() {
-  const supabase = createServerClient();
-  const { data: entrants, error } = await supabase.from('entrants').select('id, sports(name)');
+  const supabase = createServerClient()
+  const { data: entrants, error } = await supabase.from('entrants').select('id, sports(name)')
   const sportGroups = entrants
     ? groupBy(entrants, (entrant) => entrant.sports?.name ?? 'none')
-    : null;
+    : null
 
   return (
     <Alert
@@ -164,24 +169,24 @@ async function EntrantSummary() {
         </>
       )}
     </Alert>
-  );
+  )
 }
 
-const outerAccordionStyles = { content: { padding: 0 } };
+const outerAccordionStyles = { content: { padding: 0 } }
 async function EntrantList() {
-  const supabase = createServerClient();
+  const supabase = createServerClient()
   const { data: entrants } = await supabase
     .from('entrants')
-    .select('id, first_name, last_name, nick_name, country, dob, data, sports(name, slug)');
+    .select('id, first_name, last_name, nick_name, country, dob, data, sports(name, slug)')
   const sportGroups = entrants
     ? groupBy(entrants, (entrant) => entrant.sports?.name ?? 'none')
-    : null;
+    : null
 
   return (
     <Accordion styles={outerAccordionStyles}>
       {Object.entries(sportGroups ?? {})?.map(([sport, entrants]) => {
-        const slug = entrants[0]?.sports?.slug;
-        const Icon = slug && slug in PROJECT_ICONS ? PROJECT_ICONS[slug]! : IconQuestionMark;
+        const slug = entrants[0]?.sports?.slug
+        const Icon = slug && slug in PROJECT_ICONS ? PROJECT_ICONS[slug]! : IconQuestionMark
 
         return (
           <AccordionItem value={sport} key={sport}>
@@ -206,8 +211,8 @@ async function EntrantList() {
               </Accordion>
             </AccordionPanel>
           </AccordionItem>
-        );
+        )
       })}
     </Accordion>
-  );
+  )
 }

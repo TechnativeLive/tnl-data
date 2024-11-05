@@ -17,6 +17,7 @@
     "@formkit/auto-animate": "1.0.0-beta.6",
     "@mantine/core": "^7.12.1",
     "@mantine/dates": "^7.12.1",
+    "@mantine/dropzone": "^7.13.4",
     "@mantine/hooks": "^7.12.1",
     "@mantine/modals": "^7.12.1",
     "@mantine/notifications": "^7.12.1",
