@@ -1,7 +1,6 @@
 'use client'
 
-import { convertToBase64 } from './utils'
-import { headshotAbsoluteUrl } from '@/app/(app-shell)/entrants/utils'
+import { convertToBase64, headshotAbsoluteUrl } from '@/app/(app-shell)/entrants/utils'
 import { createBrowserClient } from '@/lib/db/client'
 import { InputLabel, Group, rem, Text } from '@mantine/core'
 import { Dropzone, DropzoneAccept, DropzoneReject, DropzoneIdle } from '@mantine/dropzone'

@@ -10,8 +10,9 @@ import { DatePickerInput } from '@mantine/dates'
 import { IconCalendarDue } from '@tabler/icons-react'
 import clsx from 'clsx'
 import { Suspense, useEffect, useState } from 'react'
-import { PhotoDropzone } from '@/app/(app-shell)/entrants/photo-dropzone'
 import { headshotDest } from '@/app/(app-shell)/entrants/utils'
+import { PhotoDropzone } from '@/app/(app-shell)/entrants/tabs/edit/photo-dropzone'
+import { PrimarySportSelection } from '@/app/(app-shell)/entrants/tabs/primary-sport-selection'
 
 export function EditEntrantForm({
   entrants,
@@ -157,36 +158,4 @@ function isDataValidJson(data: string): boolean {
   } catch {
     return false
   }
-}
-
-function PrimarySportSelection({
-  value,
-  onChange,
-}: {
-  value: number | undefined
-  onChange: (v: string | null) => void
-}) {
-  const supabase = createBrowserClient()
-  const [data, setData] = useState<Pick<Tables<'sports'>, 'id' | 'name'>[]>([])
-
-  useEffect(() => {
-    const update = async () => {
-      const { data: sportsData } = await supabase.from('sports').select('id, name')
-      if (sportsData) setData(sportsData)
-    }
-    update()
-  }, [supabase])
-  const options = (data ?? []).map((sport) => ({ value: sport.id.toString(), label: sport.name }))
-
-  return (
-    <Select
-      disabled={!data}
-      label="Primary Sport"
-      name="primary_sport"
-      data={options}
-      defaultValue="3"
-      value={value?.toString()}
-      onChange={onChange}
-    />
-  )
 }

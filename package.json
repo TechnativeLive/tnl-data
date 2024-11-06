@@ -25,6 +25,7 @@
     "@supabase/supabase-js": "^2.38.5",
     "@tabler/icons-react": "^2.42.0",
     "array-grouping-polyfill": "^0.0.3",
+    "clipboardy": "^4.0.0",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
     "fitty": "^2.4.2",
