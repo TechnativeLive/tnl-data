@@ -34,7 +34,6 @@ export function getBoulderingJudgeIndex(station: string, blocCount: number) {
 }
 
 export function getBoulderingJudgeStation(cls: string, index: number) {
-  console.log({ cls, index })
   const initial = cls.charAt(0).toUpperCase()
   return `${initial}${index + 1}`
 }
