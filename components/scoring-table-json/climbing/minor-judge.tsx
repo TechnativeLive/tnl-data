@@ -48,7 +48,8 @@ export function ClimbingMinorJudge({
 }: MinorJudgeProps) {
   const searchParams = useSearchParams()
 
-  const [timer] = useEventTimers()
+  const timers = useEventTimers()
+  const timer = timers.find((timer) => timer.isRunning) ?? timers[0]
   // const [isActive, setIsActive] = useState(false);
 
   const stationClassId = station.charAt(0) === 'M' ? 'mens' : 'womens'

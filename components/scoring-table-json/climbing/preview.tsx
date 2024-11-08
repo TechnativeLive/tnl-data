@@ -38,15 +38,15 @@ type PreviewCols<T, E> = {
 type ResultRow = NonNullable<EventLiveData<'climbing'>['results'][number]>[number]
 
 const overallRows: PreviewCols<ResultRow, Tables<'entrants'>>[] = [
-  { field: 'id', label: 'e.id', get: (row) => row.entrant },
-  { field: 'rank', label: 'rank', get: (row) => row.rank },
-  { field: 'tops', label: 'tops', get: (row) => row.tops },
-  { field: 'zones', label: 'zones', get: (row) => row.zones },
+  { field: 'id', label: 'Id', get: (row) => row.entrant },
+  { field: 'rank', label: 'Rank', get: (row) => row.rank },
+  { field: 'tops', label: 'Tops', get: (row) => row.tops },
+  { field: 'zones', label: 'Zones', get: (row) => row.zones },
   { field: 'ta', label: 'TA', get: (row) => row.ta },
   { field: 'za', label: 'ZA', get: (row) => row.za },
-  { field: 'first_name', label: 'e.first_name', get: (_row, entrant) => entrant?.first_name },
-  { field: 'last_name', label: 'e.last_name', get: (_row, entrant) => entrant?.last_name },
-  { field: 'status', label: 'status', get: (row) => row.status },
+  { field: 'first_name', label: 'First Name', get: (_row, entrant) => entrant?.first_name },
+  { field: 'last_name', label: 'Last Name', get: (_row, entrant) => entrant?.last_name },
+  { field: 'status', label: 'Status', get: (row) => row.status },
 ]
 
 function ResultsPreview({
@@ -123,9 +123,9 @@ type StartlistCols = NonNullable<
 const startlistCols: PreviewCols<StartlistCols, Tables<'entrants'>>[] = [
   { field: 'id', label: 'e.id', get: (row) => row.entrant },
   { field: 'pos', label: '#', get: (row) => row.pos },
-  { field: 'first_name', label: 'e.first_name', get: (_row, entrant) => entrant.first_name },
-  { field: 'last_name', label: 'e.last_name', get: (_row, entrant) => entrant.last_name },
-  { field: 'country', label: 'e.country', get: (_row, entrant) => entrant.country },
+  { field: 'first_name', label: 'e.first_name', get: (_row, entrant) => entrant?.first_name },
+  { field: 'last_name', label: 'e.last_name', get: (_row, entrant) => entrant?.last_name },
+  { field: 'country', label: 'e.country', get: (_row, entrant) => entrant?.country },
   // {
   //   field: 'dob',
   //   label: 'dob',

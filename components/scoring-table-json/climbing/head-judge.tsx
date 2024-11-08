@@ -575,7 +575,9 @@ function EventProgressionModalInternals({
                 />
               </div>
               {results.map((result, i) => {
-                const entrant = entrantMap[result.entrant]!
+                const entrant = entrantMap[result.entrant]
+
+                console.log({ entrantMap, result, entrant })
                 const isManualDQ = manualDQ.includes(result.entrant)
                 if (isManualDQ) cutoff += 1
 
@@ -594,7 +596,7 @@ function EventProgressionModalInternals({
                     </Text>
                     <Text>{result.rank}</Text>
                     <Text>
-                      {entrant.first_name} {entrant.last_name}
+                      {entrant?.first_name} {entrant?.last_name}
                     </Text>
                     <Text>{result.tops}</Text>
                     <Text>{result.zones}</Text>
