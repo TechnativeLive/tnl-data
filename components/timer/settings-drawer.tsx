@@ -1,16 +1,16 @@
-import { DrawerAutoHeight } from '@/components/mantine-extensions/drawer';
-import { TimerControlsDeleteButton, TimerControlsUpdateButton } from '@/components/timer/buttons';
-import { TimerControlsDuration } from '@/components/timer/duration';
-import { TimerControlsSoundsSettings } from '@/components/timer/sounds-settings';
-import { useTimerControls } from '@/app/(app-shell)/timers/controls';
-import { TimerControlsDatastreamSelection } from '@/components/timer/datastream-selection';
-import { ActionIcon, Text, Tooltip } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { IconSettings } from '@tabler/icons-react';
+import { DrawerAutoHeight } from '@/components/mantine-extensions/drawer'
+import { TimerControlsDeleteButton, TimerControlsUpdateButton } from '@/components/timer/buttons'
+import { TimerControlsDuration } from '@/components/timer/duration'
+import { TimerControlsSoundsSettings } from '@/components/timer/sounds-settings'
+import { useTimerControls } from '@/app/(app-shell)/timers/controls'
+import { TimerControlsDatastreamSelection } from '@/components/timer/datastream-selection'
+import { ActionIcon, ActionIconProps, Text, Tooltip } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { IconSettings } from '@tabler/icons-react'
 
-export function TimerControlsSettingsDrawer() {
-  const [timer] = useTimerControls();
-  const [opened, { open, close }] = useDisclosure(false);
+export function TimerControlsSettingsDrawer({ size = 'lg' }: { size?: ActionIconProps['size'] }) {
+  const [timer] = useTimerControls()
+  const [opened, { open, close }] = useDisclosure(false)
 
   return (
     <>
@@ -32,15 +32,14 @@ export function TimerControlsSettingsDrawer() {
           <TimerControlsSoundsSettings />
           <div className="flex sm:col-span-2 gap-2.5">
             <TimerControlsUpdateButton />
-            <TimerControlsDeleteButton />
           </div>
         </div>
       </DrawerAutoHeight>
       <Tooltip label="Settings">
-        <ActionIcon className="shrink-0" size="lg" onClick={open} c="dimmed">
-          <IconSettings stroke={1.5} />
+        <ActionIcon className="shrink-0" size={size} onClick={open} c="dimmed">
+          <IconSettings size={size === 'lg' || size === 'xl' ? 24 : 20} stroke={1.5} />
         </ActionIcon>
       </Tooltip>
     </>
-  );
+  )
 }

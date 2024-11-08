@@ -1,16 +1,20 @@
-'use client';
+'use client'
 
-import { TimerControls } from '@/app/(app-shell)/timers/controls';
-import { TimerControlsButtons, TimerControlsUpdateButton } from '@/components/timer/buttons';
-import { TimerControlsDisplay } from '@/components/timer/display';
-import { TimerControlsDuration } from '@/components/timer/duration';
-import { TimerControlsSoundsSettings } from '@/components/timer/sounds-settings';
-import { TimerControlsStatus } from '@/components/timer/status';
-import { TimerControlsTitle } from '@/components/timer/title';
-import { DbTimer } from '@/lib/db/custom';
-import { ActionIcon, Divider } from '@mantine/core';
-import { IconWindowMaximize } from '@tabler/icons-react';
-import Link from 'next/link';
+import { TimerControls } from '@/app/(app-shell)/timers/controls'
+import {
+  TimerControlsButtons,
+  TimerControlsDeleteButton,
+  TimerControlsUpdateButton,
+} from '@/components/timer/buttons'
+import { TimerControlsDisplay } from '@/components/timer/display'
+import { TimerControlsDuration } from '@/components/timer/duration'
+import { TimerControlsSoundsSettings } from '@/components/timer/sounds-settings'
+import { TimerControlsStatus } from '@/components/timer/status'
+import { TimerControlsTitle } from '@/components/timer/title'
+import { DbTimer } from '@/lib/db/custom'
+import { ActionIcon, Divider } from '@mantine/core'
+import { IconWindowMaximize } from '@tabler/icons-react'
+import Link from 'next/link'
 
 export function TimerControlCardLarge({ timer }: { timer: DbTimer }) {
   return (
@@ -34,7 +38,10 @@ export function TimerControlCardLarge({ timer }: { timer: DbTimer }) {
       <Divider className="mt-8 mb-2" />
       <TimerControlsSoundsSettings />
       <Divider className="my-2" />
-      <TimerControlsUpdateButton />
+      <div className="flex gap-lg">
+        <TimerControlsUpdateButton />
+        <TimerControlsDeleteButton />
+      </div>
     </TimerControls>
-  );
+  )
 }
