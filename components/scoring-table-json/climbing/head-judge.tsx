@@ -576,8 +576,6 @@ function EventProgressionModalInternals({
               </div>
               {results.map((result, i) => {
                 const entrant = entrantMap[result.entrant]
-
-                console.log({ entrantMap, result, entrant })
                 const isManualDQ = manualDQ.includes(result.entrant)
                 if (isManualDQ) cutoff += 1
 
