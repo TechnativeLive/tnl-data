@@ -94,6 +94,12 @@ function ActiveFullscreenTimer({ timer }: { timer: DbTimer }) {
 function Display({ timer }: { timer: DbTimer }) {
   const time = useTimerDisplay(timer, true)
 
+  useEffect(() => {
+    if (document) {
+      document.title = `${time.display} - ${timer.name || 'Unnamed Timer'}`
+    }
+  }, [time.display, timer.name])
+
   return (
     <>
       {!timer.muted && (
