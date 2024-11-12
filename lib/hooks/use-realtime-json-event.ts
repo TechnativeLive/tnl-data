@@ -1,37 +1,40 @@
-'use client';
+'use client'
 
-import { updateOutlineAtom } from '@/components/shell/event-outline';
-import { createBrowserClient } from '@/lib/db/client';
-import { Json } from '@/lib/db/types';
-import { Sport, EventResults, JudgeDataClimbing, EventFormat } from '@/lib/event-data';
-import { EventFormatClimbing } from '@/lib/event-data/climbing';
-import { mergeBoulderingResults } from '@/lib/json/merge-bouldering-results';
-import { notifications } from '@mantine/notifications';
-import { atom, useSetAtom } from 'jotai';
-import { useParams } from 'next/navigation';
-import { useState, useCallback, useEffect } from 'react';
-import { useThrottledCallback } from 'use-debounce';
+import { updateOutlineAtom } from '@/components/shell/event-outline'
+import { createBrowserClient } from '@/lib/db/client'
+import { Json } from '@/lib/db/types'
+import { Sport, EventResults, JudgeDataClimbing, EventFormat } from '@/lib/event-data'
+import { EventFormatClimbing } from '@/lib/event-data/climbing'
+import { mergeBoulderingResults } from '@/lib/json/merge-bouldering-results'
+import { notifications } from '@mantine/notifications'
+import { atom, useAtomValue, useSetAtom } from 'jotai'
+import { useParams } from 'next/navigation'
+import { useState, useCallback, useEffect } from 'react'
+import { useThrottledCallback } from 'use-debounce'
 
 type Data = Omit<Tables<'events'>, 'slug' | 'snapshot' | 'sport' | 'ds_keys' | '_format'> & {
-  ds_keys: Tables<'ds_keys'> | null;
-};
+  ds_keys: Tables<'ds_keys'> | null
+}
 
-export type EntrantMap = Record<string | number, Tables<'entrants'> & { startPos: number; }>;
+export const executeUpdateJsonEventAtom__workaround = atom(0)
+
+export type EntrantMap = Record<string | number, Tables<'entrants'> & { startPos: number }>
 export const entrantMapAtom = atom({} as EntrantMap)
 
 export function useRealtimeJsonEvent<S extends string>() {
-  const params = useParams<{ sport?: string; event?: string }>();
-  const supabase = createBrowserClient();
+  const params = useParams<{ sport?: string; event?: string }>()
+  const supabase = createBrowserClient()
   const [event, setEvent] = useState<
     | (Data & {
-      results: S extends Sport ? EventResults<S> : Json;
-      format: S extends Sport ? EventFormat<S> : Json;
-    })
+        results: S extends Sport ? EventResults<S> : Json
+        format: S extends Sport ? EventFormat<S> : Json
+      })
     | null
-  >(null);
-  const [loading, setLoading] = useState(true);
-  const updateOutline = useSetAtom(updateOutlineAtom);
-  const updateEntrantMap = useSetAtom(entrantMapAtom);
+  >(null)
+  const [loading, setLoading] = useState(true)
+  const updateOutline = useSetAtom(updateOutlineAtom)
+  const updateEntrantMap = useSetAtom(entrantMapAtom)
+  const setInjectedUpdateCallback = useAtomValue(executeUpdateJsonEventAtom__workaround)
 
   const fetchData = useThrottledCallback(
     useCallback(async () => {
@@ -41,21 +44,24 @@ export function useRealtimeJsonEvent<S extends string>() {
           'name, format, format_options, results, starts_at, ends_at, created_at, updated_at, timers, judge_data, ds_keys(name, description, private, public, kind, id)',
         )
         .eq('slug', params.event || '')
-        .single();
+        .single()
 
       if (params.sport === 'climbing') {
-        const activeRound = (data?.format as EventFormatClimbing)?.rounds.find((round) => round.id === (data?.results as EventResults<'climbing'>)?.active?.round);
+        const activeRound = (data?.format as EventFormatClimbing)?.rounds.find(
+          (round) => round.id === (data?.results as EventResults<'climbing'>)?.active?.round,
+        )
 
         if (activeRound && activeRound.classes) {
           const entrantMap: EntrantMap = Object.fromEntries(
-            activeRound?.classes.flatMap(
-              ({ entrants }) => entrants.map(
-                (entrant, i) => ([entrant.id, {
+            activeRound?.classes.flatMap(({ entrants }) =>
+              entrants.map((entrant, i) => [
+                entrant.id,
+                {
                   ...entrant,
                   startPos: i + 1,
-                }])
-              )
-            )
+                },
+              ]),
+            ),
           )
 
           updateEntrantMap(entrantMap)
@@ -64,14 +70,14 @@ export function useRealtimeJsonEvent<S extends string>() {
 
       // @ts-ignore
       setEvent((prev) => {
-        if (params.sport !== 'climbing') return data;
+        if (params.sport !== 'climbing') return data
         // console.group('RealtimeJsonEvent', Date.now() - prevNow);
         // prevNow = Date.now();
         const mergedResults = mergeBoulderingResults({
           results: (data?.results || prev?.results || {}) as EventResults<'climbing'>,
           judgesData: data?.judge_data as JudgeDataClimbing[],
           blocCount: (data?.format_options as { blocCount: number })?.blocCount || 4,
-        });
+        })
         // console.log('data', data);
         // console.log('mergedResults', mergedResults);
         // console.log('prev', prev);
@@ -80,18 +86,19 @@ export function useRealtimeJsonEvent<S extends string>() {
         return {
           ...(data as Data),
           results: mergedResults,
-        };
-      });
-      setLoading(false);
-      updateOutline();
+        }
+      })
+      setLoading(false)
+      updateOutline()
     }, [params.event, params.sport, supabase, updateOutline, updateEntrantMap]),
     500,
     { leading: true, trailing: true },
-  );
+  )
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData()
+    // also update when this workaround atom changes
+  }, [fetchData, setInjectedUpdateCallback])
 
   useEffect(() => {
     const channel = supabase
@@ -107,24 +114,23 @@ export function useRealtimeJsonEvent<S extends string>() {
               color: 'orange',
               message: 'The event has been updated. Please refresh the page',
               autoClose: false,
-            });
-            if (e.errors) console.warn('Realtime Event - UPDATE - Error', e.errors);
-            return;
+            })
+            if (e.errors) console.warn('Realtime Event - UPDATE - Error', e.errors)
+            return
           }
 
-          fetchData();
+          fetchData()
         },
       )
-      .subscribe();
+      .subscribe()
 
     return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [supabase, fetchData, params.event, event?.ds_keys?.name]);
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, fetchData, params.event, event?.ds_keys?.name])
 
   return {
     event,
     loading,
-  };
+  }
 }
-
