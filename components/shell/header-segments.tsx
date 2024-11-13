@@ -1,25 +1,26 @@
-'use client';
+'use client'
 
-import { createBrowserClient } from '@/lib/db/client';
-import { IconChevronRight, IconEdit } from '@tabler/icons-react';
-import clsx from 'clsx';
-import { Route } from 'next';
-import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
-import { Fragment, useEffect, useState } from 'react';
+import { createBrowserClient } from '@/lib/db/client'
+import { IconChevronRight, IconEdit } from '@tabler/icons-react'
+import clsx from 'clsx'
+import { Route } from 'next'
+import Link from 'next/link'
+import { useParams, usePathname, useSearchParams } from 'next/navigation'
+import { Fragment, useEffect, useState } from 'react'
 
-type Segment = { id?: string | number; slug: string; name: string } & Record<string, unknown>;
+type Segment = { id?: string | number; slug: string; name: string } & Record<string, unknown>
 
 export function HeaderSegments() {
-  const supabase = createBrowserClient();
-  const [loading, setLoading] = useState(true);
-  const [segments, setSegments] = useState<(Segment | null)[]>([]);
-  const params = useParams();
-  const pathname = usePathname();
-  const isLegacy = pathname.includes('legacy');
+  const supabase = createBrowserClient()
+  const [loading, setLoading] = useState(true)
+  const [segments, setSegments] = useState<(Segment | null)[]>([])
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const isLegacy = pathname.includes('legacy')
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       const data = await Promise.all([
         !params.sport
           ? null
@@ -35,25 +36,36 @@ export function HeaderSegments() {
         //       .eq('slug', params.round)
         //       .eq('event', params.event)
         //       .single(),
-      ]);
-      setSegments(data.map((query, i) => query?.data ?? null));
-    })();
+      ])
+      setSegments(data.map((query, i) => query?.data ?? null))
+    })()
 
-    setLoading(false);
-  }, [params.sport, params.event, params.round, supabase]);
+    setLoading(false)
+  }, [params.sport, params.event, params.round, supabase])
 
-  const isOnEditPage = pathname.endsWith('/edit');
-  const isOnDebugPage = pathname.endsWith('/debug');
-  const specialSemgent = isOnEditPage
+  const isOnEditPage = pathname.endsWith('/edit')
+  const isOnDebugPage = pathname.endsWith('/debug')
+  const specialSemgent: Segment | null = isOnEditPage
     ? { id: '__edit', slug: 'edit', name: 'Edit' }
     : isOnDebugPage
       ? { id: '__debug', slug: 'debug', name: 'Debug' }
-      : null;
-  const allSegments = specialSemgent ? [...segments, specialSemgent] : segments;
+      : null
+
+  const judgeParam = searchParams.get('judge')
+  const judgeSegment: Segment | null = judgeParam
+    ? {
+        id: '__judge',
+        slug: 'judge',
+        searchParam: 'judge',
+        name: judgeParam === 'head' ? `Head Judge` : `Judge ${judgeParam}`,
+      }
+    : null
+
+  const allSegments = [...segments, specialSemgent, judgeSegment].filter((s) => !!s)
 
   const segmentsLength = allSegments
     .map((segment) => segment?.name.length ?? 0)
-    .reduce((a, b) => a + b, 0);
+    .reduce((a, b) => a + b, 0)
 
   return (
     <div
@@ -67,17 +79,26 @@ export function HeaderSegments() {
           .slice(0, index + 1)
           .filter((s) => !!s?.slug)
           .map((s) => s!.slug)
-          .join('/')}`;
+          .join('/')}`
+        const hrefWithSearchParams =
+          index === allSegments.length - 1 && judgeSegment ? `${href}?judge=${judgeParam}` : href
+
+        const highlight = index === allSegments.length - 1
+
         return !segment ? null : (
           <Fragment key={segment.id ?? segment.slug}>
             {index > 0 && <IconChevronRight size={14} className="animate-fade" />}
             <Link
               aria-disabled={loading}
-              href={index === 1 && isLegacy ? (`${href}/legacy` as Route) : (href as Route)}
+              href={
+                index === 1 && isLegacy
+                  ? (`${href}/legacy` as Route)
+                  : (hrefWithSearchParams as Route)
+              }
               className={clsx(
                 'underline-offset-2 animate-fade flex items-center transition-all',
                 'hover:underline hover:text-teal-5',
-                index === segments.length - 1 && 'text-violet-5 dark:text-violet-3',
+                highlight && 'text-violet-5 dark:text-violet-3',
                 loading && 'cursor-default',
                 segmentsLength > 60 ? 'text-xs md:text-sm' : 'text-xs sm:text-sm',
               )}
@@ -86,8 +107,8 @@ export function HeaderSegments() {
               {segment.name}
             </Link>
           </Fragment>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
