@@ -12,16 +12,18 @@ import {
   getBoulderingJudgeStation,
 } from '@/components/scoring-table-json/climbing/utils'
 import { sortAndRank } from '@/lib/sort-and-rank'
-import { useAtomValue } from 'jotai'
 import { atomStore } from '@/components/providers'
 
-export type EventResultClimbing = ({
-  s: number
-  z?: number
-  t?: number
-  tp?: number
-  e?: number
-} | null)[][]
+export type EventResultClimbing = (
+  | ({
+      s: number
+      z?: number
+      t?: number
+      tp?: number
+      e?: number
+    } | null)[]
+  | null
+)[]
 
 export type EventFormatClimbing = {
   rounds: { id: string; kind?: RoundKind; name: string; classes: RoundClass[] }[]
