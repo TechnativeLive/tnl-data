@@ -23,7 +23,7 @@ export function EditEntrantForm({
 }) {
   const entrantsAsOptions =
     entrants?.map((entrant) => ({
-      label: `${entrant.first_name} ${entrant.last_name}`,
+      label: `[${entrant.id.toString().padStart(4, " ")}] ${entrant.first_name} ${entrant.last_name}`,
       value: entrant.id.toString(),
     })) ?? []
   const [selectedEditEntrant, setSelectedEditEntrant] = useState<Tables<'entrants'> | undefined>(
@@ -98,6 +98,7 @@ export function EditEntrantForm({
             value={nickName || ''}
             onChange={(v) => setNickName(v.currentTarget.value)}
           />
+          <TextInput label="ID" value={selectedEditEntrant?.id} />
           <DatePickerInput
             label="Date of Birth"
             name="dob"

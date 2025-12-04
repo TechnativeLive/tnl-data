@@ -22,7 +22,7 @@ export function TimerControlCardLarge({ timer }: { timer: DbTimer }) {
       <div className="flex gap-4 justify-between flex-wrap items-center">
         <TimerControlsTitle />
         <div className="flex items-center gap-2">
-          <TimerControlsDisplay className="text-4xl font-bold -mt-0.5" />
+          <TimerControlsDisplay className="text-4xl -mt-0.5" />
           <TimerControlsStatus size={36} />
           <Link target="_blank" href={`/timers/${timer.id}`}>
             <ActionIcon className="shrink-0" size={36} c="dimmed">

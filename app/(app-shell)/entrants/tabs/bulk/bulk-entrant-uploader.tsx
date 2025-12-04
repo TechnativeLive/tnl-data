@@ -97,10 +97,17 @@ async function bulkInsert(
       return Object.fromEntries([...cells, ['primary_sport', sport]])
     }) as Record<'first_name' | 'last_name', string>[]
 
-  console.log({ rows })
-  const { data: insertData, error } = await supabase.from('entrants').insert(rows).select('*')
+  const { data: existing, error: selectError } = await supabase.from("entrants").select().in("first_name", rows.map(r => r.first_name)).in("last_name", rows.map(r => r.last_name))
 
-  return { data: insertData, error }
+  if (selectError) {
+    return {data: existing, error: selectError}
+  }
+
+  const newRows = rows.filter(r => !existing.find(e => e.first_name === r.first_name && e.last_name === r.last_name))
+
+  const { data: insertData, error } = await supabase.from('entrants').insert(newRows).select('*')
+
+  return { data: insertData, error, existing }
 }
 
 export function BulkEntrantUploader() {
@@ -125,14 +132,14 @@ export function BulkEntrantUploader() {
 
   async function upload() {
     setLoading(true)
-    const { data: insertData, error } = await bulkInsert(
+    const { data: insertData, existing, error } = await bulkInsert(
       validated,
       sport,
       headers,
       data,
       selectedRows,
     )
-    console.log({ insertData, error })
+    console.log({ insertData, existing, error })
 
     if (error) {
       notifications.show({ color: 'red', title: 'Error', message: error.message })
@@ -140,7 +147,11 @@ export function BulkEntrantUploader() {
       notifications.show({
         color: 'green',
         title: 'Success',
-        message: 'Data uploaded successfully',
+        message: [
+          `Data uploaded: [${insertData?.map(d => d.id).join(', ')}]`,
+          `Existing: [${existing?.map(d => d.id).join(', ')}]`
+        ].join("\n"),
+        autoClose: false
       })
       setData([])
     }

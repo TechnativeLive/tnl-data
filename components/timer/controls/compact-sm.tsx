@@ -38,7 +38,7 @@ export function TimerControlCardCompactSm({ timer }: { timer: DbTimer }) {
             <TimerControlsSettingsDrawer size="md" />
           </div>
           <div className="flex gap-2 items-center">
-            <TimerControlsDisplay className="text-2xl font-bold grow" />
+            <TimerControlsDisplay className="text-2xl grow" />
             <TimerControlsStatus />
             <TimerControlsMuteButton />
             <TimerControlsRepeatButton />

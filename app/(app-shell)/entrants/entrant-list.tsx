@@ -36,7 +36,8 @@ export async function EntrantList() {
                 {entrants.map((entrant) => (
                   <AccordionItem key={entrant.id} value={entrant.id.toString()}>
                     <AccordionControl>
-                      <SimpleGrid cols={4}>
+                      <SimpleGrid cols={5}>
+                        <Text span>{entrant.id}</Text>
                         <Text span>{entrant.first_name}</Text>
                         <Text span>{entrant.last_name}</Text>
                         <Text span>{entrant.country}</Text>

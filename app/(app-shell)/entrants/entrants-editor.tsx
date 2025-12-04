@@ -7,6 +7,7 @@ import { CenteredLoader } from '@/components/mantine-extensions/centered-loader'
 import { createServerClient } from '@/lib/db/server'
 import { Card, Tabs, TabsList, TabsTab, TabsPanel } from '@mantine/core'
 import { Suspense } from 'react'
+import { EntrantDuplicates } from './tabs/duplicates/entrant-duplicates'
 
 export async function EntrantsEditor() {
   const supabase = createServerClient()
@@ -23,6 +24,7 @@ export async function EntrantsEditor() {
           <TabsTab value="edit">Edit Entrant</TabsTab>
           <TabsTab value="bulk">Bulk Create</TabsTab>
           <TabsTab value="summary">Sumary (stats)</TabsTab>
+          <TabsTab value="duplicates">Duplicates</TabsTab>
         </TabsList>
 
         <TabsPanel value="create">
@@ -42,6 +44,12 @@ export async function EntrantsEditor() {
         <TabsPanel value="summary">
           <Suspense fallback={<CenteredLoader />}>
             <EntrantSummary />
+          </Suspense>
+        </TabsPanel>
+
+        <TabsPanel value="duplicates">
+          <Suspense fallback={<CenteredLoader />}>
+            <EntrantDuplicates />
           </Suspense>
         </TabsPanel>
       </Tabs>
