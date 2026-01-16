@@ -210,7 +210,8 @@ export const parseFormatIceSkating = (input: any): typia.Primitive<EventFormat<'
 }; input = JSON.parse(input); return is(input) ? input as any : null; };
 // format options
 export const isFormatOptionsClimbing = (input: any): input is EventFormatOptions<'climbing'> => {
-    const $io0 = (input: any): boolean => "number" === typeof input.blocCount && (undefined === input.blocDataDsKey || "string" === typeof input.blocDataDsKey);
+    const $io0 = (input: any): boolean => "number" === typeof input.blocCount && (undefined === input.blocDataDsKey || "string" === typeof input.blocDataDsKey) && (undefined === input.scoring || "object" === typeof input.scoring && null !== input.scoring && $io1(input.scoring));
+    const $io1 = (input: any): boolean => "number" === typeof input.top && "number" === typeof input.zone && "number" === typeof input.fall;
     return "object" === typeof input && null !== input && $io0(input);
 };
 export const isFormatOptionsIceSkating = (input: any): input is EventFormatOptions<'ice-skating'> => {
@@ -219,7 +220,8 @@ export const isFormatOptionsIceSkating = (input: any): input is EventFormatOptio
 export const validateFormatOptionsClimbing = (input: any): typia.IValidation<EventFormatOptions<'climbing'>> => {
     const errors = [] as any[];
     const __is = (input: any): input is EventFormatOptions<'climbing'> => {
-        const $io0 = (input: any): boolean => "number" === typeof input.blocCount && (undefined === input.blocDataDsKey || "string" === typeof input.blocDataDsKey);
+        const $io0 = (input: any): boolean => "number" === typeof input.blocCount && (undefined === input.blocDataDsKey || "string" === typeof input.blocDataDsKey) && (undefined === input.scoring || "object" === typeof input.scoring && null !== input.scoring && $io1(input.scoring));
+        const $io1 = (input: any): boolean => "number" === typeof input.top && "number" === typeof input.zone && "number" === typeof input.fall;
         return "object" === typeof input && null !== input && $io0(input);
     };
     if (false === __is(input)) {
@@ -233,6 +235,27 @@ export const validateFormatOptionsClimbing = (input: any): typia.IValidation<Eve
                     path: _path + ".blocDataDsKey",
                     expected: "(string | undefined)",
                     value: input.blocDataDsKey
+                }), undefined === input.scoring || ("object" === typeof input.scoring && null !== input.scoring || $report(_exceptionable, {
+                    path: _path + ".scoring",
+                    expected: "(__type | undefined)",
+                    value: input.scoring
+                })) && $vo1(input.scoring, _path + ".scoring", true && _exceptionable) || $report(_exceptionable, {
+                    path: _path + ".scoring",
+                    expected: "(__type | undefined)",
+                    value: input.scoring
+                })].every((flag: boolean) => flag);
+            const $vo1 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ["number" === typeof input.top || $report(_exceptionable, {
+                    path: _path + ".top",
+                    expected: "number",
+                    value: input.top
+                }), "number" === typeof input.zone || $report(_exceptionable, {
+                    path: _path + ".zone",
+                    expected: "number",
+                    value: input.zone
+                }), "number" === typeof input.fall || $report(_exceptionable, {
+                    path: _path + ".fall",
+                    expected: "number",
+                    value: input.fall
                 })].every((flag: boolean) => flag);
             return ("object" === typeof input && null !== input || $report(true, {
                 path: _path + "",

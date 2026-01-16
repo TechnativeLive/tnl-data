@@ -1,8 +1,9 @@
-import { EventResult } from '@/lib/event-data'
+import { EventFormatOptions, EventResult } from '@/lib/event-data'
 import { BlocScores } from '@/lib/event-data/climbing'
 
 export function getBlocScores(
   result: EventResult<'climbing'>['result'][number] | undefined,
+  formatOptions: EventFormatOptions<'climbing'>,
 ): BlocScores {
   const scores: BlocScores = {
     data: result ?? [],
@@ -11,6 +12,7 @@ export function getBlocScores(
     z: 0,
     tp: 0,
     a: result?.length ?? 0,
+    s: 0,
   }
   if (!result) return scores
 
@@ -23,6 +25,15 @@ export function getBlocScores(
     scores.z ||= bloc.z !== undefined ? i + 1 : 0
   }
 
+  if (formatOptions.scoring?.top) {
+    const { top, zone, fall } = formatOptions.scoring
+    if (scores.t) {
+      scores.s = top + fall * (scores.t - 1)
+    } else if (scores.z) {
+      scores.s = zone + fall * (scores.z - 1)
+    }
+  }
+  
   return scores
 }
 

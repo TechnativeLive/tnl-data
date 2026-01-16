@@ -69,9 +69,6 @@ function genericCompare(a: unknown, b: unknown): number {
     return Number(a) - Number(b);
   }
 
-  console.log(
-    `Incompatible types or incorrect field/accessor. Proceeding without sorting these values: [A: ${a}] \u00B7 [B: ${b}]`,
-  );
   return 0;
 }
 

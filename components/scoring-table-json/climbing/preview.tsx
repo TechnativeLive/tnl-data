@@ -7,6 +7,7 @@ import {
   AccordionPanel,
   Text,
   Accordion,
+  Divider,
 } from '@mantine/core'
 import { Fragment } from 'react'
 import styles from './preview.module.css'
@@ -40,12 +41,13 @@ type ResultRow = NonNullable<EventLiveData<'climbing'>['results'][number]>[numbe
 const overallRows: PreviewCols<ResultRow, Tables<'entrants'>>[] = [
   { field: 'id', label: 'Id', get: (row) => row.entrant },
   { field: 'rank', label: 'Rank', get: (row) => row.rank },
+  { field: 'score', label: 'Score', get: (row) => row.score },
+  { field: 'first_name', label: 'First Name', get: (_row, entrant) => entrant?.first_name },
+  { field: 'last_name', label: 'Last Name', get: (_row, entrant) => entrant?.last_name },
   { field: 'tops', label: 'Tops', get: (row) => row.tops },
   { field: 'zones', label: 'Zones', get: (row) => row.zones },
   { field: 'ta', label: 'TA', get: (row) => row.ta },
   { field: 'za', label: 'ZA', get: (row) => row.za },
-  { field: 'first_name', label: 'First Name', get: (_row, entrant) => entrant?.first_name },
-  { field: 'last_name', label: 'Last Name', get: (_row, entrant) => entrant?.last_name },
   { field: 'status', label: 'Status', get: (row) => row.status },
 ]
 
@@ -93,11 +95,12 @@ function PreviewGrid<T, E>({
         {cols.map(({ field, label }) => {
           const isId = field === 'id'
           return (
-            <Text key={field} c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined}>
+            <Text key={field} c={isId ? 'dimmed' : undefined} fz={isId ? 'xs' : undefined} fw="bold">
               {label}
             </Text>
           )
         })}
+        <Divider className='col-span-full' />
         {data?.map((row) =>
           cols.map(({ field, get }) => {
             const isId = field === 'id'
