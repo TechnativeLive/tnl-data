@@ -25,15 +25,24 @@ export function displayTime(timer: DbTimer, trailing = false) {
     timer.end_hours * 60 * 60 * 1000 + timer.end_mins * 60 * 1000 + timer.end_secs * 1000
 
   const displayMs = timer.countdown
-    ? Math.max(0, total - runningTime + (trailing ? 999 : 0))
+    ? total - runningTime + (trailing ? 999 : 0)
     : runningTime + total
-
-  const formatted = dayjs(displayMs).format(timer.format)
+    
+  const formatted = formatDisplayTime(displayMs, timer.format, timer.repeating ? timer.repeat_delay : 0)
   return {
     display: formatted,
     raw: displayMs,
     total,
   }
+}
+
+function formatDisplayTime(displayMs: number, format: string, repeat_delay: number) {
+  if (displayMs < 0 && repeat_delay) {
+    const repeatCountdown = Math.max(0, repeat_delay + displayMs)
+    return "-" + dayjs(repeatCountdown).format("ss.SSS").slice(0, 4)
+  }
+
+  return dayjs(Math.max(0, displayMs)).format(format)
 }
 
 export function timerStart(timer: DbTimer) {

@@ -11,10 +11,13 @@ import { useTimerDisplay } from '@/lib/hooks/use-timer-display'
 import { TimerEvents } from '@/components/timer/timer-events'
 import { DbTimer } from '@/lib/db/custom'
 import { useSyncTimerWithDatastream } from '@/lib/hooks/use-sync-timer-with-datastream'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { timerBackgroundAtom } from '@/lib/atoms/timer-background'
 
 export function FullscreenTimer({ id, className }: { id: number | string; className?: string }) {
   const supabase = createBrowserClient()
   const [timer, setTimer] = useState<DbTimer | null>(null)
+  const invert = useAtomValue(timerBackgroundAtom)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,7 +70,8 @@ export function FullscreenTimer({ id, className }: { id: number | string; classN
     <section
       className={clsx(
         'text-white bg-black text-center h-screen select-none',
-        timer?.isRunning && 'invert',
+        // timer?.isRunning && 'invert',
+        invert,
         className,
       )}
     >
@@ -93,6 +97,7 @@ function ActiveFullscreenTimer({ timer }: { timer: DbTimer }) {
 
 function Display({ timer }: { timer: DbTimer }) {
   const time = useTimerDisplay(timer, true)
+  const setTimerBackground = useSetAtom(timerBackgroundAtom)
 
   useEffect(() => {
     if (document) {
@@ -100,22 +105,18 @@ function Display({ timer }: { timer: DbTimer }) {
     }
   }, [time.display, timer.name])
 
+  const isNegativeTimer = time.display.startsWith("-")
+  useEffect(() => {
+    setTimerBackground(timer.isRunning && !isNegativeTimer ? "invert" : "")
+  }, [timer.isRunning, isNegativeTimer, setTimerBackground])
+
   return (
     <>
       {!timer.muted && (
         <TimerEvents
           timer={timer}
           time={time}
-          // value={timer.value}
-          // isRunning={timer.isRunning}
-          // rawTime={time.raw}
-          // total={time.total}
-          // muted={timer.muted}
-          // sounds={timer.sounds}
           trailing
-          // repeat_count={timer.repeat_count}
-          // repeat_delay={timer.repeat_delay}
-          // repeating={timer.repeating}
         />
       )}
       <FullscreenText>{time.display}</FullscreenText>

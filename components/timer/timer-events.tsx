@@ -41,7 +41,7 @@ export function TimerEvents({
           syncTimer(timer)
 
           timeoutRef.current = undefined
-        }, timer.repeat_delay)
+        }, timer.repeat_delay + 999)
       }
     }
 
