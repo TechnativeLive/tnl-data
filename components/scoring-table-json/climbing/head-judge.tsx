@@ -17,19 +17,20 @@ import {
 import { TimersRealtime } from '@/components/timer/controls/realtime'
 import { createBrowserClient } from '@/lib/db/client'
 import {
+  EventFormatOptions,
   EventLiveData,
   EventResult,
-  EventResults,
   JudgeDataClimbing,
   Sport,
 } from '@/lib/event-data'
 import {
+  BlocScores,
   generateLiveDataClimbing,
   generateLiveDataResultsClimbing,
 } from '@/lib/event-data/climbing'
 import { entrantMapAtom } from '@/lib/hooks/use-realtime-json-event'
 import { isFormatClimbing } from '@/lib/json/generated/format'
-import { toNumOr } from '@/lib/utils'
+import { toNumOr, toNumOrZero } from '@/lib/utils'
 import {
   ActionIcon,
   Alert,
@@ -49,17 +50,18 @@ import {
   Select,
   Stack,
   Text,
+  TextInput,
   Title,
   Tooltip,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
+import { IconEdit, IconProgressAlert, IconProgressCheck } from '@tabler/icons-react'
 import {
   IconArrowDown,
   IconArrowRight,
   IconChevronsUp,
   IconCircleCheck,
-  IconExclamationMark,
   IconInfoCircle,
   IconMinus,
   IconX,
@@ -223,6 +225,10 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
                       <Divider />
                       {cls.entrants.map((entrant, i) => {
                         const row = typeof entrant === 'number' ? { id: entrant } : entrant
+                        if (row === null) {
+                          console.log('NULL ENTRANT', { i, cls })
+                          return null
+                        }
                         return (
                           <Fragment key={row.id}>
                             {i > 0 && <Divider />}
@@ -232,6 +238,7 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
                               entrant={row}
                               initialResult={results[round.id]?.[cls.id]?.[row.id]}
                               updateResults={updateResult}
+                              formatOptions={props.formatOptions}
                               roundId={round.id}
                               classId={cls.id}
                               blocCount={props.formatOptions.blocCount}
@@ -278,14 +285,15 @@ type EntrantProps = {
   classId: string
   loading: boolean
   blocCount: number
+  formatOptions: EventFormatOptions<'climbing'>
 }
-
 function Entrant({
   index,
   entrant,
   judgesData,
   initialResult,
   updateResults,
+  formatOptions,
   roundId,
   classId,
   blocCount,
@@ -344,10 +352,14 @@ function Entrant({
           <ActionIcon
             size="sm"
             onClick={open}
-            color={initialResult?.status && 'red'}
-            variant={initialResult?.status && 'light'}
+            color={initialResult?.status ? 'red' : 'dark'}
+            variant={'light'}
           >
-            <IconExclamationMark size={16} />
+            {initialResult?.status ? (
+              <IconProgressAlert size={16} />
+            ) : (
+              <IconProgressCheck size={16} />
+            )}
           </ActionIcon>
         </Tooltip>
         <div className="flex flex-wrap gap-x-1 gap-y-2">
@@ -364,7 +376,9 @@ function Entrant({
           judgesData={judgesData}
           initialResult={initialResult}
           classId={classId}
+          roundId={roundId}
           entrantId={entrant.id}
+          formatOptions={formatOptions}
         />
       </div>
     </div>
@@ -377,49 +391,254 @@ function EntrantScores({
   judgesData,
   initialResult,
   classId,
+  roundId,
   entrantId,
-}: Pick<EntrantProps, 'index' | 'initialResult' | 'blocCount' | 'classId' | 'judgesData'> & {
+  formatOptions,
+}: Pick<
+  EntrantProps,
+  'index' | 'initialResult' | 'blocCount' | 'classId' | 'roundId' | 'judgesData' | 'formatOptions'
+> & {
+  entrantId: EntrantProps['entrant']['id']
+}) {
+  const allBlocScores = Array.from({ length: blocCount }).map((_, i) =>
+    getBlocScores(initialResult?.result[i], formatOptions),
+  )
+  const totalScore = allBlocScores.reduce((acc, cur) => acc + cur.s, 0)
+
+  return (
+    <div className="flex flex-wrap gap-2 items-center justify-around">
+      <div className="flex flex-col items-end gap-0.5">
+        {index === 0 && (
+          <Text c="dimmed" size="xs" mt={-8}>
+            Score
+          </Text>
+        )}
+        <Text>{totalScore.toFixed(1)}</Text>
+      </div>
+      <div className="flex flex-row gap-0.5 flex-wrap justify-center sm:flex-nowrap">
+        {allBlocScores.map((blocScores, i) => {
+          const classInitial = classId.charAt(0).toUpperCase()
+          const station = `${classInitial}${i + 1}`
+
+          const judgeIndex = getBoulderingJudgeIndex(station, blocCount)
+          const isActive = judgesData[judgeIndex]?.active?.entrant === entrantId
+
+          return (
+            <div key={i} className="flex flex-col">
+              {index === 0 && <Divider label={`Bloc ${i + 1}`} mt={-4} />}
+              <Button
+                component={QueryLink}
+                query={{
+                  judge: `${classInitial}${i + 1}`,
+                  entrant: (index ?? 0) + 1,
+                }}
+                removeOthers
+                size="compact-md"
+                variant={isActive ? 'outline' : blocScores ? 'light' : 'subtle'}
+                color={blocScores?.climbing ? 'orange' : 'teal'}
+              >
+                <div className="flex space-x-2">
+                  <Text miw={27} c={blocScores?.t || blocScores?.tp ? undefined : 'dimmed'}>
+                    T{blocScores?.t || blocScores?.tp || '\u00A0'}
+                  </Text>
+                  <Text miw={27} c={blocScores?.z ? undefined : 'dimmed'}>
+                    Z{blocScores?.z || '\u00A0'}
+                  </Text>
+                  <Text miw={27} c={blocScores?.a ? undefined : 'dimmed'}>
+                    A{blocScores?.a || '\u00A0'}
+                  </Text>
+                </div>
+              </Button>
+            </div>
+          )
+        })}
+      </div>
+      <EditScoresModal
+        index={index}
+        blocCount={blocCount}
+        initialResult={initialResult}
+        roundId={roundId}
+        classId={classId}
+        entrantId={entrantId}
+        allBlocScores={allBlocScores}
+      />
+    </div>
+  )
+}
+
+function EditScoresModal({
+  index,
+  blocCount,
+  initialResult,
+  classId,
+  roundId,
+  entrantId,
+  allBlocScores,
+}: Pick<EntrantProps, 'index' | 'initialResult' | 'blocCount' | 'classId' | 'roundId'> & {
+  allBlocScores: BlocScores[]
+  entrantId: EntrantProps['entrant']['id']
+}) {
+  const [opened, { close, open }] = useDisclosure()
+
+  return (
+    <>
+      <Tooltip label="Directly modify scores">
+        <ActionIcon
+          size="sm"
+          onClick={open}
+          color={initialResult?.status ? 'red' : 'dark'}
+          variant={'light'}
+          className={index === 0 ? 'mt-4' : ''}
+        >
+          <IconEdit size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Modal
+        size={1000}
+        centered
+        opened={opened}
+        onClose={close}
+        title="Edit scores (no timing data)"
+      >
+        <EditScoresModalContent
+          close={close}
+          blocCount={blocCount}
+          roundId={roundId}
+          classId={classId}
+          entrantId={entrantId}
+          allBlocScores={allBlocScores}
+        />
+      </Modal>
+    </>
+  )
+}
+
+function EditScoresModalContent({
+  close,
+  blocCount,
+  roundId,
+  classId,
+  entrantId,
+  allBlocScores,
+}: Pick<EntrantProps, 'blocCount' | 'classId' | 'roundId'> & {
+  close: () => void
+  allBlocScores: BlocScores[]
   entrantId: EntrantProps['entrant']['id']
 }) {
   return (
-    <div className="flex flex-wrap gap-2 items-center justify-around">
-      {Array.from({ length: blocCount }).map((_, i) => {
-        const classInitial = classId.charAt(0).toUpperCase()
-        const blocScores = getBlocScores(initialResult?.result[i])
-        const station = `${classInitial}${i + 1}`
+    <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-row gap-x-4 gap-y-12 flex-wrap p-6 justify-center">
+        {allBlocScores.map((blocScores, i) => {
+          const classInitial = classId.charAt(0).toUpperCase()
+          const station = `${classInitial}${i + 1}`
+          const judgeIndex = getBoulderingJudgeIndex(station, blocCount)
 
-        const judgeIndex = getBoulderingJudgeIndex(station, blocCount)
-        const isActive = judgesData[judgeIndex]?.active?.entrant === entrantId
+          return (
+            <DirectEditBlocScore
+              key={i}
+              index={i}
+              judgeIndex={judgeIndex}
+              roundId={roundId}
+              classId={classId}
+              entrantId={entrantId?.toString() || ''}
+              close={close}
+              initialBlocScores={blocScores}
+            />
+          )
+        })}
+      </div>
+      <Text fz="sm" ta="center" c="dimmed" className="mb-4">
+        This will remove all timing data from this entrants scores. This should be used as an escape
+        hatch and not for editing single scores
+      </Text>
+    </div>
+  )
+}
 
-        return (
-          <div key={i} className="flex flex-col">
-            {index === 0 && <Divider label={`Bloc ${i + 1}`} mt={-4} />}
-            <Button
-              component={QueryLink}
-              query={{
-                judge: `${classInitial}${i + 1}`,
-                entrant: (index ?? 0) + 1,
-              }}
-              removeOthers
-              size="compact-md"
-              variant={isActive ? 'outline' : blocScores ? 'light' : 'subtle'}
-              color={blocScores?.climbing ? 'orange' : 'teal'}
-            >
-              <div className="flex space-x-2">
-                <Text miw={20} c={blocScores?.t || blocScores?.tp ? undefined : 'dimmed'}>
-                  T{blocScores?.t || blocScores?.tp || '\u00A0'}
-                </Text>
-                <Text miw={20} c={blocScores?.z ? undefined : 'dimmed'}>
-                  Z{blocScores?.z || '\u00A0'}
-                </Text>
-                <Text miw={27} c={blocScores?.a ? undefined : 'dimmed'}>
-                  A{blocScores?.a || '\u00A0'}
-                </Text>
-              </div>
-            </Button>
-          </div>
-        )
-      })}
+function DirectEditBlocScore({
+  index,
+  judgeIndex,
+  roundId,
+  classId,
+  entrantId,
+  initialBlocScores,
+  close,
+}: {
+  index: number
+  judgeIndex: number
+  roundId: string
+  classId: string
+  entrantId: string
+  initialBlocScores: BlocScores
+  close: () => void
+}) {
+  const [t, setT] = useState(initialBlocScores.t)
+  const [z, setZ] = useState(initialBlocScores.z)
+  const [loading, setLoading] = useState(false)
+  const { event } = useParams<{ event: string }>()
+  const supabase = createBrowserClient()
+
+  const updateScores = (callback?: () => void) => {
+    const blocScore: NonNullable<NonNullable<EventResult<'climbing'>['result'][number]>[number]>[] =
+      Array.from({ length: Math.max(t, z) }, () => ({
+        s: 0,
+        e: 0,
+      }))
+
+    if (z) blocScore[z - 1] = { s: 0, z: 0, e: 0 }
+    if (t) blocScore[t - 1] = { s: 0, z: 0, t: 0, tp: 0, e: 0 }
+    console.log('update_judge_data_by_entrant', {
+      event,
+      judge_index: judgeIndex,
+      round: roundId,
+      class_id: classId,
+      entrant: entrantId,
+      value: blocScore,
+    })
+    supabase
+      .rpc('update_judge_data_by_entrant', {
+        event,
+        judge_index: judgeIndex,
+        round: roundId,
+        class: classId,
+        entrant: entrantId,
+        value: blocScore,
+      })
+      .then(callback)
+  }
+
+  const invalidScore = z < t
+  const noChange = initialBlocScores.t === t && initialBlocScores.z === z
+
+  return (
+    <div className="flex flex-col">
+      <Divider label={`Bloc ${index + 1}`} />
+      <TextInput
+        type="number"
+        value={t}
+        onChange={(n) => setT(toNumOrZero(n.currentTarget.value))}
+        label="Top"
+      />
+      <TextInput
+        type="number"
+        value={z}
+        onChange={(n) => setZ(toNumOrZero(n.currentTarget.value))}
+        label="Zone"
+      />
+      <Button
+      className='mt-6'
+        disabled={noChange || invalidScore || loading}
+        variant="filled"
+        onClick={() => {
+          setLoading(true)
+          updateScores(() => {
+            setLoading(false)
+            close()
+          })
+        }}
+      >
+        {noChange ? "No change" : invalidScore ? "Zone can't be < Top" : loading ? 'Updating...' : 'Update'}
+      </Button>
     </div>
   )
 }
@@ -442,6 +661,7 @@ function EventProgressionModal({
         <EventProgressionModalInternals
           results={props.results}
           format={props.format}
+          formatOptions={props.formatOptions}
           onClose={onClose}
         />
       )}
@@ -455,8 +675,10 @@ const CheckboxIcon: CheckboxProps['icon'] = ({ indeterminate, ...others }) =>
 function EventProgressionModalInternals({
   results,
   format,
+  formatOptions,
   onClose,
-}: Pick<ScoringTableProps<'climbing'>, 'results' | 'format'> & Pick<ModalProps, 'onClose'>) {
+}: Pick<ScoringTableProps<'climbing'>, 'results' | 'format' | 'formatOptions'> &
+  Pick<ModalProps, 'onClose'>) {
   const supabase = createBrowserClient()
   const params = useParams() as { sport: Sport; event: string }
   const [from, setFrom] = useState<string | null>(format.rounds[0]?.id ?? null)
@@ -478,8 +700,9 @@ function EventProgressionModalInternals({
 
   useEffect(() => {
     // const round = format.rounds.find((round) => round.id === from);
-    if (fromRound) setPreview(generateLiveDataResultsClimbing({ round: fromRound, results }))
-  }, [fromRound, results, format.rounds])
+    if (fromRound)
+      setPreview(generateLiveDataResultsClimbing({ round: fromRound, results, formatOptions }))
+  }, [fromRound, results, format.rounds, formatOptions])
 
   let cutoff = progressEntrantCount
   const previewEntries = Object.entries(preview ?? {})

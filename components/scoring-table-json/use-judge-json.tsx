@@ -35,12 +35,14 @@ export function useJudgeJson<S extends Sport>({
   judgeData: initialJudgeData,
   station,
   blocCount,
+  entrantId
 }: {
   round: string | undefined;
   class: string | undefined;
   station: string;
   blocCount: number;
   judgeData: ScoringTableProps<S>['judgesData'][number] | undefined;
+  entrantId: number | undefined
 }) {
   const params = useParams();
   const eventSlug = params.event;
@@ -79,9 +81,9 @@ export function useJudgeJson<S extends Sport>({
         };
 
         supabase
-          .rpc('update_judge_data', {
+          .rpc('update_judge_data_test', {
             event: eventSlug,
-            index: judgeIndex + 1,
+            judge_index: judgeIndex,
             value: newResults,
           })
           .then(() => {
@@ -125,10 +127,13 @@ export function useJudgeJson<S extends Sport>({
 
         // console.log({ id, data, newResults }); // update db
         supabase
-          .rpc('update_judge_data', {
+          .rpc('update_judge_data_by_entrant', {
             event: eventSlug,
-            index: judgeIndex + 1,
-            value: newResults,
+            class: cls,
+            round: round,
+            entrant: entrantId?.toString() || "",
+            judge_index: judgeIndex,
+            value: data,
           })
           .then(() => {
             setLoading(false);
@@ -143,7 +148,7 @@ export function useJudgeJson<S extends Sport>({
         return newResults;
       });
     },
-    [setJudgeData, setLoading, supabase, eventSlug, round, cls, judgeIndex],
+    [setJudgeData, setLoading, supabase, eventSlug, round, cls, judgeIndex, entrantId],
   );
 
   return {

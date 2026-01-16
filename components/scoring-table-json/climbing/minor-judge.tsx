@@ -64,6 +64,7 @@ export function ClimbingMinorJudge({
     blocCount: formatOptions.blocCount,
     round: activeRound?.id,
     class: stationClassId,
+    entrantId: entrant?.id
   })
 
   if (!activeRound)
