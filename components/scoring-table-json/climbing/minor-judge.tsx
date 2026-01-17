@@ -22,7 +22,7 @@ import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import clsx from 'clsx'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 
 type Attempt = NonNullable<EventResult<'climbing'>['result'][number]>[number]
 
@@ -384,7 +384,7 @@ export function ClimbingMinorJudge({
   )
 }
 
-function ActiveButton({
+const ActiveButton = memo(({
   hint,
   active,
   ...props
@@ -392,7 +392,7 @@ function ActiveButton({
   Omit<
     React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>,
     'ref'
-  >) {
+  >) => {
   return (
     <div className="relative grow p-px rounded overflow-hidden">
       {active && (
@@ -412,7 +412,8 @@ function ActiveButton({
       />
     </div>
   )
-}
+})
+ActiveButton.displayName = 'ActiveButton'
 
 type BadgeLabel = 'Started' | 'Zone' | 'Top' | 'Top (Provisional)'
 function getBadge(attempt: Attempt): {
@@ -425,7 +426,7 @@ function getBadge(attempt: Attempt): {
   return { label: 'Started', color: 'gray' }
 }
 
-function Attempt({
+const Attempt = memo(({
   attempt,
   number,
   active,
@@ -437,7 +438,7 @@ function Attempt({
   active: boolean
   handleEdit: (attemptNumber: number | undefined, target: 'start' | 'zone' | 'top') => void
   handleDelete: (attemptNumber: number) => void
-}) {
+}) => {
   const [opened, { open, close }] = useDisclosure(false)
   const [editing, setEditing] = useState<number>()
 
@@ -536,4 +537,5 @@ function Attempt({
       </div>
     </>
   )
-}
+})
+Attempt.displayName = "Attempt"
