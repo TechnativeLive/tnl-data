@@ -607,7 +607,7 @@ function DirectEditBlocScore({
       .then(callback)
   }
 
-  const invalidScore = z < t
+  const invalidScore = t > z
   const noChange = initialBlocScores.t === t && initialBlocScores.z === z
 
   return (
@@ -637,7 +637,7 @@ function DirectEditBlocScore({
           })
         }}
       >
-        {noChange ? "No change" : invalidScore ? "Zone can't be < Top" : loading ? 'Updating...' : 'Update'}
+        {noChange ? "No change" : invalidScore ? "Top can't be > Zone" : loading ? 'Updating...' : 'Update'}
       </Button>
     </div>
   )
