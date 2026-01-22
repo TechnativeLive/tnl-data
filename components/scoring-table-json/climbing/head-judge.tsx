@@ -585,16 +585,10 @@ function DirectEditBlocScore({
         e: 0,
       }))
 
-    if (z) blocScore[z - 1] = { s: 0, z: 0, e: 0 }
+    const zAdj = t > 0 && z === 0 ? t : z
+    if (zAdj) blocScore[zAdj - 1] = { s: 0, z: 0, e: 0 }
     if (t) blocScore[t - 1] = { s: 0, z: 0, t: 0, tp: 0, e: 0 }
-    console.log('update_judge_data_by_entrant', {
-      event,
-      judge_index: judgeIndex,
-      round: roundId,
-      class_id: classId,
-      entrant: entrantId,
-      value: blocScore,
-    })
+
     supabase
       .rpc('update_judge_data_by_entrant', {
         event,
@@ -607,7 +601,7 @@ function DirectEditBlocScore({
       .then(callback)
   }
 
-  const invalidScore = t > z
+  const invalidScore = t > 0 && (z > t)
   const noChange = initialBlocScores.t === t && initialBlocScores.z === z
 
   return (
@@ -637,7 +631,7 @@ function DirectEditBlocScore({
           })
         }}
       >
-        {noChange ? "No change" : invalidScore ? "Top can't be > Zone" : loading ? 'Updating...' : 'Update'}
+        {noChange ? "No change" : invalidScore ? "Zone can't be > Top" : loading ? 'Updating...' : 'Update'}
       </Button>
     </div>
   )
