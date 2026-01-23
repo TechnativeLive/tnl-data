@@ -30,7 +30,7 @@ import {
 } from '@/lib/event-data/climbing'
 import { entrantMapAtom } from '@/lib/hooks/use-realtime-json-event'
 import { isFormatClimbing } from '@/lib/json/generated/format'
-import { toNumOr, toNumOrZero } from '@/lib/utils'
+import { cn, toNumOr, toNumOrZero } from '@/lib/utils'
 import {
   ActionIcon,
   Alert,
@@ -45,6 +45,7 @@ import {
   Modal,
   ModalProps,
   NumberInput,
+  NumberInputProps,
   Paper,
   ScrollAreaAutosize,
   Select,
@@ -56,7 +57,13 @@ import {
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
-import { IconEdit, IconProgressAlert, IconProgressCheck } from '@tabler/icons-react'
+import {
+  IconCheck,
+  IconEdit,
+  IconExclamationMark,
+  IconProgressAlert,
+  IconProgressCheck,
+} from '@tabler/icons-react'
 import {
   IconArrowDown,
   IconArrowRight,
@@ -68,10 +75,13 @@ import {
 } from '@tabler/icons-react'
 import clsx from 'clsx'
 import { useAtomValue } from 'jotai'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useState } from 'react'
 
 export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
+  const params = useSearchParams()
+  const direct = !params.get('default')
+
   const [previewOpened, { toggle: togglePreview }] = useDisclosure(false)
   const { results, updateActive, updateResult, loading, liveDataPreview } = useUpdateJsonResults(
     props,
@@ -248,6 +258,7 @@ export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
                                 loading[1] === cls.id &&
                                 loading[2] === row.id
                               }
+                              direct={direct}
                             />
                           </Fragment>
                         )
@@ -286,6 +297,7 @@ type EntrantProps = {
   loading: boolean
   blocCount: number
   formatOptions: EventFormatOptions<'climbing'>
+  direct: boolean
 }
 function Entrant({
   index,
@@ -297,6 +309,7 @@ function Entrant({
   roundId,
   classId,
   blocCount,
+  direct,
 }: EntrantProps) {
   const [opened, { close, open }] = useDisclosure(false)
   function updateStatus(status: EventResult<'climbing'>['status']) {
@@ -379,6 +392,7 @@ function Entrant({
           roundId={roundId}
           entrantId={entrant.id}
           formatOptions={formatOptions}
+          direct={direct}
         />
       </div>
     </div>
@@ -394,9 +408,17 @@ function EntrantScores({
   roundId,
   entrantId,
   formatOptions,
+  direct,
 }: Pick<
   EntrantProps,
-  'index' | 'initialResult' | 'blocCount' | 'classId' | 'roundId' | 'judgesData' | 'formatOptions'
+  | 'index'
+  | 'initialResult'
+  | 'blocCount'
+  | 'classId'
+  | 'roundId'
+  | 'judgesData'
+  | 'formatOptions'
+  | 'direct'
 > & {
   entrantId: EntrantProps['entrant']['id']
 }) {
@@ -415,7 +437,7 @@ function EntrantScores({
         )}
         <Text>{totalScore.toFixed(1)}</Text>
       </div>
-      <div className="flex flex-row gap-0.5 flex-wrap justify-center sm:flex-nowrap">
+      <div className="flex flex-row gap-2 flex-wrap justify-center sm:flex-nowrap">
         {allBlocScores.map((blocScores, i) => {
           const classInitial = classId.charAt(0).toUpperCase()
           const station = `${classInitial}${i + 1}`
@@ -426,143 +448,56 @@ function EntrantScores({
           return (
             <div key={i} className="flex flex-col">
               {index === 0 && <Divider label={`Bloc ${i + 1}`} mt={-4} />}
-              <Button
-                component={QueryLink}
-                query={{
-                  judge: `${classInitial}${i + 1}`,
-                  entrant: (index ?? 0) + 1,
-                }}
-                removeOthers
-                size="compact-md"
-                variant={isActive ? 'outline' : blocScores ? 'light' : 'subtle'}
-                color={blocScores?.climbing ? 'orange' : 'teal'}
-              >
-                <div className="flex space-x-2">
-                  <Text miw={27} c={blocScores?.t || blocScores?.tp ? undefined : 'dimmed'}>
-                    T{blocScores?.t || blocScores?.tp || '\u00A0'}
-                  </Text>
-                  <Text miw={27} c={blocScores?.z ? undefined : 'dimmed'}>
-                    Z{blocScores?.z || '\u00A0'}
-                  </Text>
-                  <Text miw={27} c={blocScores?.a ? undefined : 'dimmed'}>
-                    A{blocScores?.a || '\u00A0'}
-                  </Text>
-                </div>
-              </Button>
+              {direct ? (
+                <DirectBlocScore
+                  key={i}
+                  index={i}
+                  judgeIndex={judgeIndex}
+                  roundId={roundId}
+                  classId={classId}
+                  entrantId={entrantId?.toString() || ''}
+                  initialBlocScores={blocScores}
+                />
+              ) : (
+                <Button
+                  component={QueryLink}
+                  query={{
+                    judge: `${classInitial}${i + 1}`,
+                    entrant: (index ?? 0) + 1,
+                  }}
+                  removeOthers
+                  size="compact-md"
+                  variant={isActive ? 'outline' : blocScores ? 'light' : 'subtle'}
+                  color={blocScores?.climbing ? 'orange' : 'teal'}
+                >
+                  <div className="flex space-x-2">
+                    <Text miw={27} c={blocScores?.t || blocScores?.tp ? undefined : 'dimmed'}>
+                      T{blocScores?.t || blocScores?.tp || '\u00A0'}
+                    </Text>
+                    <Text miw={27} c={blocScores?.z ? undefined : 'dimmed'}>
+                      Z{blocScores?.z || '\u00A0'}
+                    </Text>
+                    <Text miw={27} c={blocScores?.a ? undefined : 'dimmed'}>
+                      A{blocScores?.a || '\u00A0'}
+                    </Text>
+                  </div>
+                </Button>
+              )}
             </div>
           )
         })}
       </div>
-      <EditScoresModal
-        index={index}
-        blocCount={blocCount}
-        initialResult={initialResult}
-        roundId={roundId}
-        classId={classId}
-        entrantId={entrantId}
-        allBlocScores={allBlocScores}
-      />
     </div>
   )
 }
 
-function EditScoresModal({
-  index,
-  blocCount,
-  initialResult,
-  classId,
-  roundId,
-  entrantId,
-  allBlocScores,
-}: Pick<EntrantProps, 'index' | 'initialResult' | 'blocCount' | 'classId' | 'roundId'> & {
-  allBlocScores: BlocScores[]
-  entrantId: EntrantProps['entrant']['id']
-}) {
-  const [opened, { close, open }] = useDisclosure()
-
-  return (
-    <>
-      <Tooltip label="Directly modify scores">
-        <ActionIcon
-          size="sm"
-          onClick={open}
-          color={initialResult?.status ? 'red' : 'dark'}
-          variant={'light'}
-          className={index === 0 ? 'mt-4' : ''}
-        >
-          <IconEdit size={16} />
-        </ActionIcon>
-      </Tooltip>
-      <Modal
-        size={1000}
-        centered
-        opened={opened}
-        onClose={close}
-        title="Edit scores (no timing data)"
-      >
-        <EditScoresModalContent
-          close={close}
-          blocCount={blocCount}
-          roundId={roundId}
-          classId={classId}
-          entrantId={entrantId}
-          allBlocScores={allBlocScores}
-        />
-      </Modal>
-    </>
-  )
-}
-
-function EditScoresModalContent({
-  close,
-  blocCount,
-  roundId,
-  classId,
-  entrantId,
-  allBlocScores,
-}: Pick<EntrantProps, 'blocCount' | 'classId' | 'roundId'> & {
-  close: () => void
-  allBlocScores: BlocScores[]
-  entrantId: EntrantProps['entrant']['id']
-}) {
-  return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="flex flex-row gap-x-4 gap-y-12 flex-wrap p-6 justify-center">
-        {allBlocScores.map((blocScores, i) => {
-          const classInitial = classId.charAt(0).toUpperCase()
-          const station = `${classInitial}${i + 1}`
-          const judgeIndex = getBoulderingJudgeIndex(station, blocCount)
-
-          return (
-            <DirectEditBlocScore
-              key={i}
-              index={i}
-              judgeIndex={judgeIndex}
-              roundId={roundId}
-              classId={classId}
-              entrantId={entrantId?.toString() || ''}
-              close={close}
-              initialBlocScores={blocScores}
-            />
-          )
-        })}
-      </div>
-      <Text fz="sm" ta="center" c="dimmed" className="mb-4">
-        This will remove all timing data from this entrants scores. This should be used as an escape
-        hatch and not for editing single scores
-      </Text>
-    </div>
-  )
-}
-
-function DirectEditBlocScore({
+function DirectBlocScore({
   index,
   judgeIndex,
   roundId,
   classId,
   entrantId,
   initialBlocScores,
-  close,
 }: {
   index: number
   judgeIndex: number
@@ -570,13 +505,20 @@ function DirectEditBlocScore({
   classId: string
   entrantId: string
   initialBlocScores: BlocScores
-  close: () => void
 }) {
   const [t, setT] = useState(initialBlocScores.t)
   const [z, setZ] = useState(initialBlocScores.z)
-  const [loading, setLoading] = useState(false)
+  // const [submitted, setSubmitted] = useState<[number, number] | null>()
   const { event } = useParams<{ event: string }>()
   const supabase = createBrowserClient()
+
+  // useEffect(() => {
+  //   setSubmitted(null)
+  //   console.log({ t: initialBlocScores.t, z: initialBlocScores.z })
+  // }, [initialBlocScores.t, initialBlocScores.z])
+
+  // const loading =
+  //   !!submitted && submitted[0] !== initialBlocScores.t && submitted[1] !== initialBlocScores.z
 
   const updateScores = (callback?: () => void) => {
     const blocScore: NonNullable<NonNullable<EventResult<'climbing'>['result'][number]>[number]>[] =
@@ -589,51 +531,69 @@ function DirectEditBlocScore({
     if (zAdj) blocScore[zAdj - 1] = { s: 0, z: 0, e: 0 }
     if (t) blocScore[t - 1] = { s: 0, z: 0, t: 0, tp: 0, e: 0 }
 
-    supabase
-      .rpc('update_judge_data_by_entrant', {
-        event,
-        judge_index: judgeIndex,
-        round: roundId,
-        class: classId,
-        entrant: entrantId,
-        value: blocScore,
-      })
-      .then(callback)
+    console.log("submit", t, zAdj)
+    // setSubmitted([t, zAdj])
+
+    supabase.rpc('update_judge_data_by_entrant', {
+      event,
+      judge_index: judgeIndex,
+      round: roundId,
+      class: classId,
+      entrant: entrantId,
+      value: blocScore,
+    })
   }
 
-  const invalidScore = t > 0 && (z > t)
+  const invalidScore = t > 0 && z > t
   const noChange = initialBlocScores.t === t && initialBlocScores.z === z
+  const tooltip =
+    t > 0 && z === 0
+      ? `Zone will be set to ${t}`
+      : invalidScore
+        ? "Tops can't take less attempts than a Zone"
+        : ''
 
   return (
-    <div className="flex flex-col">
-      <Divider label={`Bloc ${index + 1}`} />
-      <TextInput
-        type="number"
-        value={t}
-        onChange={(n) => setT(toNumOrZero(n.currentTarget.value))}
-        label="Top"
-      />
-      <TextInput
-        type="number"
-        value={z}
-        onChange={(n) => setZ(toNumOrZero(n.currentTarget.value))}
-        label="Zone"
-      />
-      <Button
-      className='mt-6'
-        disabled={noChange || invalidScore || loading}
-        variant="filled"
-        onClick={() => {
-          setLoading(true)
-          updateScores(() => {
-            setLoading(false)
-            close()
-          })
-        }}
-      >
-        {noChange ? "No change" : invalidScore ? "Zone can't be > Top" : loading ? 'Updating...' : 'Update'}
-      </Button>
+    <div className="flex space-x-1 items-center">
+      <DirectNumberInput prefix="T" value={t || undefined} onChange={(v) => setT(Number(v))} />
+      <DirectNumberInput prefix="Z" value={z || undefined} onChange={(v) => setZ(Number(v))} />
+      <Tooltip label={tooltip} hidden={!tooltip}>
+        <ActionIcon
+          size="sm"
+          onClick={() => (invalidScore ? undefined : updateScores())}
+          disabled={noChange}
+          aria-disabled={noChange || invalidScore}
+          color={noChange ? 'dark' : invalidScore ? 'red' : 'green'}
+          variant={'light'}
+          className={cn(
+            'disabled:cursor-default disabled:bg-white/0',
+            invalidScore && 'cursor-default',
+          )}
+        >
+          {invalidScore ? <IconExclamationMark size={16} /> : <IconCheck size={16} />}
+        </ActionIcon>
+      </Tooltip>
     </div>
+  )
+}
+
+function DirectNumberInput({
+  value,
+  onChange,
+  prefix,
+}: Pick<NumberInputProps, 'value' | 'onChange' | 'prefix'>) {
+  return (
+    <NumberInput
+      prefix={prefix}
+      placeholder={prefix}
+      miw={1}
+      w={40}
+      p={0}
+      hideControls
+      classNames={{ input: 'p-2' }}
+      value={value}
+      onChange={onChange}
+    />
   )
 }
 
