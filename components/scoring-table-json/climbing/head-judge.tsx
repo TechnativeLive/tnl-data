@@ -567,7 +567,7 @@ function DirectBlocScore({
     <div className="flex space-x-1 items-center">
       <DirectNumberInput
         index={index}
-        value={score || undefined}
+        value={initialBlocScores.a > 0 ? score : score || undefined}
         onChange={(v) => {
           setScore(Number(v))
           setLoading(false)
