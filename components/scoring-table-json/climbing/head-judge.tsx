@@ -6,6 +6,7 @@ import { QueryLink } from '@/components/query-link'
 import { RealtimeHeartbeat } from '@/components/realtime-heartbeat'
 import { LiveDataPreviewClimbing } from '@/components/scoring-table-json/climbing/preview'
 import {
+  getAttemptsFromScore,
   getBlocScores,
   getBoulderingJudgeIndex,
 } from '@/components/scoring-table-json/climbing/utils'
@@ -30,7 +31,7 @@ import {
 } from '@/lib/event-data/climbing'
 import { entrantMapAtom } from '@/lib/hooks/use-realtime-json-event'
 import { isFormatClimbing } from '@/lib/json/generated/format'
-import { cn, toNumOr, toNumOrZero } from '@/lib/utils'
+import { cn, toNumOr } from '@/lib/utils'
 import {
   ActionIcon,
   Alert,
@@ -77,7 +78,7 @@ import {
 import clsx from 'clsx'
 import { useAtomValue } from 'jotai'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 
 export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
   const params = useSearchParams()
@@ -458,6 +459,7 @@ function EntrantScores({
                   classId={classId}
                   entrantId={entrantId?.toString() || ''}
                   initialBlocScores={blocScores}
+                  scoring={formatOptions.scoring}
                 />
               ) : (
                 <Button
@@ -499,6 +501,7 @@ function DirectBlocScore({
   classId,
   entrantId,
   initialBlocScores,
+  scoring,
 }: {
   index: number
   judgeIndex: number
@@ -506,18 +509,31 @@ function DirectBlocScore({
   classId: string
   entrantId: string
   initialBlocScores: BlocScores
+  scoring: EventFormatOptions<'climbing'>['scoring']
 }) {
-  const [t, setT] = useState(initialBlocScores.t)
-  const [z, setZ] = useState(initialBlocScores.z)
+  const [score, setScore] = useState(initialBlocScores.s)
   const [loading, setLoading] = useState(false)
   const { event } = useParams<{ event: string }>()
   const supabase = createBrowserClient()
 
   useDidUpdate(() => {
     setLoading(false)
-  }, [initialBlocScores.t, initialBlocScores.z])
+  }, [initialBlocScores.s])
+
+  if (!scoring) return
 
   const updateScores = (callback?: () => void) => {
+    if (typeof score !== 'number' || Number.isNaN(score)) {
+      console.log('Invalid score:', score)
+    }
+
+    const { t, z } = getAttemptsFromScore(score, scoring)
+    
+    if (score > scoring.top || score < 0) {
+      console.log('Invalid score:', { score, scoringOpts: scoring, t, z })
+      return
+    }
+
     const blocScore: NonNullable<NonNullable<EventResult<'climbing'>['result'][number]>[number]>[] =
       Array.from({ length: Math.max(t, z) }, () => ({
         s: 0,
@@ -540,24 +556,23 @@ function DirectBlocScore({
       .then(callback)
   }
 
-  const invalidScore = t > 0 && z > t
-  const noChange = initialBlocScores.t === t && initialBlocScores.z === z
-  const tooltip =
-    t > 0 && z === 0
-      ? `Zone will be set to ${t}`
-      : invalidScore
-        ? "Tops can't take less attempts than a Zone"
-        : ''
+  const invalidScore = score > scoring.top || score < 0
+  const noChange = initialBlocScores.s === score
 
   return (
     <div className="flex space-x-1 items-center">
-      <DirectNumberInput prefix="T" value={t || undefined} onChange={(v) => setT(Number(v))} />
-      <DirectNumberInput prefix="Z" value={z || undefined} onChange={(v) => setZ(Number(v))} />
-      <Tooltip label={tooltip} hidden={!tooltip}>
+      <DirectNumberInput
+        value={score || undefined}
+        onChange={(v) => {
+          setScore(Number(v))
+          setLoading(false)
+        }}
+      />
+      {/* <DirectNumberInput prefix="Z" value={z || undefined} onChange={(v) => setZ(toNumOrZero(v))} /> */}
+      <Tooltip label="Invalid score" hidden={!invalidScore}>
         <ActionIcon
           size="sm"
           onClick={() => {
-            if (invalidScore) return
             setLoading(true)
             updateScores()
           }}
@@ -570,9 +585,14 @@ function DirectBlocScore({
             invalidScore && 'cursor-default',
           )}
         >
-          <div className={loading ? "animate-spin" : ""}>
-
-          {invalidScore ? <IconExclamationMark size={16} /> : loading ? <IconLoader2 size={16} /> : <IconCheck size={16} />}
+          <div className={loading && !invalidScore ? 'animate-spin' : ''}>
+            {invalidScore ? (
+              <IconExclamationMark size={16} />
+            ) : loading ? (
+              <IconLoader2 size={16} />
+            ) : (
+              <IconCheck size={16} />
+            )}
           </div>
         </ActionIcon>
       </Tooltip>
@@ -585,12 +605,18 @@ function DirectNumberInput({
   onChange,
   prefix,
 }: Pick<NumberInputProps, 'value' | 'onChange' | 'prefix'>) {
+  const ref = useRef<HTMLInputElement>(null)
   return (
     <NumberInput
+      ref={ref}
+      onClick={() => ref.current?.select()}
       prefix={prefix}
       placeholder={prefix}
       miw={1}
-      w={40}
+      w={50}
+      min={0}
+      decimalScale={1}
+      step={0.1}
       p={0}
       hideControls
       classNames={{ input: 'p-2' }}
