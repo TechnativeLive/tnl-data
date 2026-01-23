@@ -55,12 +55,13 @@ import {
   Title,
   Tooltip,
 } from '@mantine/core'
-import { useDisclosure } from '@mantine/hooks'
+import { useDidUpdate, useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import {
   IconCheck,
   IconEdit,
   IconExclamationMark,
+  IconLoader2,
   IconProgressAlert,
   IconProgressCheck,
 } from '@tabler/icons-react'
@@ -508,17 +509,13 @@ function DirectBlocScore({
 }) {
   const [t, setT] = useState(initialBlocScores.t)
   const [z, setZ] = useState(initialBlocScores.z)
-  // const [submitted, setSubmitted] = useState<[number, number] | null>()
+  const [loading, setLoading] = useState(false)
   const { event } = useParams<{ event: string }>()
   const supabase = createBrowserClient()
 
-  // useEffect(() => {
-  //   setSubmitted(null)
-  //   console.log({ t: initialBlocScores.t, z: initialBlocScores.z })
-  // }, [initialBlocScores.t, initialBlocScores.z])
-
-  // const loading =
-  //   !!submitted && submitted[0] !== initialBlocScores.t && submitted[1] !== initialBlocScores.z
+  useDidUpdate(() => {
+    setLoading(false)
+  }, [initialBlocScores.t, initialBlocScores.z])
 
   const updateScores = (callback?: () => void) => {
     const blocScore: NonNullable<NonNullable<EventResult<'climbing'>['result'][number]>[number]>[] =
@@ -531,17 +528,16 @@ function DirectBlocScore({
     if (zAdj) blocScore[zAdj - 1] = { s: 0, z: 0, e: 0 }
     if (t) blocScore[t - 1] = { s: 0, z: 0, t: 0, tp: 0, e: 0 }
 
-    console.log("submit", t, zAdj)
-    // setSubmitted([t, zAdj])
-
-    supabase.rpc('update_judge_data_by_entrant', {
-      event,
-      judge_index: judgeIndex,
-      round: roundId,
-      class: classId,
-      entrant: entrantId,
-      value: blocScore,
-    })
+    supabase
+      .rpc('update_judge_data_by_entrant', {
+        event,
+        judge_index: judgeIndex,
+        round: roundId,
+        class: classId,
+        entrant: entrantId,
+        value: blocScore,
+      })
+      .then(callback)
   }
 
   const invalidScore = t > 0 && z > t
@@ -560,17 +556,24 @@ function DirectBlocScore({
       <Tooltip label={tooltip} hidden={!tooltip}>
         <ActionIcon
           size="sm"
-          onClick={() => (invalidScore ? undefined : updateScores())}
+          onClick={() => {
+            if (invalidScore) return
+            setLoading(true)
+            updateScores()
+          }}
           disabled={noChange}
           aria-disabled={noChange || invalidScore}
-          color={noChange ? 'dark' : invalidScore ? 'red' : 'green'}
+          color={noChange ? 'dark' : invalidScore ? 'red' : loading ? 'orange' : 'green'}
           variant={'light'}
           className={cn(
             'disabled:cursor-default disabled:bg-white/0',
             invalidScore && 'cursor-default',
           )}
         >
-          {invalidScore ? <IconExclamationMark size={16} /> : <IconCheck size={16} />}
+          <div className={loading ? "animate-spin" : ""}>
+
+          {invalidScore ? <IconExclamationMark size={16} /> : loading ? <IconLoader2 size={16} /> : <IconCheck size={16} />}
+          </div>
         </ActionIcon>
       </Tooltip>
     </div>
