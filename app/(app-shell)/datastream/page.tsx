@@ -54,13 +54,14 @@ export default async function DatastreamPage() {
             </Title>
             <div
               className="grid gap-x-6"
-              style={{ gridTemplateColumns: `repeat(3,max-content) auto min-content` }}
+              style={{ gridTemplateColumns: `repeat(3,max-content) auto min-content min-content` }}
             >
               <div className="subgrid-cols col-span-full py-2 px-4 border font-semibold bg-body-dimmed rounded-t-md">
                 <div>Name</div>
                 <div>Public</div>
                 <div>Private</div>
                 <div>Description</div>
+                <div>ID</div>
                 <div></div>
               </div>
               {keys?.map((key) => (
@@ -73,6 +74,9 @@ export default async function DatastreamPage() {
                   <DatastreamKeyCopyButton value={key.private} />
                   <Text fz="sm" c="dimmed" fs="italic">
                     {key.description}
+                  </Text>
+                  <Text fz="sm" c="dimmed" fs="italic">
+                    {key.id}
                   </Text>
                   <SimpleForm action={deleteDatastream} className="flex justify-end">
                     <input name="id" value={key.id} hidden readOnly />
