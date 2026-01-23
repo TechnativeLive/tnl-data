@@ -625,7 +625,6 @@ function DirectNumberInput({
       classNames={{ input: 'p-2' }}
       value={value}
       onChange={onChange}
-      onSubmit={() => console.log('submit')}
       onKeyDown={(event) => {
         if (event.key === 'Enter') {
           submit()
