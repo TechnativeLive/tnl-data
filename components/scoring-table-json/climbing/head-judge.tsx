@@ -566,6 +566,7 @@ function DirectBlocScore({
   return (
     <div className="flex space-x-1 items-center">
       <DirectNumberInput
+        index={index}
         value={score || undefined}
         onChange={(v) => {
           setScore(Number(v))
@@ -607,10 +608,15 @@ function DirectNumberInput({
   onChange,
   prefix,
   submit,
-}: Pick<NumberInputProps, 'value' | 'onChange' | 'prefix'> & { submit: () => void }) {
+  index,
+}: Pick<NumberInputProps, 'value' | 'onChange' | 'prefix'> & {
+  submit: () => void
+  index: number
+}) {
   const ref = useRef<HTMLInputElement>(null)
   return (
     <NumberInput
+      tabIndex={index + 1}
       ref={ref}
       onClick={() => ref.current?.select()}
       prefix={prefix}
