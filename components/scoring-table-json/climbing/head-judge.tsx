@@ -78,7 +78,7 @@ import {
 import clsx from 'clsx'
 import { useAtomValue } from 'jotai'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 export function ClimbingHeadJudge(props: ScoringTableProps<'climbing'>) {
   const params = useSearchParams()
@@ -528,7 +528,7 @@ function DirectBlocScore({
     }
 
     const { t, z } = getAttemptsFromScore(score, scoring)
-    
+
     if (score > scoring.top || score < 0) {
       console.log('Invalid score:', { score, scoringOpts: scoring, t, z })
       return
@@ -558,6 +558,10 @@ function DirectBlocScore({
 
   const invalidScore = score > scoring.top || score < 0
   const noChange = initialBlocScores.s === score
+  const submit = () => {
+    setLoading(true)
+    updateScores()
+  }
 
   return (
     <div className="flex space-x-1 items-center">
@@ -567,15 +571,13 @@ function DirectBlocScore({
           setScore(Number(v))
           setLoading(false)
         }}
+        submit={submit}
       />
       {/* <DirectNumberInput prefix="Z" value={z || undefined} onChange={(v) => setZ(toNumOrZero(v))} /> */}
       <Tooltip label="Invalid score" hidden={!invalidScore}>
         <ActionIcon
           size="sm"
-          onClick={() => {
-            setLoading(true)
-            updateScores()
-          }}
+          onClick={submit}
           disabled={noChange}
           aria-disabled={noChange || invalidScore}
           color={noChange ? 'dark' : invalidScore ? 'red' : loading ? 'orange' : 'green'}
@@ -604,7 +606,8 @@ function DirectNumberInput({
   value,
   onChange,
   prefix,
-}: Pick<NumberInputProps, 'value' | 'onChange' | 'prefix'>) {
+  submit,
+}: Pick<NumberInputProps, 'value' | 'onChange' | 'prefix'> & { submit: () => void }) {
   const ref = useRef<HTMLInputElement>(null)
   return (
     <NumberInput
@@ -622,6 +625,12 @@ function DirectNumberInput({
       classNames={{ input: 'p-2' }}
       value={value}
       onChange={onChange}
+      onSubmit={() => console.log('submit')}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          submit()
+        }
+      }}
     />
   )
 }
