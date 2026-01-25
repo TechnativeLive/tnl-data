@@ -535,7 +535,7 @@ function DirectBlocScore({
     }
 
     const blocScore: NonNullable<NonNullable<EventResult<'climbing'>['result'][number]>[number]>[] =
-      Array.from({ length: Math.max(t, z) }, () => ({
+      Array.from({ length: Math.max(t, z, 1) }, () => ({
         s: 0,
         e: 0,
       }))
