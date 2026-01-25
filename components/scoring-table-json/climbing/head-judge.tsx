@@ -581,7 +581,7 @@ function DirectBlocScore({
           onClick={submit}
           disabled={noChange && score !== 0}
           aria-disabled={noChange || invalidScore}
-          color={noChange ? 'dark' : invalidScore ? 'red' : loading ? 'orange' : 'green'}
+          color={noChange ? 'default' : invalidScore ? 'red' : loading ? 'orange' : 'green'}
           variant={'light'}
           className={cn(
             'disabled:cursor-default disabled:bg-white/0',
