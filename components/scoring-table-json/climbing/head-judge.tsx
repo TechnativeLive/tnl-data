@@ -579,7 +579,7 @@ function DirectBlocScore({
         <ActionIcon
           size="sm"
           onClick={submit}
-          disabled={noChange}
+          disabled={noChange && score !== 0}
           aria-disabled={noChange || invalidScore}
           color={noChange ? 'dark' : invalidScore ? 'red' : loading ? 'orange' : 'green'}
           variant={'light'}
