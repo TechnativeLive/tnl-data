@@ -518,7 +518,7 @@ function DirectBlocScore({
 
   useDidUpdate(() => {
     setLoading(false)
-  }, [initialBlocScores.s])
+  }, [initialBlocScores.s, initialBlocScores.a])
 
   if (!scoring) return
 
